@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Level;
-use App\Models\Unit;
-use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Arr;
+use Symfony\Component\HttpFoundation\Response;
+use App\Models\User;
 
 class AuthController extends ApiController
 {
-    public function login()
+    public function login(Request $request)
     {
         $attributes = [
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
 
-        $input = request()->only(array_keys($attributes));
+        $input = Arr::only($request->post(), array_keys($attributes));
 
         $validator = Validator::make($input, $attributes);
 
@@ -37,22 +37,22 @@ class AuthController extends ApiController
         if (is_null($user)) {
             return $this->APIResponse(
                 false,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                Response::HTTP_UNAUTHORIZED,
+                Response::$statusTexts[Response::HTTP_UNAUTHORIZED],
                 null,
-                ['username' => ['Invalid Username']],
+                ['user' => ['Username or Password is wrong']],
             );
         }
 
-        $user = $user->makeVisible(['password']);
+        $user->makeVisible(['password']);
 
         if (!Hash::check($input['password'], $user->password)) {
             return $this->APIResponse(
                 false,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                Response::HTTP_UNAUTHORIZED,
+                Response::$statusTexts[Response::HTTP_UNAUTHORIZED],
                 null,
-                ['password' => ['Invalid Password']],
+                ['user' => ['Username or Password is wrong']],
             );
         }
 
@@ -62,15 +62,28 @@ class AuthController extends ApiController
             'role' => $user->role->name,
             'level' => $user->unit == null ? null : $user->unit->level->slug,
             'unit' => $user->unit == null ? null : $user->unit->slug,
+            'token' => $user->createToken('token_name')->plainTextToken,
         ];
-
-        $userId = $data['id'];
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User ID : $userId",
+            "Login successfully",
             $data,
+            null,
+        );
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Logout successfully",
+            null,
             null,
         );
     }

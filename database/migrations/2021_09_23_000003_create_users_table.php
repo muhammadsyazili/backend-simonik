@@ -19,10 +19,13 @@ class CreateUsersTable extends Migration
             $table->string('nip')->nullable()->default(null);
             $table->string('name');
             $table->string('username')->unique();
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->boolean('actived')->default(0);
             $table->string('password');
             $table->foreignUuid('unit_id')->nullable()->default(null)->constrained()->onUpdate('cascade')->onDelete('restrict'); //if 'super-admin' than 'null' else 'valueable'
             $table->foreignId('role_id')->constrained()->onUpdate('cascade')->onDelete('restrict');
+            $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
         });

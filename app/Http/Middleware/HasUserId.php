@@ -4,9 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureTokenIsValid
+class HasUserId
 {
     use \App\Traits\ApiResponser;
 
@@ -19,6 +20,6 @@ class EnsureTokenIsValid
      */
     public function handle(Request $request, Closure $next)
     {
-        return $request->bearerToken() == env('BEARERTOKEN') ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+        return $request->hasHeader('X-User-Id') === true && Str::isUuid($request->header('X-User-Id')) === true ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
     }
 }
