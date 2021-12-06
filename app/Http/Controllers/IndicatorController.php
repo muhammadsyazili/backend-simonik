@@ -32,6 +32,20 @@ class IndicatorController extends ApiController
             'weight' => ['nullable'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_if' => ':attribute tidak boleh kosong.',
+            'max' => [
+                'numeric' => ':attribute tidak boleh lebih besar dari :max.',
+                'file'    => ':attribute tidak boleh lebih besar dari :max kilobytes.',
+                'string'  => ':attribute tidak boleh lebih besar dari :max characters.',
+                'array'   => ':attribute tidak boleh lebih dari :max items.',
+            ],
+            'boolean' => ':attribute harus true atau false.',
+            'in' => ':attribute yang dipilih tidak sah.',
+            'numeric' => ':attribute harus numerik.',
+        ];
+
         if (!is_null($request->post('validity'))) {
             foreach ($request->post('validity') as $key => $value) {
                 $attributes["validity.$key"] = ['in:aman,1'];
@@ -46,7 +60,7 @@ class IndicatorController extends ApiController
 
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if($validator->fails()){
             return $this->APIResponse(
@@ -207,6 +221,20 @@ class IndicatorController extends ApiController
             'weight' => ['nullable'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_if' => ':attribute tidak boleh kosong.',
+            'max' => [
+                'numeric' => ':attribute tidak boleh lebih besar dari :max.',
+                'file'    => ':attribute tidak boleh lebih besar dari :max kilobytes.',
+                'string'  => ':attribute tidak boleh lebih besar dari :max characters.',
+                'array'   => ':attribute tidak boleh lebih dari :max items.',
+            ],
+            'boolean' => ':attribute harus true atau false.',
+            'in' => ':attribute yang dipilih tidak sah.',
+            'numeric' => ':attribute harus numerik.',
+        ];
+
         if (!is_null($request->post('validity'))) {
             foreach ($request->post('validity') as $key => $value) {
                 $attributes["validity.$key"] = ['in:aman,1'];
@@ -221,7 +249,7 @@ class IndicatorController extends ApiController
 
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if($validator->fails()){
             return $this->APIResponse(

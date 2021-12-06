@@ -51,9 +51,14 @@ class IndicatorReferenceController extends ApiController
             'preferences.*' => ['required'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+        ];
+
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         $indicators = Indicator::where(['label' => 'super-master'])->get(['id'])->toArray(); //get indicators paper work
 
@@ -62,7 +67,7 @@ class IndicatorReferenceController extends ApiController
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "The 'indicator ID: $value' doesn't match with paper work 'level: super-master'."
+                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
                     );
                 }
             }
@@ -75,7 +80,7 @@ class IndicatorReferenceController extends ApiController
             foreach ($request->post('preferences') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "The 'preference ID: $value' doesn't match with paper work 'level: super-master'."
+                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
                     );
                 }
             }
@@ -133,9 +138,15 @@ class IndicatorReferenceController extends ApiController
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = Arr::only($request->query(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if ($validator->fails()) {
             return $this->APIResponse(
@@ -192,9 +203,16 @@ class IndicatorReferenceController extends ApiController
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         $year = $request->post('tahun');
         $levelId = Level::firstWhere(['slug' => $request->post('level')])->id;
@@ -217,7 +235,7 @@ class IndicatorReferenceController extends ApiController
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "The 'indicator ID: $value' doesn't match with paper work 'level: super-master'."
+                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
                     );
                 }
             }
@@ -230,7 +248,7 @@ class IndicatorReferenceController extends ApiController
             foreach ($request->post('preferences') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "The 'preference ID: $value' doesn't match with paper work 'level: super-master'."
+                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
                     );
                 }
             }

@@ -45,6 +45,6 @@ class ValidRequestUnitBaseOnRequestLevel implements Rule
      */
     public function message()
     {
-        return "The :attribute not found or doesn't match with level.";
+        return ":attribute tidak ditemukan atau tidak cocok dengan level terpilih.";
     }
 }

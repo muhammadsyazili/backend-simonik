@@ -18,9 +18,13 @@ class AuthController extends ApiController
             'password' => ['required', 'string'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+        ];
+
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if ($validator->fails()) {
             return $this->APIResponse(

@@ -39,9 +39,15 @@ class PaperWorkIndicatorController extends ApiController
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = Arr::only($request->query(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if ($validator->fails()) {
             return $this->APIResponse(
@@ -162,9 +168,14 @@ class PaperWorkIndicatorController extends ApiController
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         $levelId = Level::firstWhere(['slug' => $request->post('level')])->id;
 
@@ -174,7 +185,7 @@ class PaperWorkIndicatorController extends ApiController
         $validator->after(function ($validator) use ($sumOfIndicator, $request) {
             if ($sumOfIndicator > 0) {
                 $validator->errors()->add(
-                    'level', sprintf("The paper work 'level: %s' 'year: %s' already available.", $request->post('level'), $request->post('year'))
+                    'level', sprintf("Kertas kerja 'level: %s' 'year: %s' sudah tersedia.", $request->post('level'), $request->post('year'))
                 );
             }
         });
@@ -186,7 +197,7 @@ class PaperWorkIndicatorController extends ApiController
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, $indicatorsIdOfSuperMasterLevel)) {
                     $validator->errors()->add(
-                        'indicators', "The 'indicator ID: $value' doesn't match with paper work 'level: super-master'."
+                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
                     );
                 }
             }
@@ -364,9 +375,15 @@ class PaperWorkIndicatorController extends ApiController
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = Arr::only($request->query(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if ($validator->fails()) {
             return $this->APIResponse(
@@ -405,14 +422,19 @@ class PaperWorkIndicatorController extends ApiController
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         $validator->after(function ($validator) use ($level) {
             if ($level === 'super-master') {
                 $validator->errors()->add(
-                    'level', sprintf("The paper work 'level: %s' can not be deleted.", $level)
+                    'level', sprintf("Kertas Kerja 'level: %s' tidak bisa dihapus.", $level)
                 );
             }
         });
@@ -459,7 +481,7 @@ class PaperWorkIndicatorController extends ApiController
         if (!$is_default) {
             $validator->after(function ($validator) use ($level, $unit, $year) {
                 $validator->errors()->add(
-                    'level', sprintf("The paper work 'level: %s' 'unit: %s' 'year: %s' can not be deleted, because it already has a paper work target or realization.", $level, $unit, $year)
+                    'level', sprintf("Kertas kerja 'level: %s' 'unit: %s' 'year: %s' tidak bisa dihapus, karena sudah ada kertas kerja target atau realisasi.", $level, $unit, $year)
                 );
             });
         }

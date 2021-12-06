@@ -75,9 +75,14 @@ class PaperWorkTargetController extends ApiController
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
         $input = Arr::only($request->query(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes);
+        $validator = Validator::make($input, $attributes, $messages);
 
         if ($validator->fails()) {
             return $this->APIResponse(

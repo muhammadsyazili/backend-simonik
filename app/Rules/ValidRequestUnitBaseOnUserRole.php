@@ -48,6 +48,6 @@ class ValidRequestUnitBaseOnUserRole implements Rule
      */
     public function message()
     {
-        return "The filter :attribute doesn't match with your role.";
+        return ":attribute terpilih tidak cocok dengan ROLE Anda.";
     }
 }
