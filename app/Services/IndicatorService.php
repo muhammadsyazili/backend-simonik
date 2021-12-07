@@ -3,39 +3,41 @@
 namespace App\Services;
 
 use App\Domains\Indicator;
-use Illuminate\Http\Request;
+use App\DTO\IndicatorConstructRequenst;
+use App\DTO\IndicatorInsertRequenst;
+use App\DTO\IndicatorInsertResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use Illuminate\Support\Str;
 
 class IndicatorService {
     private IndicatorRepository $indicatorRepository;
-    private LevelRepository $levelRepository;
+    private ?LevelRepository $levelRepository;
 
-    public function __construct(IndicatorRepository $indicatorRepository, LevelRepository $levelRepository)
+    public function __construct(IndicatorConstructRequenst $indicatorConstructRequenst)
     {
-        $this->indicatorRepository = $indicatorRepository;
-        $this->levelRepository = $levelRepository;
+        $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
+        $this->levelRepository = $indicatorConstructRequenst->levelRepository;
     }
 
-    public function insert(Request $request) : mixed
+    public function insert(IndicatorInsertRequenst $request) : IndicatorInsertResponse
     {
         $indicator = new Indicator();
 
-        $toJson = $this->validity_and_weight_ToJson($request->post('validity'), $request->post('weight'));
+        $toJson = $this->validity_and_weight_ToJson($request->validity, $request->weight);
 
-        if ($request->post('dummy') == 1) { //indikator merupakan dummy
+        if ($request->dummy) { //indikator merupakan dummy
             $indicator->weight = null;
             $indicator->polarity = null;
             $indicator->reducing_factor = null;
             $indicator->validity = null;
             $indicator->dummy = true;
         } else {
-            if ($request->post('reducing_factor') == 1) { //indikator merupakan faktor pengurang
+            if ($request->reducing_factor) { //indikator merupakan faktor pengurang
                 $indicator->polarity = null;
                 $indicator->reducing_factor = true;
             } else { //indikator bukan merupakan faktor pengurang
-                $indicator->polarity = $request->post('polarity');
+                $indicator->polarity = $request->polarity;
                 $indicator->reducing_factor = false;
             }
 
@@ -47,9 +49,9 @@ class IndicatorService {
         $id = (string) Str::orderedUuid();
 
         $indicator->id = $id;
-        $indicator->indicator = $request->post('indicator');
-        $indicator->formula = $request->post('formula');
-        $indicator->measure = $request->post('measure');
+        $indicator->indicator = $request->indicator;
+        $indicator->formula = $request->formula;
+        $indicator->measure = $request->measure;
         $indicator->year = null;
         $indicator->reviewed = true;
         $indicator->referenced = false;
@@ -59,16 +61,28 @@ class IndicatorService {
         $indicator->order = $this->indicatorRepository->countOrderColumn();
         $indicator->parent_vertical_id = null;
         $indicator->parent_horizontal_id = null;
-        $indicator->created_by = $request->header('X-User-Id');
+        $indicator->created_by = $request->user_id;
 
         $insert = $this->indicatorRepository->save($indicator);
 
         if ($insert) {
-            return $this->indicatorRepository->updateCodeColumn($id);
+            $this->indicatorRepository->updateCodeColumn($id);
         }
+
+        $response = new IndicatorInsertResponse();
+        $response->indicator = $indicator;
+
+        return $response;
     }
 
-    private function validity_and_weight_ToJson($validity, $weight)
+    public function show($id)
+    {
+        $indicator = $this->indicatorRepository->findById($id);
+        $indicator->original_polarity = $indicator->getRawOriginal('polarity');
+        return $indicator;
+    }
+
+    private function validity_and_weight_ToJson($validity, $weight) : array
     {
         $jsonString = [];
         if (is_null($validity)) {

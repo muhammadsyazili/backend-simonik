@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Domains\Indicator;
 use Illuminate\Support\Facades\DB;
+use App\Models\Indicator as IndicatorModel;
 
 class IndicatorRepository {
     public function save(Indicator $indicator) : bool
@@ -34,13 +35,18 @@ class IndicatorRepository {
         return DB::table('indicators')->insert($data);
     }
 
-    public function countOrderColumn() : mixed
+    public function countOrderColumn()
     {
-        return \App\Models\Indicator::withTrashed()->count()+1;
+        return IndicatorModel::withTrashed()->count()+1;
     }
 
-    public function updateCodeColumn($id) : mixed
+    public function updateCodeColumn($id)
     {
         return DB::table('indicators')->where(['id' => $id])->update(['code' => $id]);
+    }
+
+    public function findById($id)
+    {
+        return IndicatorModel::findOrFail($id);
     }
 }

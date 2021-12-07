@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\IndicatorConstructRequenst;
+use App\DTO\IndicatorInsertRequenst;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
@@ -29,7 +31,12 @@ class IndicatorController extends ApiController
 
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
-        $indicatorService = new IndicatorService($indicatorRepository, $levelRepository);
+        $indicatorConstructRequenst = new IndicatorConstructRequenst();
+
+        $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
+        $indicatorConstructRequenst->levelRepository = $levelRepository;
+
+        $indicatorService = new IndicatorService($indicatorConstructRequenst);
 
         $insertValidation = $indicatorValidationService->insertValidation($request);
 
@@ -43,7 +50,26 @@ class IndicatorController extends ApiController
             );
         }
 
-        $insert = $indicatorService->insert($request);
+        $indicatorInsertRequenst = new IndicatorInsertRequenst();
+
+        $reducing_factor = null;
+        if (is_null($request->post('reducing_factor'))) {
+            $reducing_factor = null;
+        } else {
+            $reducing_factor = $request->post('reducing_factor') == 1 ? true : false;
+        }
+
+        $indicatorInsertRequenst->validity = $request->post('validity');
+        $indicatorInsertRequenst->weight = $request->post('weight');
+        $indicatorInsertRequenst->dummy = $request->post('dummy') == 1 ? true : false;
+        $indicatorInsertRequenst->reducing_factor = $reducing_factor;
+        $indicatorInsertRequenst->polarity = $request->post('polarity');
+        $indicatorInsertRequenst->indicator = $request->post('indicator');
+        $indicatorInsertRequenst->formula = $request->post('formula');
+        $indicatorInsertRequenst->measure = $request->post('measure');
+        $indicatorInsertRequenst->user_id = $request->header('X-User-Id');
+
+        $insert = $indicatorService->insert($indicatorInsertRequenst);
 
         return $this->APIResponse(
             true,
@@ -62,8 +88,14 @@ class IndicatorController extends ApiController
      */
     public function show($id)
     {
-        $indicator = Indicator::find($id);
-        $indicator->original_polarity = $indicator->getRawOriginal('polarity');
+        $indicatorRepository = new IndicatorRepository();
+        $indicatorConstructRequenst = new IndicatorConstructRequenst();
+
+        $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
+
+        $indicatorService = new IndicatorService($indicatorConstructRequenst);
+
+        $indicator = $indicatorService->show($id);
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
