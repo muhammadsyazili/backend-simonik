@@ -1,0 +1,146 @@
+<?php
+
+namespace App\Services;
+
+use App\DTO\IndicatorConstructRequest;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use App\Rules\ValidRequestUnitBaseOnRequestLevel;
+
+class IndicatorReferenceValidationService {
+    private IndicatorRepository $indicatorRepository;
+    private ?LevelRepository $levelRepository;
+    private ?UnitRepository $unitRepository;
+
+    public function __construct(IndicatorConstructRequest $indicatorConstructRequenst)
+    {
+        $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
+        $this->levelRepository = $indicatorConstructRequenst->levelRepository;
+        $this->unitRepository = $indicatorConstructRequenst->unitRepository;
+    }
+
+    public function insertValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    {
+        $attributes = [
+            'indicators.*' => ['required', 'uuid'],
+            'preferences.*' => ['required'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+        ];
+
+        $input = Arr::only($request->post(), array_keys($attributes));
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        $indicators = $this->indicatorRepository->findAllIdBySuperMasterLevel(); //get indicators paper work
+
+        //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
+        $validator->after(function ($validator) use ($request, $indicators) {
+            foreach ($request->post('indicators') as $key => $value) {
+                if (!in_array($value, Arr::flatten($indicators))) {
+                    $validator->errors()->add(
+                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                    );
+                }
+            }
+        });
+
+        $indicators[count($indicators)] = ['id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
+
+        //memastikan semua ID preferensi dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
+        $validator->after(function ($validator) use ($request, $indicators) {
+            foreach ($request->post('preferences') as $key => $value) {
+                if (!in_array($value, Arr::flatten($indicators))) {
+                    $validator->errors()->add(
+                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                    );
+                }
+            }
+        });
+
+        return $validator;
+    }
+
+    public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    {
+        $attributes = [
+            'level' => ['required', 'string'],
+            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->query('level'))],
+            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
+        $input = Arr::only($request->query(), array_keys($attributes));
+
+        return Validator::make($input, $attributes, $messages);
+    }
+
+    public function x(Request $request)
+    {
+        $attributes = [
+            'indicators.*' => ['required', 'uuid'],
+            'preferences.*' => ['required'],
+            'level' => ['required', 'string'],
+            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->post('level'))],
+            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
+        $input = Arr::only($request->post(), array_keys($attributes));
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        $indicators = $this->indicatorRepository->findIdParentHorizontalIdByLevelUnitYear(
+            $request->post('level') === 'super-master' ?
+            ['label' => 'super-master'] :
+            [
+                'level_id' => $this->levelRepository->findIdBySlug($request->post('level')),
+                'label' => $request->post('unit') === 'master' ? 'master' : 'child',
+                'unit_id' => $request->post('unit') === 'master' ? null : $this->unitRepository->findIdBySlug($request->post('unit')),
+                'year' => $request->post('tahun'),
+            ]
+        );
+
+        //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja
+        $validator->after(function ($validator) use ($request, $indicators) {
+            foreach ($request->post('indicators') as $key => $value) {
+                if (!in_array($value, Arr::flatten($indicators))) {
+                    $validator->errors()->add(
+                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                    );
+                }
+            }
+        });
+
+        $indicators[count($indicators)] = ['id' => 'root', 'parent_horizontal_id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
+
+        //memastikan semua ID preferensi dari request ada pada daftar ID indikator kertas kerja
+        $validator->after(function ($validator) use ($request, $indicators) {
+            foreach ($request->post('preferences') as $key => $value) {
+                if (!in_array($value, Arr::flatten($indicators))) {
+                    $validator->errors()->add(
+                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                    );
+                }
+            }
+        });
+    }
+}

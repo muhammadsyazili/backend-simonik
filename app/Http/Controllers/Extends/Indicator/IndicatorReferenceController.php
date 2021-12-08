@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Extends\Indicator;
 
+use App\DTO\IndicatorConstructRequest;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
@@ -11,6 +12,11 @@ use App\Rules\ValidRequestUnitBaseOnRequestLevel;
 use App\Models\Indicator;
 use App\Models\Unit;
 use App\Models\Level;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
+use App\Services\IndicatorReferenceService;
+use App\Services\IndicatorReferenceValidationService;
 
 class IndicatorReferenceController extends ApiController
 {
@@ -21,18 +27,22 @@ class IndicatorReferenceController extends ApiController
      */
     public function create()
     {
+        $indicatorRepository = new IndicatorRepository();
+        $indicatorConstructRequenst = new IndicatorConstructRequest();
+
+        $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
+
+        $indicatorReferenceService = new IndicatorReferenceService($indicatorConstructRequenst);
+
+        $create = $indicatorReferenceService->create();
+
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Indicators referencing showed",
             [
-                'indicators' => Indicator::notReferenced()
-                    ->where(['label' => 'super-master'])
-                    ->get(),
-                'preferences' =>Indicator::with('childsHorizontalRecursive')
-                    ->rootHorizontal()
-                    ->where(['label' => 'super-master'])
-                    ->get(),
+                'indicators' => $create->indicators,
+                'preferences' => $create->preferences,
             ],
             null,
         );
@@ -46,63 +56,28 @@ class IndicatorReferenceController extends ApiController
      */
     public function store(Request $request)
     {
-        $attributes = [
-            'indicators.*' => ['required', 'uuid'],
-            'preferences.*' => ['required'],
-        ];
+        $indicatorRepository = new IndicatorRepository();
+        $indicatorConstructRequenst = new IndicatorConstructRequest();
 
-        $messages = [
-            'required' => ':attribute tidak boleh kosong.',
-            'uuid' => ':attribute harus UUID format.',
-        ];
+        $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
 
-        $input = Arr::only($request->post(), array_keys($attributes));
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($indicatorConstructRequenst);
 
-        $validator = Validator::make($input, $attributes, $messages);
+        $validation = $indicatorReferenceValidationService->insertValidation($request);
 
-        $indicators = Indicator::where(['label' => 'super-master'])->get(['id'])->toArray(); //get indicators paper work
-
-        //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('indicators') as $key => $value) {
-                if (!in_array($value, Arr::flatten($indicators))) {
-                    $validator->errors()->add(
-                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
-                    );
-                }
-            }
-        });
-
-        $indicators[count($indicators)] = ['id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
-
-        //memastikan semua ID preferensi dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('preferences') as $key => $value) {
-                if (!in_array($value, Arr::flatten($indicators))) {
-                    $validator->errors()->add(
-                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
-                    );
-                }
-            }
-        });
-
-        if($validator->fails()){
+        if($validation->fails()){
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
                 Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
                 null,
-                $validator->errors(),
+                $validation->errors(),
             );
         }
 
-        for ($i=0; $i < count($request->post('indicators')); $i++) {
-            Indicator::where(['id' => $request->post('indicators')[$i]])
-                ->update([
-                    'parent_horizontal_id' => $request->post('preferences')[$i] === 'root' ? null : $request->post('preferences')[$i],
-                    'referenced' => 1,
-                ]);
-        }
+        $indicatorReferenceService = new IndicatorReferenceService($indicatorConstructRequenst);
+
+        $indicatorReferenceService->insert($request->post('indicators'), $request->post('preferences'));
 
         return $this->APIResponse(
             true,
@@ -114,17 +89,6 @@ class IndicatorReferenceController extends ApiController
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -132,47 +96,34 @@ class IndicatorReferenceController extends ApiController
      */
     public function edit(Request $request)
     {
-        $attributes = [
-            'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->query('level'))],
-            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
-        ];
+        $indicatorRepository = new IndicatorRepository();
+        $indicatorConstructRequenst = new IndicatorConstructRequest();
 
-        $messages = [
-            'required' => ':attribute tidak boleh kosong.',
-            'required_unless' => ':attribute tidak boleh kosong.',
-            'date_format' => ':attribute harus berformat yyyy.',
-        ];
+        $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
 
-        $input = Arr::only($request->query(), array_keys($attributes));
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($indicatorConstructRequenst);
 
-        $validator = Validator::make($input, $attributes, $messages);
+        $validation = $indicatorReferenceValidationService->updateValidation($request);
 
-        if ($validator->fails()) {
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
                 Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
                 null,
-                $validator->errors(),
+                $validation->errors(),
             );
         }
 
-        // 'indicators' handler
-        $indicators = Indicator::with('childsHorizontalRecursive')
-        ->referenced()
-        ->rootHorizontal()
-        ->where(
-            $request->query('level') === 'super-master' ?
-            ['label' => 'super-master'] :
-            [
-                'level_id' => Level::firstWhere(['slug' => $request->query('level')])->id,
-                'label' => $request->query('unit') === 'master' ? 'master' : 'child',
-                'unit_id' => $request->query('unit') === 'master' ? null : Unit::firstWhere(['slug' => $request->query('unit')])->id,
-                'year' => $request->query('tahun'),
-            ]
-        )
-        ->get();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $indicatorConstructRequenst->levelRepository = $levelRepository;
+        $indicatorConstructRequenst->unitRepository = $unitRepository;
+
+        $indicatorReferenceService = new IndicatorReferenceService($indicatorConstructRequenst);
+
+        $indicators = $indicatorReferenceService->edit($request->query('level'), $request->query('unit'), $request->query('tahun'));
 
         return $this->APIResponse(
             true,
@@ -214,7 +165,6 @@ class IndicatorReferenceController extends ApiController
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $year = $request->post('tahun');
         $levelId = Level::firstWhere(['slug' => $request->post('level')])->id;
 
         $indicators = Indicator::where(
@@ -263,6 +213,8 @@ class IndicatorReferenceController extends ApiController
                 $validator->errors(),
             );
         }
+
+        $year = $request->post('tahun');
 
         if ($request->post('level') !== 'super-master' && $request->post('unit') === 'master') {
             //section: paper work current request updating

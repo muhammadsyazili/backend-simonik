@@ -3,40 +3,41 @@
 namespace App\Services;
 
 use App\Domains\Indicator;
-use App\DTO\IndicatorConstructRequenst;
-use App\DTO\IndicatorInsertRequenst;
+use App\DTO\IndicatorConstructRequest;
+use App\DTO\IndicatorInsertRequest;
 use App\DTO\IndicatorInsertResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class IndicatorService {
     private IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
 
-    public function __construct(IndicatorConstructRequenst $indicatorConstructRequenst)
+    public function __construct(IndicatorConstructRequest $indicatorConstructRequenst)
     {
         $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
         $this->levelRepository = $indicatorConstructRequenst->levelRepository;
     }
 
-    public function insert(IndicatorInsertRequenst $request) : IndicatorInsertResponse
+    public function insert(IndicatorInsertRequest $request) : IndicatorInsertResponse
     {
         $indicator = new Indicator();
 
         $toJson = $this->validity_and_weight_ToJson($request->validity, $request->weight);
 
-        if ($request->dummy) { //indikator merupakan dummy
+        if ($request->dummy === '1') {
             $indicator->weight = null;
             $indicator->polarity = null;
             $indicator->reducing_factor = null;
             $indicator->validity = null;
             $indicator->dummy = true;
         } else {
-            if ($request->reducing_factor) { //indikator merupakan faktor pengurang
+            if ($request->reducing_factor === '1') {
                 $indicator->polarity = null;
                 $indicator->reducing_factor = true;
-            } else { //indikator bukan merupakan faktor pengurang
+            } else {
                 $indicator->polarity = $request->polarity;
                 $indicator->reducing_factor = false;
             }
@@ -63,11 +64,10 @@ class IndicatorService {
         $indicator->parent_horizontal_id = null;
         $indicator->created_by = $request->user_id;
 
-        $insert = $this->indicatorRepository->save($indicator);
-
-        if ($insert) {
+        DB::transaction(function () use ($indicator, $id) {
+            $this->indicatorRepository->save($indicator);
             $this->indicatorRepository->updateCodeColumn($id);
-        }
+        });
 
         $response = new IndicatorInsertResponse();
         $response->indicator = $indicator;

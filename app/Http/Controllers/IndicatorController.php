@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\IndicatorConstructRequenst;
-use App\DTO\IndicatorInsertRequenst;
+use App\DTO\IndicatorConstructRequest;
+use App\DTO\IndicatorInsertRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
@@ -31,38 +31,31 @@ class IndicatorController extends ApiController
 
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
-        $indicatorConstructRequenst = new IndicatorConstructRequenst();
+        $indicatorConstructRequenst = new IndicatorConstructRequest();
 
         $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
         $indicatorConstructRequenst->levelRepository = $levelRepository;
 
         $indicatorService = new IndicatorService($indicatorConstructRequenst);
 
-        $insertValidation = $indicatorValidationService->insertValidation($request);
+        $validation = $indicatorValidationService->insertValidation($request);
 
-        if($insertValidation->fails()){
+        if($validation->fails()){
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
                 Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
                 null,
-                $insertValidation->errors(),
+                $validation->errors(),
             );
         }
 
-        $indicatorInsertRequenst = new IndicatorInsertRequenst();
-
-        $reducing_factor = null;
-        if (is_null($request->post('reducing_factor'))) {
-            $reducing_factor = null;
-        } else {
-            $reducing_factor = $request->post('reducing_factor') == 1 ? true : false;
-        }
+        $indicatorInsertRequenst = new IndicatorInsertRequest();
 
         $indicatorInsertRequenst->validity = $request->post('validity');
         $indicatorInsertRequenst->weight = $request->post('weight');
-        $indicatorInsertRequenst->dummy = $request->post('dummy') == 1 ? true : false;
-        $indicatorInsertRequenst->reducing_factor = $reducing_factor;
+        $indicatorInsertRequenst->dummy = $request->post('dummy');
+        $indicatorInsertRequenst->reducing_factor = $request->post('reducing_factor');
         $indicatorInsertRequenst->polarity = $request->post('polarity');
         $indicatorInsertRequenst->indicator = $request->post('indicator');
         $indicatorInsertRequenst->formula = $request->post('formula');
@@ -89,7 +82,7 @@ class IndicatorController extends ApiController
     public function show($id)
     {
         $indicatorRepository = new IndicatorRepository();
-        $indicatorConstructRequenst = new IndicatorConstructRequenst();
+        $indicatorConstructRequenst = new IndicatorConstructRequest();
 
         $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
 
