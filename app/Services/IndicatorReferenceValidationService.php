@@ -23,7 +23,7 @@ class IndicatorReferenceValidationService {
         $this->unitRepository = $indicatorConstructRequenst->unitRepository;
     }
 
-    public function insertValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicators.*' => ['required', 'uuid'],
@@ -39,7 +39,7 @@ class IndicatorReferenceValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $indicators = $this->indicatorRepository->findAllIdBySuperMasterLevel(); //get indicators paper work
+        $indicators = $this->indicatorRepository->findAllIdBySuperMasterLabel(); //get indicators paper work
 
         //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
@@ -68,7 +68,7 @@ class IndicatorReferenceValidationService {
         return $validator;
     }
 
-    public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'level' => ['required', 'string'],
@@ -87,7 +87,7 @@ class IndicatorReferenceValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
-    public function x(Request $request)
+    public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicators.*' => ['required', 'uuid'],
@@ -108,7 +108,7 @@ class IndicatorReferenceValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $indicators = $this->indicatorRepository->findIdParentHorizontalIdByLevelUnitYear(
+        $indicators = $this->indicatorRepository->findIdAndParentHorizontalIdByWhere(
             $request->post('level') === 'super-master' ?
             ['label' => 'super-master'] :
             [
@@ -142,5 +142,7 @@ class IndicatorReferenceValidationService {
                 }
             }
         });
+
+        return $validator;
     }
 }

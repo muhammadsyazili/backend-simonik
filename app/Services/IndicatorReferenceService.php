@@ -23,8 +23,8 @@ class IndicatorReferenceService {
 
     public function create() : IndicatorPreferencesCreateResponse
     {
-        $indicators = $this->indicatorRepository->findAllSuperMasterLevelNotReferenced();
-        $preferences = $this->indicatorRepository->findAllPreference();
+        $indicators = $this->indicatorRepository->findAllNotReferencedBySuperMasterLabel();
+        $preferences = $this->indicatorRepository->findAllWithChildsBySuperMasterLabel();
 
         $response = new IndicatorPreferencesCreateResponse();
         $response->indicators = $indicators;
@@ -33,18 +33,18 @@ class IndicatorReferenceService {
         return $response;
     }
 
-    public function insert(array $indicator, array $preference) : void
+    public function store(array $indicator, array $preference) : void
     {
         DB::transaction(function () use ($indicator, $preference) {
             for ($i=0; $i < count($indicator); $i++) {
-                $this->indicatorRepository->insertReferenceByIndicator($indicator[$i], $preference[$i] === 'root' ? null : $preference[$i]);
+                $this->indicatorRepository->updateReferenceByIndicatorId($indicator[$i], $preference[$i] === 'root' ? null : $preference[$i]);
             }
         });
     }
 
-    public function edit($level, $unit, $year)
+    public function edit(string $level, ?string $unit = null, ?string $year = null)
     {
-        return $this->indicatorRepository->findAllWithChildByLevelUnitYear(
+        return $this->indicatorRepository->findAllReferencedWithChildsByWhere(
             $level === 'super-master' ?
             ['label' => 'super-master'] :
             [
@@ -54,5 +54,60 @@ class IndicatorReferenceService {
                 'year' => $year,
             ]
         );
+    }
+
+    public function update(array $indicators, array $preferences, string $level, ?string $unit = null, ?string $year = null) : void
+    {
+        $indicatorsModel = $this->indicatorRepository->findIdAndParentHorizontalIdByWhere(
+            $level === 'super-master' ?
+            ['label' => 'super-master'] :
+            [
+                'level_id' => $this->levelRepository->findIdBySlug($level),
+                'label' => $unit === 'master' ? 'master' : 'child',
+                'unit_id' => $unit === 'master' ? null : $this->unitRepository->findIdBySlug($unit),
+                'year' => $year,
+            ]
+        );
+
+        $indicatorsModel[count($indicatorsModel)] = ['id' => 'root', 'parent_horizontal_id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
+
+        if ($level !== 'super-master' && $unit === 'master') {
+            //section: paper work current request updating
+            $log = [];
+            for ($i=0; $i < count($indicators); $i++) {
+                $key = array_search($indicators[$i], array_column($indicatorsModel, 'id'));
+
+                $log[$i]['id'] = $indicators[$i];
+                $log[$i]['new_preference'] = $preferences[$i] === 'root' ? null : $preferences[$i];
+                $log[$i]['old_preference'] = $indicatorsModel[$key]['id'];
+
+                $this->indicatorRepository->updateReferenceByIndicatorId($indicators[$i], $preferences[$i] === 'root' ? null : $preferences[$i]);
+            }
+            //section end: paper work current request updating
+
+            //section: paper work chlids updating
+            $units = $this->unitRepository->findAllWithIndicatorByLevelId($this->levelRepository->findIdBySlug($level), $year);
+
+            foreach ($units as $unit) {
+                foreach ($unit->indicators as $indicator) {
+                    $key = array_search($indicator->parent_vertical_id, array_column($log, 'id'));
+
+                    if ($key !== false) {
+                        $this->indicatorRepository->updateReferenceByIndicatorId($indicator->id, is_null($log[$key]['new_preference']) ? null :
+                        $this->indicatorRepository->findIdByWhere([
+                            'level_id' => $this->levelRepository->findIdBySlug($level),
+                            'unit_id' => $unit->id,
+                            'year' => $year,
+                            'parent_vertical_id' => $log[$key]['new_preference'],
+                        ]));
+                    }
+                }
+            }
+            //end section: paper work chlids updating
+        } else {
+            for ($i=0; $i < count($indicators); $i++) {
+                $this->indicatorRepository->updateReferenceByIndicatorId($indicators[$i], $preferences[$i] === 'root' ? null : $preferences[$i]);
+            }
+        }
     }
 }

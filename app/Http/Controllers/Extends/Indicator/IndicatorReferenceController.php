@@ -63,7 +63,7 @@ class IndicatorReferenceController extends ApiController
 
         $indicatorReferenceValidationService = new IndicatorReferenceValidationService($indicatorConstructRequenst);
 
-        $validation = $indicatorReferenceValidationService->insertValidation($request);
+        $validation = $indicatorReferenceValidationService->storeValidation($request);
 
         if($validation->fails()){
             return $this->APIResponse(
@@ -77,7 +77,7 @@ class IndicatorReferenceController extends ApiController
 
         $indicatorReferenceService = new IndicatorReferenceService($indicatorConstructRequenst);
 
-        $indicatorReferenceService->insert($request->post('indicators'), $request->post('preferences'));
+        $indicatorReferenceService->store($request->post('indicators'), $request->post('preferences'));
 
         return $this->APIResponse(
             true,
@@ -103,7 +103,7 @@ class IndicatorReferenceController extends ApiController
 
         $indicatorReferenceValidationService = new IndicatorReferenceValidationService($indicatorConstructRequenst);
 
-        $validation = $indicatorReferenceValidationService->updateValidation($request);
+        $validation = $indicatorReferenceValidationService->editValidation($request);
 
         if ($validation->fails()) {
             return $this->APIResponse(
@@ -144,7 +144,7 @@ class IndicatorReferenceController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function updateOld(Request $request)
     {
         $attributes = [
             'indicators.*' => ['required', 'uuid'],
@@ -271,6 +271,52 @@ class IndicatorReferenceController extends ApiController
                     ]);
             }
         }
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Indicators referenced successfully",
+            null,
+            null,
+        );
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $indicatorConstructRequenst = new IndicatorConstructRequest();
+
+        $indicatorConstructRequenst->indicatorRepository = $indicatorRepository;
+        $indicatorConstructRequenst->levelRepository = $levelRepository;
+        $indicatorConstructRequenst->unitRepository = $unitRepository;
+
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($indicatorConstructRequenst);
+
+        $validation = $indicatorReferenceValidationService->updateValidation($request);
+
+        if($validation->fails()){
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $IndicatorReferenceService = new IndicatorReferenceService($indicatorConstructRequenst);
+
+        $IndicatorReferenceService->update($request->post('indicators'), $request->post('preferences'), $request->post('level'), $request->post('unit'), $request->post('tahun'));
 
         return $this->APIResponse(
             true,

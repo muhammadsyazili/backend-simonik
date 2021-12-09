@@ -38,7 +38,7 @@ class IndicatorController extends ApiController
 
         $indicatorService = new IndicatorService($indicatorConstructRequenst);
 
-        $validation = $indicatorValidationService->insertValidation($request);
+        $validation = $indicatorValidationService->storeValidation($request);
 
         if($validation->fails()){
             return $this->APIResponse(
@@ -62,7 +62,7 @@ class IndicatorController extends ApiController
         $indicatorInsertRequenst->measure = $request->post('measure');
         $indicatorInsertRequenst->user_id = $request->header('X-User-Id');
 
-        $insert = $indicatorService->insert($indicatorInsertRequenst);
+        $insert = $indicatorService->store($indicatorInsertRequenst);
 
         return $this->APIResponse(
             true,

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class IndicatorValidationService {
-    public function insertValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicator' => ['required', 'string', 'max:100'],

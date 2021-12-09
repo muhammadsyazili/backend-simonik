@@ -5,8 +5,6 @@ namespace App\Repositories;
 use App\Domains\Indicator;
 use Illuminate\Support\Facades\DB;
 use App\Models\Indicator as IndicatorModel;
-use App\Models\Level;
-use App\Models\Unit;
 
 class IndicatorRepository {
     public function save(Indicator $indicator) : void
@@ -37,12 +35,12 @@ class IndicatorRepository {
         DB::table('indicators')->insert($data);
     }
 
-    public function countOrderColumn()
+    public function countOrderColumn() : int
     {
         return IndicatorModel::withTrashed()->count()+1;
     }
 
-    public function updateCodeColumn($id) : void
+    public function updateCodeColumnById($id) : void
     {
         DB::table('indicators')->where(['id' => $id])->update(['code' => $id]);
     }
@@ -52,33 +50,38 @@ class IndicatorRepository {
         return IndicatorModel::findOrFail($id);
     }
 
-    public function findAllSuperMasterLevelNotReferenced()
+    public function findAllNotReferencedBySuperMasterLabel()
     {
         return IndicatorModel::notReferenced()->where(['label' => 'super-master'])->get();
     }
 
-    public function findAllPreference()
+    public function findAllWithChildsBySuperMasterLabel()
     {
         return IndicatorModel::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->get();
     }
 
-    public function findAllIdBySuperMasterLevel()
+    public function findAllIdBySuperMasterLabel()
     {
         return IndicatorModel::where(['label' => 'super-master'])->get(['id'])->toArray();
     }
 
-    public function insertReferenceByIndicator($indicator, $preference) : void
+    public function updateReferenceByIndicatorId($indicator_id, $parent_horizontal_id) : void
     {
-        IndicatorModel::where(['id' => $indicator])->update(['parent_horizontal_id' => $preference, 'referenced' => 1]);
+        IndicatorModel::where(['id' => $indicator_id])->update(['parent_horizontal_id' => $parent_horizontal_id, 'referenced' => 1]);
     }
 
-    public function findAllWithChildByLevelUnitYear(array $where)
+    public function findAllReferencedWithChildsByWhere(array $where)
     {
         return IndicatorModel::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where($where)->get();
     }
 
-    public function findIdParentHorizontalIdByLevelUnitYear(array $where)
+    public function findIdAndParentHorizontalIdByWhere(array $where)
     {
         return IndicatorModel::where($where)->get(['id', 'parent_horizontal_id'])->toArray();
+    }
+
+    public function findIdByWhere(array $where)
+    {
+        return IndicatorModel::firstWhere($where)->id;
     }
 }

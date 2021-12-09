@@ -21,7 +21,7 @@ class IndicatorService {
         $this->levelRepository = $indicatorConstructRequenst->levelRepository;
     }
 
-    public function insert(IndicatorInsertRequest $request) : IndicatorInsertResponse
+    public function store(IndicatorInsertRequest $request) : IndicatorInsertResponse
     {
         $indicator = new Indicator();
 
@@ -66,7 +66,7 @@ class IndicatorService {
 
         DB::transaction(function () use ($indicator, $id) {
             $this->indicatorRepository->save($indicator);
-            $this->indicatorRepository->updateCodeColumn($id);
+            $this->indicatorRepository->updateCodeColumnById($id);
         });
 
         $response = new IndicatorInsertResponse();
