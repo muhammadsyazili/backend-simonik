@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Extends\Indicator;
 
+use App\DTO\ConstructRequest;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,17 @@ use App\Models\Level;
 use App\Models\LevelOnlySlug;
 use App\Models\Realization;
 use App\Models\Target;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\RealizationRepository;
+use App\Repositories\TargetRepository;
+use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
 use App\Rules\ValidRequestLevelBaseOnUserRole;
 use App\Rules\ValidRequestUnitBaseOnUserRole;
 use App\Rules\ValidRequestUnitBaseOnRequestLevel;
+use App\Services\IndicatorPaperWorkService;
+use App\Services\IndicatorPaperWorkValidationService;
 
 class PaperWorkIndicatorController extends ApiController
 {
@@ -29,9 +38,9 @@ class PaperWorkIndicatorController extends ApiController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function indexOld(Request $request)
     {
-        $user = User::with(['role', 'unit.level'])->findOrFail(request()->header('X-User-Id'));
+        $user = User::with(['role', 'unit.level'])->findOrFail($request->header('X-User-Id'));
 
         $attributes = [
             'level' => ['required', 'string', new ValidRequestLevelBaseOnUserRole($user)],
@@ -122,13 +131,69 @@ class PaperWorkIndicatorController extends ApiController
     }
 
     /**
+     * Display a listing of the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $userRepository = new UserRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequenst = new ConstructRequest();
+
+        $constructRequenst->userRepository = $userRepository;
+        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequenst->levelRepository = $levelRepository;
+        $constructRequenst->unitRepository = $unitRepository;
+
+        $IndicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequenst);
+
+        $validation = $IndicatorPaperWorkValidationService->indexValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+
+        $user_id = $request->header('X-User-Id');
+        $level = $request->query('level');
+        $unit = $request->query('unit');
+        $year = $request->query('tahun');
+
+        $response = $indicatorPaperWorkService->index($user_id, $level, $unit, $year);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Paper work indicator 'level: %s' 'unit: %s' 'year: %s' showed", $level, $unit, $year),
+            [
+                'levels' => $response->levels,
+                'indicators' => $response->indicators,
+                'permissions' => $response->permissions,
+            ],
+            null,
+        );
+    }
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function createOld(Request $request)
     {
-        $user = User::with(['role', 'unit.level'])->findOrFail(request()->header('X-User-Id'));
+        $user = User::with(['role', 'unit.level'])->findOrFail($request->header('X-User-Id'));
 
         return $this->APIResponse(
             true,
@@ -153,14 +218,49 @@ class PaperWorkIndicatorController extends ApiController
     }
 
     /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create(Request $request)
+    {
+        $userRepository = new UserRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+
+        $constructRequenst = new ConstructRequest();
+
+        $constructRequenst->userRepository = $userRepository;
+        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequenst->levelRepository = $levelRepository;
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+
+        $response = $indicatorPaperWorkService->create(
+            $request->header('X-User-Id')
+        );
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Paper work indicators showed",
+            [
+                'indicators' => $response->indicators,
+                'levels' => $response->levels,
+            ],
+            null,
+        );
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function storeOld(Request $request)
     {
-        $user = User::with(['role', 'unit.level'])->findOrFail(request()->header('X-User-Id'));
+        $user = User::with(['role', 'unit.level'])->findOrFail($request->header('X-User-Id'));
 
         $attributes = [
             'indicators' => ['required'],
@@ -256,7 +356,7 @@ class PaperWorkIndicatorController extends ApiController
                 'code' => $indicator->code,
                 'parent_vertical_id' => $indicator->id,
                 'parent_horizontal_id' => is_null($indicator->parent_horizontal_id) ? null : $idListMaster[$indicator->parent_horizontal_id],
-                'created_by' => request()->header('X-User-Id'),
+                'created_by' => $request->header('X-User-Id'),
 
                 'created_at' => \Carbon\Carbon::now(),
                 'updated_at' => \Carbon\Carbon::now(),
@@ -274,7 +374,6 @@ class PaperWorkIndicatorController extends ApiController
                         'value' => 0,
                         'locked' => 1,
                         'default' => 1,
-                        'created_at' => request()->header('X-User-Id'),
                     ]);
                 }
             }
@@ -315,7 +414,7 @@ class PaperWorkIndicatorController extends ApiController
                     'code' => $indicator->code,
                     'parent_vertical_id' => $indicator->id,
                     'parent_horizontal_id' => is_null($indicator->parent_horizontal_id) ? null : $idListChild[$indicator->parent_horizontal_id],
-                    'created_by' => request()->header('X-User-Id'),
+                    'created_by' => $request->header('X-User-Id'),
 
                     'created_at' => \Carbon\Carbon::now(),
                     'updated_at' => \Carbon\Carbon::now(),
@@ -333,7 +432,6 @@ class PaperWorkIndicatorController extends ApiController
                             'value' => 0,
                             'locked' => 1,
                             'default' => 1,
-                            'created_at' => request()->header('X-User-Id'),
                         ]);
 
                         Realization::create([
@@ -343,7 +441,6 @@ class PaperWorkIndicatorController extends ApiController
                             'value' => 0,
                             'locked' => 1,
                             'default' => 1,
-                            'created_at' => request()->header('X-User-Id'),
                         ]);
                     }
                 }
@@ -351,6 +448,62 @@ class PaperWorkIndicatorController extends ApiController
             }
         }
         //end section: paper work 'CHILD' creating
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Paper work indicator 'level: %s' 'year: %s' creating successfully.", $request->post('level'), $request->post('year')),
+            null,
+            null,
+        );
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $userRepository = new UserRepository();
+        $targetRepository = new TargetRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequenst = new ConstructRequest();
+
+        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequenst->levelRepository = $levelRepository;
+        $constructRequenst->unitRepository = $unitRepository;
+        $constructRequenst->userRepository = $userRepository;
+        $constructRequenst->targetRepository = $targetRepository;
+        $constructRequenst->realizationRepository = $realizationRepository;
+
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequenst);
+
+        $validation = $indicatorPaperWorkValidationService->storeValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+
+        $indicatorPaperWorkService->store(
+            $request->post('indicators'),
+            $request->post('level'),
+            $request->post('year'),
+            $request->header('X-User-Id')
+        );
 
         return $this->APIResponse(
             true,

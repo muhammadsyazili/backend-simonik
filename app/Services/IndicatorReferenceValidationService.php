@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\DTO\IndicatorConstructRequest;
+use App\DTO\ConstructRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
@@ -12,11 +12,11 @@ use Illuminate\Support\Arr;
 use App\Rules\ValidRequestUnitBaseOnRequestLevel;
 
 class IndicatorReferenceValidationService {
-    private IndicatorRepository $indicatorRepository;
+    private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
 
-    public function __construct(IndicatorConstructRequest $indicatorConstructRequenst)
+    public function __construct(ConstructRequest $indicatorConstructRequenst)
     {
         $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
         $this->levelRepository = $indicatorConstructRequenst->levelRepository;

@@ -3,25 +3,24 @@
 namespace App\Services;
 
 use App\Domains\Indicator;
-use App\DTO\IndicatorConstructRequest;
+use App\DTO\ConstructRequest;
 use App\DTO\IndicatorInsertRequest;
-use App\DTO\IndicatorInsertResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class IndicatorService {
-    private IndicatorRepository $indicatorRepository;
+    private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
 
-    public function __construct(IndicatorConstructRequest $indicatorConstructRequenst)
+    public function __construct(ConstructRequest $indicatorConstructRequenst)
     {
         $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
         $this->levelRepository = $indicatorConstructRequenst->levelRepository;
     }
 
-    public function store(IndicatorInsertRequest $request) : IndicatorInsertResponse
+    public function store(IndicatorInsertRequest $request) : \App\Domains\Indicator
     {
         $indicator = new Indicator();
 
@@ -69,20 +68,17 @@ class IndicatorService {
             $this->indicatorRepository->updateCodeColumnById($id);
         });
 
-        $response = new IndicatorInsertResponse();
-        $response->indicator = $indicator;
-
-        return $response;
+        return $indicator;
     }
 
-    public function show($id)
+    public function show(string|int $id)
     {
         $indicator = $this->indicatorRepository->findById($id);
         $indicator->original_polarity = $indicator->getRawOriginal('polarity');
         return $indicator;
     }
 
-    private function validity_and_weight_ToJson($validity, $weight) : array
+    private function validity_and_weight_ToJson(?array $validity, ?array $weight) : array
     {
         $jsonString = [];
         if (is_null($validity)) {

@@ -4,7 +4,8 @@ namespace App\Repositories;
 
 use App\Domains\Indicator;
 use Illuminate\Support\Facades\DB;
-use App\Models\Indicator as IndicatorModel;
+use App\Models\Indicator as ModelsIndicator;
+use App\Models\IndicatorOnlyId as ModelsIndicatorOnlyId;
 
 class IndicatorRepository {
     public function save(Indicator $indicator) : void
@@ -37,51 +38,76 @@ class IndicatorRepository {
 
     public function countOrderColumn() : int
     {
-        return IndicatorModel::withTrashed()->count()+1;
+        return ModelsIndicator::withTrashed()->count()+1;
     }
 
-    public function updateCodeColumnById($id) : void
+    public function updateCodeColumnById(string|int $id) : void
     {
         DB::table('indicators')->where(['id' => $id])->update(['code' => $id]);
     }
 
-    public function findById($id)
+    public function findById(string|int $id)
     {
-        return IndicatorModel::findOrFail($id);
+        return ModelsIndicator::findOrFail($id);
     }
 
     public function findAllNotReferencedBySuperMasterLabel()
     {
-        return IndicatorModel::notReferenced()->where(['label' => 'super-master'])->get();
+        return ModelsIndicator::notReferenced()->where(['label' => 'super-master'])->get();
     }
 
     public function findAllWithChildsBySuperMasterLabel()
     {
-        return IndicatorModel::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->get();
+        return ModelsIndicator::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->get();
     }
 
-    public function findAllIdBySuperMasterLabel()
+    public function findAllIdBySuperMasterLabel() : array
     {
-        return IndicatorModel::where(['label' => 'super-master'])->get(['id'])->toArray();
+        return ModelsIndicator::where(['label' => 'super-master'])->get(['id'])->toArray();
     }
 
-    public function updateReferenceByIndicatorId($indicator_id, $parent_horizontal_id) : void
+    public function updateReferenceById(string|int $id, string|int $parent_horizontal_id) : void
     {
-        IndicatorModel::where(['id' => $indicator_id])->update(['parent_horizontal_id' => $parent_horizontal_id, 'referenced' => 1]);
+        ModelsIndicator::where(['id' => $id])->update(['parent_horizontal_id' => $parent_horizontal_id, 'referenced' => 1]);
     }
 
     public function findAllReferencedWithChildsByWhere(array $where)
     {
-        return IndicatorModel::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where($where)->get();
+        return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where($where)->get();
     }
 
-    public function findIdAndParentHorizontalIdByWhere(array $where)
+    public function findIdAndParentHorizontalIdByWhere(array $where) : array
     {
-        return IndicatorModel::where($where)->get(['id', 'parent_horizontal_id'])->toArray();
+        return ModelsIndicator::where($where)->get(['id', 'parent_horizontal_id'])->toArray();
     }
 
-    public function findIdByWhere(array $where)
+    public function findIdByWhere(array $where) : string|int
     {
-        return IndicatorModel::firstWhere($where)->id;
+        return ModelsIndicator::firstWhere($where)->id;
+    }
+
+    public function countByWhere(array $where) : int
+    {
+        return ModelsIndicator::where($where)->count();
+    }
+
+    public function findAllIdReferencedBySuperMasterLabel() : array
+    {
+        return ModelsIndicator::referenced()->where(['label' => 'super-master'])->get(['id'])->toArray();
+    }
+
+    public function findAllWithParentsById(string|int $id) : array
+    {
+        return ModelsIndicatorOnlyId::with('parentHorizontalRecursive')->where(['id' => $id])->get()->toArray();
+    }
+
+    public function findAllById(array $id)
+    {
+        return ModelsIndicator::whereIn('id', $id)->get();
+    }
+
+    public function findAllByWhere(array $where)
+    {
+        return ModelsIndicator::where($where)->get();
     }
 }
