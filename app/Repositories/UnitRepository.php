@@ -10,7 +10,7 @@ class UnitRepository {
         return Unit::firstWhere(['slug' => $slug])->id;
     }
 
-    public function findAllWithIndicatorByLevelId(string|int $level_id, string $year)
+    public function findAllWithIndicatorByLevelIdAndYear(string|int $level_id, string|int $year)
     {
         return Unit::with(['indicators' => function ($query) use ($year) {
             $query->where([

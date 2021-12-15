@@ -129,7 +129,7 @@ class IndicatorPaperWorkService {
                 $domainIndicator->weight = $indicator->getRawOriginal('weight');
                 $domainIndicator->polarity = $indicator->getRawOriginal('polarity');
                 $domainIndicator->year = $year;
-                $domainIndicator->reducing_factor = $indicator->getRawOriginal('reducing_factor');
+                $domainIndicator->reducing_factor = $indicator->reducing_factor;
                 $domainIndicator->validity = $indicator->getRawOriginal('validity');
                 $domainIndicator->reviewed = $indicator->reviewed;
                 $domainIndicator->referenced = $indicator->referenced;
@@ -152,8 +152,8 @@ class IndicatorPaperWorkService {
                         $target->indicator_id = $idListMaster[$indicator->id];
                         $target->month = $key;
                         $target->value = 0;
-                        $target->locked = 1;
-                        $target->default = 1;
+                        $target->locked = true;
+                        $target->default = true;
 
                         $this->targetRepository->save($target);
                     }
@@ -182,7 +182,7 @@ class IndicatorPaperWorkService {
                     $domainIndicator->weight = $indicator->getRawOriginal('weight');
                     $domainIndicator->polarity = $indicator->getRawOriginal('polarity');
                     $domainIndicator->year = $year;
-                    $domainIndicator->reducing_factor = $indicator->getRawOriginal('reducing_factor');
+                    $domainIndicator->reducing_factor = $indicator->reducing_factor;
                     $domainIndicator->validity = $indicator->getRawOriginal('validity');
                     $domainIndicator->reviewed = $indicator->reviewed;
                     $domainIndicator->referenced = $indicator->referenced;
@@ -205,8 +205,8 @@ class IndicatorPaperWorkService {
                             $target->indicator_id = $idListChild[$indicator->id];
                             $target->month = $key;
                             $target->value = 0;
-                            $target->locked = 1;
-                            $target->default = 1;
+                            $target->locked = true;
+                            $target->default = true;
 
                             $this->targetRepository->save($target);
 
@@ -214,8 +214,8 @@ class IndicatorPaperWorkService {
                             $realization->indicator_id = $idListChild[$indicator->id];
                             $realization->month = $key;
                             $realization->value = 0;
-                            $realization->locked = 1;
-                            $realization->default = 1;
+                            $realization->locked = true;
+                            $realization->default = true;
 
                             $this->realizationRepository->save($realization);
                         }

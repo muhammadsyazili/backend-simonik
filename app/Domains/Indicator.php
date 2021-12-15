@@ -16,11 +16,11 @@ class Indicator {
     public bool $referenced;
     public bool $dummy;
     public string $label;
-    public ?string $unit_id;
-    public int $level_id;
+    public string|int|null $unit_id;
+    public string|int $level_id;
     public int $order;
     public ?string $code;
-    public ?string $parent_vertical_id;
-    public ?string $parent_horizontal_id;
+    public string|int|null $parent_vertical_id;
+    public string|int|null $parent_horizontal_id;
     public ?string $created_by;
 }

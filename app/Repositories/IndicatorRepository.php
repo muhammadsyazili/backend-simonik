@@ -66,7 +66,7 @@ class IndicatorRepository {
         return ModelsIndicator::where(['label' => 'super-master'])->get(['id'])->toArray();
     }
 
-    public function updateReferenceById(string|int $id, string|int $parent_horizontal_id) : void
+    public function updateReferenceById(string|int $id, string|int|null $parent_horizontal_id) : void
     {
         ModelsIndicator::where(['id' => $id])->update(['parent_horizontal_id' => $parent_horizontal_id, 'referenced' => 1]);
     }
