@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
-class UnitCustom extends Model
+class UnitOnlySlug extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -85,7 +85,7 @@ class UnitCustom extends Model
 
     public function childs()
     {
-        return $this->hasMany(UnitCustom::class, 'parent_id', 'id');
+        return $this->hasMany(UnitOnlySlug::class, 'parent_id', 'id');
     }
     // Childs recursive, loads all children
     public function childsRecursive()
@@ -95,7 +95,7 @@ class UnitCustom extends Model
 
     public function parent()
     {
-        return $this->belongsTo(UnitCustom::class, 'parent_id', 'id');
+        return $this->belongsTo(UnitOnlySlug::class, 'parent_id', 'id');
     }
 
     public function users()

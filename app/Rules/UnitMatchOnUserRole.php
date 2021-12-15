@@ -4,11 +4,12 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
-use App\Models\LevelOnlySlug;
+use App\Repositories\UnitRepository;
 
-class ValidRequestLevelBaseOnUserRole implements Rule
+class UnitMatchOnUserRole implements Rule
 {
-    public $user;
+    private UnitRepository $unitRepository;
+    private $user;
 
     /**
      * Create a new rule instance.
@@ -18,6 +19,8 @@ class ValidRequestLevelBaseOnUserRole implements Rule
     public function __construct($user)
     {
         $this->user = $user;
+
+        $this->unitRepository = new UnitRepository;
     }
 
     /**
@@ -32,10 +35,10 @@ class ValidRequestLevelBaseOnUserRole implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            $childLevels = LevelOnlySlug::with('childsRecursive')->where(['id' => $this->user->unit->level->id])->get()->toArray();
-            return in_array($value, Arr::flatten($childLevels)) ? true : false;
+            $childUnits = $this->unitRepository->findAllSlugWithChildsById($this->user->unit->id);
+            return $value === 'master' || in_array($value, Arr::flatten($childUnits)) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
-            return $value === $this->user->unit->level->slug ? true : false;
+            return $value === $this->user->unit->slug ? true : false;
         } else {
             return false;
         }

@@ -17,9 +17,9 @@ use App\Models\Level;
 use App\Models\LevelOnlySlug;
 use App\Models\Realization;
 use App\Models\Target;
-use App\Rules\ValidRequestLevelBaseOnUserRole;
-use App\Rules\ValidRequestUnitBaseOnUserRole;
-use App\Rules\ValidRequestUnitBaseOnRequestLevel;
+use App\Rules\LevelMatchOnUserRole;
+use App\Rules\UnitMatchOnUserRole;
+use App\Rules\UnitMatchOnRequestLevel;
 
 class PaperWorkIndicatorOldController extends ApiController
 {
@@ -34,8 +34,8 @@ class PaperWorkIndicatorOldController extends ApiController
         $user = User::with(['role', 'unit.level'])->findOrFail($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new ValidRequestLevelBaseOnUserRole($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnUserRole($user), new ValidRequestUnitBaseOnRequestLevel($request->query('level'))],
+            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -164,7 +164,7 @@ class PaperWorkIndicatorOldController extends ApiController
 
         $attributes = [
             'indicators' => ['required'],
-            'level' => ['required', 'string', new ValidRequestLevelBaseOnUserRole($user)],
+            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -391,7 +391,7 @@ class PaperWorkIndicatorOldController extends ApiController
     {
         $attributes = [
             'level' => ['required', 'string'],
-            'unit' => ['required', 'string', new ValidRequestUnitBaseOnRequestLevel($level)],
+            'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 

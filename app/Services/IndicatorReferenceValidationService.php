@@ -9,7 +9,7 @@ use App\Repositories\UnitRepository;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use App\Rules\ValidRequestUnitBaseOnRequestLevel;
+use App\Rules\UnitMatchOnRequestLevel;
 
 class IndicatorReferenceValidationService {
     private ?IndicatorRepository $indicatorRepository;
@@ -72,7 +72,7 @@ class IndicatorReferenceValidationService {
     {
         $attributes = [
             'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->query('level'))],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnRequestLevel($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -93,7 +93,7 @@ class IndicatorReferenceValidationService {
             'indicators.*' => ['required', 'uuid'],
             'preferences.*' => ['required'],
             'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->post('level'))],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnRequestLevel($request->post('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 

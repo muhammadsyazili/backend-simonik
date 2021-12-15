@@ -4,11 +4,12 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
-use App\Models\UnitCustom;
+use App\Repositories\LevelRepository;
 
-class ValidRequestUnitBaseOnUserRole implements Rule
+class LevelMatchOnUserRole implements Rule
 {
-    public $user;
+    private LevelRepository $levelRepository;
+    private $user;
 
     /**
      * Create a new rule instance.
@@ -18,6 +19,8 @@ class ValidRequestUnitBaseOnUserRole implements Rule
     public function __construct($user)
     {
         $this->user = $user;
+
+        $this->levelRepository = new LevelRepository();
     }
 
     /**
@@ -32,10 +35,10 @@ class ValidRequestUnitBaseOnUserRole implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            $childUnits = UnitCustom::with('childsRecursive')->where(['id' => $this->user->unit->id])->get()->toArray();
-            return $value === 'master' || in_array($value, Arr::flatten($childUnits)) ? true : false;
+            $childLevels = $this->levelRepository->findAllSlugWithChildsById($this->user->unit->level->id);
+            return in_array($value, Arr::flatten($childLevels)) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
-            return $value === $this->user->unit->slug ? true : false;
+            return $value === $this->user->unit->level->slug ? true : false;
         } else {
             return false;
         }

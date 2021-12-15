@@ -114,6 +114,14 @@ class IndicatorController extends ApiController
      */
     public function destroy($id)
     {
+        $indicatorRepository = new IndicatorRepository();
 
+        $constructRequenst = new ConstructRequest();
+
+        $constructRequenst->indicatorRepository = $indicatorRepository;
+
+        $indicatorService = new IndicatorService($constructRequenst);
+
+        $indicator = $indicatorService->destroy($id);
     }
 }

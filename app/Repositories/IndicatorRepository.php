@@ -120,4 +120,18 @@ class IndicatorRepository {
     {
         ModelsIndicator::where($where)->forceDelete();
     }
+
+    public function findLabelColumnById(string|int $id)
+    {
+        return ModelsIndicator::firstWhere(['id' => $id])->label;
+    }
+
+    public function x(string|int $id)
+    {
+        return ModelsIndicator::where([
+            'code' => $id
+        ])
+        ->whereIn('label', ['master', 'child'])
+        ->count();
+    }
 }

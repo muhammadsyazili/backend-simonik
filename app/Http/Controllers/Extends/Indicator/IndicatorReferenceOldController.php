@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Rules\ValidRequestUnitBaseOnRequestLevel;
+use App\Rules\UnitMatchOnRequestLevel;
 use App\Models\Indicator;
 use App\Models\Unit;
 use App\Models\Level;
@@ -118,7 +118,7 @@ class IndicatorReferenceOldController extends ApiController
     {
         $attributes = [
             'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->query('level'))],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnRequestLevel($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -177,7 +177,7 @@ class IndicatorReferenceOldController extends ApiController
             'indicators.*' => ['required', 'uuid'],
             'preferences.*' => ['required'],
             'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnRequestLevel($request->post('level'))],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnRequestLevel($request->post('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 

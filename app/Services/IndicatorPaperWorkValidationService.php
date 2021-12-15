@@ -7,9 +7,9 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\ValidRequestLevelBaseOnUserRole;
-use App\Rules\ValidRequestUnitBaseOnRequestLevel;
-use App\Rules\ValidRequestUnitBaseOnUserRole;
+use App\Rules\LevelMatchOnUserRole;
+use App\Rules\UnitMatchOnRequestLevel;
+use App\Rules\UnitMatchOnUserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -33,8 +33,8 @@ class IndicatorPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById(request()->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new ValidRequestLevelBaseOnUserRole($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new ValidRequestUnitBaseOnUserRole($user), new ValidRequestUnitBaseOnRequestLevel($request->query('level'))],
+            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -55,7 +55,7 @@ class IndicatorPaperWorkValidationService {
 
         $attributes = [
             'indicators' => ['required'],
-            'level' => ['required', 'string', new ValidRequestLevelBaseOnUserRole($user)],
+            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -101,7 +101,7 @@ class IndicatorPaperWorkValidationService {
     {
         $attributes = [
             'level' => ['required', 'string'],
-            'unit' => ['required', 'string', new ValidRequestUnitBaseOnRequestLevel($level)],
+            'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 

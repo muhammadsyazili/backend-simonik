@@ -78,6 +78,13 @@ class IndicatorService {
         return $indicator;
     }
 
+    public function destroy(string|int $id) : void
+    {
+        if ($this->indicatorRepository->findLabelColumnById($id) === 'super-master') {
+            # code...
+        }
+    }
+
     private function validity_and_weight_ToJson(?array $validity, ?array $weight) : array
     {
         $jsonString = [];

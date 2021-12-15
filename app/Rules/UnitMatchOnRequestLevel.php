@@ -5,9 +5,9 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\Unit;
 
-class ValidRequestUnitBaseOnRequestLevel implements Rule
+class UnitMatchOnRequestLevel implements Rule
 {
-    public $level;
+    private $level;
 
     /**
      * Create a new rule instance.
