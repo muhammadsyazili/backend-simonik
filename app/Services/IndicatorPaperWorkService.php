@@ -226,4 +226,31 @@ class IndicatorPaperWorkService {
             //end section: paper work 'CHILD' creating
         });
     }
+
+    public function destroy(string $level, string $unit, string $year) : void
+    {
+        $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
+
+        $indicators = $this->indicatorRepository->findAllWithTargetsAndRealizationsByWhere($where);
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::transaction(function () use ($indicators, $level, $unit, $year) {
+            //deleting target & realization
+            foreach ($indicators as $indicator) {
+                foreach ($indicator->targets as $target) {
+                    $this->targetRepository->deleteById($target->id);
+                }
+
+                foreach ($indicator->realizations as $realization) {
+                    $this->realizationRepository->deleteById($realization->id);
+                }
+            }
+
+            //deleting indicator
+            $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
+
+            $this->indicatorRepository->deleteByWhere($where);
+        });
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+    }
 }

@@ -17,4 +17,9 @@ class RealizationRepository {
             'default' => $realization->default,
         ]);
     }
+
+    public function deleteById(string|int $id) : void
+    {
+        ModelsRealization::where(['id' => $id])->forceDelete();
+    }
 }

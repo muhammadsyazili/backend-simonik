@@ -110,4 +110,14 @@ class IndicatorRepository {
     {
         return ModelsIndicator::where($where)->get();
     }
+
+    public function findAllWithTargetsAndRealizationsByWhere(array $where)
+    {
+        return ModelsIndicator::with(['targets', 'realizations'])->where($where)->get();
+    }
+
+    public function deleteByWhere(array $where) : void
+    {
+        ModelsIndicator::where($where)->forceDelete();
+    }
 }

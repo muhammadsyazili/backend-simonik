@@ -96,4 +96,64 @@ class IndicatorPaperWorkValidationService {
 
         return $validator;
     }
+
+    public function destroyValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
+    {
+        $attributes = [
+            'level' => ['required', 'string'],
+            'unit' => ['required', 'string', new ValidRequestUnitBaseOnRequestLevel($level)],
+            'year' => ['required', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
+        $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        $validator->after(function ($validator) use ($level) {
+            if ($level === 'super-master') {
+                $validator->errors()->add(
+                    'level', sprintf("Kertas Kerja 'level: %s' tidak bisa dihapus.", $level)
+                );
+            }
+        });
+
+        $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
+
+        $indicators = $this->indicatorRepository->findAllWithTargetsAndRealizationsByWhere($where);
+
+        //cek apakah target or realization sudah ada yang di-edit
+        $isDefault = true;
+        foreach ($indicators as $indicator) {
+            foreach ($indicator->targets as $target) {
+                if (!$target->default) {
+                    $isDefault = false;
+                    break;
+                }
+            }
+
+            if ($isDefault === false) {break;}
+
+            foreach ($indicator->realizations as $realization) {
+                if (!$realization->default) {
+                    $isDefault = false;
+                    break;
+                }
+            }
+        }
+
+        if (!$isDefault) {
+            $validator->after(function ($validator) use ($level, $unit, $year) {
+                $validator->errors()->add(
+                    'level', sprintf("Kertas kerja 'level: %s' 'unit: %s' 'year: %s' tidak bisa dihapus, karena sudah memiliki kertas kerja target atau realisasi.", $level, $unit, $year)
+                );
+            });
+        }
+
+        return $validator;
+    }
 }

@@ -17,4 +17,9 @@ class TargetRepository {
             'default' => $target->default,
         ]);
     }
+
+    public function deleteById(string|int $id) : void
+    {
+        ModelsTarget::where(['id' => $id])->forceDelete();
+    }
 }
