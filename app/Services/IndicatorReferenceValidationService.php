@@ -46,7 +46,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "(ID indikator: $value) tidak cocok dengan kertas kerja (level: super master)."
+                        'indicators', "Terdapat ID indikator yang tidak sesuai dengan ID pada kertas kerja."
                     );
                 }
             }
@@ -59,7 +59,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('preferences') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "(ID referensi: $value) tidak cocok dengan kertas kerja (level: super master)."
+                        'preferences', "Terdapat ID referensi yang tidak sesuai dengan ID pada kertas kerja."
                     );
                 }
             }
@@ -108,23 +108,23 @@ class IndicatorReferenceValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $indicators = $this->indicatorRepository->findIdAndParentHorizontalIdByWhere(
-            $request->post('level') === 'super-master' ?
-            ['label' => 'super-master'] :
-            [
-                'level_id' => $this->levelRepository->findIdBySlug($request->post('level')),
-                'label' => $request->post('unit') === 'master' ? 'master' : 'child',
-                'unit_id' => $request->post('unit') === 'master' ? null : $this->unitRepository->findIdBySlug($request->post('unit')),
-                'year' => $request->post('tahun'),
-            ]
-        );
+        $where = $request->post('level') === 'super-master' ?
+        ['label' => 'super-master'] :
+        [
+            'level_id' => $this->levelRepository->findIdBySlug($request->post('level')),
+            'label' => $request->post('unit') === 'master' ? 'master' : 'child',
+            'unit_id' => $request->post('unit') === 'master' ? null : $this->unitRepository->findIdBySlug($request->post('unit')),
+            'year' => $request->post('tahun'),
+        ];
+
+        $indicators = $this->indicatorRepository->findIdAndParentHorizontalIdByWhere($where);
 
         //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "(ID indikator: $value) tidak cocok dengan kertas kerja (level: super master)."
+                        'indicators', "Terdapat ID indikator yang tidak sesuai dengan ID pada kertas kerja."
                     );
                 }
             }
@@ -137,7 +137,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('preferences') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "(ID referensi: $value) tidak cocok dengan kertas kerja (level: super-master)."
+                        'preferences', "Terdapat ID referensi yang tidak sesuai dengan ID pada kertas kerja."
                     );
                 }
             }

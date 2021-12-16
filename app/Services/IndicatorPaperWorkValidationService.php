@@ -19,16 +19,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class IndicatorPaperWorkValidationService {
-    private ?IndicatorRepository $indicatorRepository;
-    private ?LevelRepository $levelRepository;
-    private ?UnitRepository $unitRepository;
     private ?UserRepository $userRepository;
 
     public function __construct(ConstructRequest $indicatorConstructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequest->levelRepository;
-        $this->unitRepository = $indicatorConstructRequest->unitRepository;
         $this->userRepository = $indicatorConstructRequest->userRepository;
     }
 
@@ -70,9 +64,7 @@ class IndicatorPaperWorkValidationService {
 
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        $validator = Validator::make($input, $attributes, $messages);
-
-        return $validator;
+        return Validator::make($input, $attributes, $messages);
     }
 
     public function destroyValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
@@ -90,8 +82,6 @@ class IndicatorPaperWorkValidationService {
 
         $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
 
-        $validator = Validator::make($input, $attributes, $messages);
-
-        return $validator;
+        return Validator::make($input, $attributes, $messages);
     }
 }
