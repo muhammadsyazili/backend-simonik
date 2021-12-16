@@ -21,17 +21,16 @@ class IndicatorController extends ApiController
      */
     public function store(Request $request)
     {
-        $indicatorValidationService = new IndicatorValidationService();
 
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
 
-        $indicatorService = new IndicatorService($constructRequenst);
+        $indicatorValidationService = new IndicatorValidationService();
 
         $validation = $indicatorValidationService->storeValidation($request);
 
@@ -45,19 +44,21 @@ class IndicatorController extends ApiController
             );
         }
 
-        $indicatorInsertRequenst = new IndicatorInsertRequest();
+        $indicatorInsertRequest = new IndicatorInsertRequest();
 
-        $indicatorInsertRequenst->validity = $request->post('validity');
-        $indicatorInsertRequenst->weight = $request->post('weight');
-        $indicatorInsertRequenst->dummy = $request->post('dummy');
-        $indicatorInsertRequenst->reducing_factor = $request->post('reducing_factor');
-        $indicatorInsertRequenst->polarity = $request->post('polarity');
-        $indicatorInsertRequenst->indicator = $request->post('indicator');
-        $indicatorInsertRequenst->formula = $request->post('formula');
-        $indicatorInsertRequenst->measure = $request->post('measure');
-        $indicatorInsertRequenst->user_id = $request->header('X-User-Id');
+        $indicatorInsertRequest->validity = $request->post('validity');
+        $indicatorInsertRequest->weight = $request->post('weight');
+        $indicatorInsertRequest->dummy = $request->post('dummy');
+        $indicatorInsertRequest->reducing_factor = $request->post('reducing_factor');
+        $indicatorInsertRequest->polarity = $request->post('polarity');
+        $indicatorInsertRequest->indicator = $request->post('indicator');
+        $indicatorInsertRequest->formula = $request->post('formula');
+        $indicatorInsertRequest->measure = $request->post('measure');
+        $indicatorInsertRequest->user_id = $request->header('X-User-Id');
 
-        $insert = $indicatorService->store($indicatorInsertRequenst);
+        $indicatorService = new IndicatorService($constructRequest);
+
+        $insert = $indicatorService->store($indicatorInsertRequest);
 
         return $this->APIResponse(
             true,
@@ -78,11 +79,11 @@ class IndicatorController extends ApiController
     {
         $indicatorRepository = new IndicatorRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
 
-        $indicatorService = new IndicatorService($constructRequenst);
+        $indicatorService = new IndicatorService($constructRequest);
 
         $indicator = $indicatorService->show($id);
         return $this->APIResponse(
@@ -116,11 +117,25 @@ class IndicatorController extends ApiController
     {
         $indicatorRepository = new IndicatorRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
 
-        $indicatorService = new IndicatorService($constructRequenst);
+        $indicatorValidationService = new IndicatorValidationService();
+
+        $validation = $indicatorValidationService->destroyValidation($id);
+
+        if($validation->fails()){
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $indicatorService = new IndicatorService($constructRequest);
 
         $indicator = $indicatorService->destroy($id);
     }

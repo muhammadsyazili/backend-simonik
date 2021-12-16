@@ -14,11 +14,11 @@ class IndicatorReferenceService {
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequenst)
+    public function __construct(ConstructRequest $indicatorConstructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequenst->levelRepository;
-        $this->unitRepository = $indicatorConstructRequenst->unitRepository;
+        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
+        $this->levelRepository = $indicatorConstructRequest->levelRepository;
+        $this->unitRepository = $indicatorConstructRequest->unitRepository;
     }
 
     public function create() : IndicatorPreferencesCreateResponse

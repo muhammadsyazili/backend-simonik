@@ -14,10 +14,10 @@ class IndicatorService {
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequenst)
+    public function __construct(ConstructRequest $indicatorConstructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequenst->levelRepository;
+        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
+        $this->levelRepository = $indicatorConstructRequest->levelRepository;
     }
 
     public function store(IndicatorInsertRequest $request) : \App\Domains\Indicator
@@ -80,9 +80,7 @@ class IndicatorService {
 
     public function destroy(string|int $id) : void
     {
-        if ($this->indicatorRepository->findLabelColumnById($id) === 'super-master') {
-            # code...
-        }
+        
     }
 
     private function validity_and_weight_ToJson(?array $validity, ?array $weight) : array

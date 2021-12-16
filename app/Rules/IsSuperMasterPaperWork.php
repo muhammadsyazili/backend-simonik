@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class HasorExtensiExtensiononNotSuperMaster implements Rule
+class IsSuperMasterPaperWork implements Rule
 {
     /**
      * Create a new rule instance.
@@ -25,7 +25,7 @@ class HasorExtensiExtensiononNotSuperMaster implements Rule
      */
     public function passes($attribute, $value)
     {
-        //
+        return $value === 'super-master' ? false : true;
     }
 
     /**
@@ -35,6 +35,6 @@ class HasorExtensiExtensiononNotSuperMaster implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'Kertas kerja tidak bisa dihapus.';
     }
 }

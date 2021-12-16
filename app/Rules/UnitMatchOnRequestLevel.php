@@ -12,6 +12,7 @@ class UnitMatchOnRequestLevel implements Rule
     /**
      * Create a new rule instance.
      *
+     * @param mixed $level
      * @return void
      */
     public function __construct($level)
@@ -45,6 +46,6 @@ class UnitMatchOnRequestLevel implements Rule
      */
     public function message()
     {
-        return ":attribute tidak ditemukan atau tidak cocok dengan level terpilih.";
+        return "Anda tidak memiliki hak akses terhadap fitur. (#VW5pdE1hdGNoT25SZXF1ZXN0TGV2ZWw)";
     }
 }

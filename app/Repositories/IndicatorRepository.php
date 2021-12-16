@@ -121,17 +121,17 @@ class IndicatorRepository {
         ModelsIndicator::where($where)->forceDelete();
     }
 
-    public function findLabelColumnById(string|int $id)
+    public function findLabelColumnById(string|int $id) : string
     {
         return ModelsIndicator::firstWhere(['id' => $id])->label;
     }
 
-    public function x(string|int $id)
+    public function countAllByLabelColumnNotSuperMaster(string|int $id) : int
     {
         return ModelsIndicator::where([
             'code' => $id
         ])
-        ->whereIn('label', ['master', 'child'])
+        ->whereNotIn('label', ['super-master'])
         ->count();
     }
 }

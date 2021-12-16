@@ -25,14 +25,14 @@ class IndicatorPaperWorkService {
     private ?TargetRepository $targetRepository;
     private ?RealizationRepository $realizationRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequenst)
+    public function __construct(ConstructRequest $indicatorConstructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequenst->levelRepository;
-        $this->unitRepository = $indicatorConstructRequenst->unitRepository;
-        $this->userRepository = $indicatorConstructRequenst->userRepository;
-        $this->targetRepository = $indicatorConstructRequenst->targetRepository;
-        $this->realizationRepository = $indicatorConstructRequenst->realizationRepository;
+        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
+        $this->levelRepository = $indicatorConstructRequest->levelRepository;
+        $this->unitRepository = $indicatorConstructRequest->unitRepository;
+        $this->userRepository = $indicatorConstructRequest->userRepository;
+        $this->targetRepository = $indicatorConstructRequest->targetRepository;
+        $this->realizationRepository = $indicatorConstructRequest->realizationRepository;
     }
 
     public function index(string|int $userId, string $level, ?string $unit, ?string $year) : IndicatorPaperWorkIndexResponse

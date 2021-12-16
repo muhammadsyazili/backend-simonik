@@ -30,14 +30,14 @@ class PaperWorkIndicatorController extends ApiController
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->userRepository = $userRepository;
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
-        $constructRequenst->unitRepository = $unitRepository;
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
 
-        $IndicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequenst);
+        $IndicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 
         $validation = $IndicatorPaperWorkValidationService->indexValidation($request);
 
@@ -51,7 +51,7 @@ class PaperWorkIndicatorController extends ApiController
             );
         }
 
-        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
         $user_id = $request->header('X-User-Id');
         $level = $request->query('level');
@@ -84,13 +84,13 @@ class PaperWorkIndicatorController extends ApiController
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->userRepository = $userRepository;
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
 
-        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
         $response = $indicatorPaperWorkService->create(
             $request->header('X-User-Id')
@@ -123,16 +123,16 @@ class PaperWorkIndicatorController extends ApiController
         $targetRepository = new TargetRepository();
         $realizationRepository = new RealizationRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
-        $constructRequenst->unitRepository = $unitRepository;
-        $constructRequenst->userRepository = $userRepository;
-        $constructRequenst->targetRepository = $targetRepository;
-        $constructRequenst->realizationRepository = $realizationRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->targetRepository = $targetRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
 
-        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequenst);
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 
         $validation = $indicatorPaperWorkValidationService->storeValidation($request);
 
@@ -146,7 +146,7 @@ class PaperWorkIndicatorController extends ApiController
             );
         }
 
-        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
         $indicatorPaperWorkService->store(
             $request->post('indicators'),
@@ -201,15 +201,15 @@ class PaperWorkIndicatorController extends ApiController
         $targetRepository = new TargetRepository();
         $realizationRepository = new RealizationRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
-        $constructRequenst->unitRepository = $unitRepository;
-        $constructRequenst->targetRepository = $targetRepository;
-        $constructRequenst->realizationRepository = $realizationRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->targetRepository = $targetRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
 
-        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequenst);
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 
         $validation = $indicatorPaperWorkValidationService->destroyValidation($level, $unit, $year);
 
@@ -223,7 +223,7 @@ class PaperWorkIndicatorController extends ApiController
             );
         }
 
-        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequenst);
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
         $indicatorPaperWorkService->destroy($level, $unit, $year);
 

@@ -14,6 +14,7 @@ class LevelMatchOnUserRole implements Rule
     /**
      * Create a new rule instance.
      *
+     * @param mixed $user
      * @return void
      */
     public function __construct($user)
@@ -51,6 +52,6 @@ class LevelMatchOnUserRole implements Rule
      */
     public function message()
     {
-        return ":attribute terpilih tidak cocok dengan ROLE Anda.";
+        return "Anda tidak memiliki hak akses terhadap fitur. (#TGV2ZWxNYXRjaE9uVXNlclJvbGU)";
     }
 }

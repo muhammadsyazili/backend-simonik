@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Rules\HasExtentionNotSuperMaster;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -49,5 +50,19 @@ class IndicatorValidationService {
         $input = Arr::only($request->post(), array_keys($attributes));
 
         return Validator::make($input, $attributes, $messages);
+    }
+
+    public function destroyValidation(string|int $id) : \Illuminate\Contracts\Validation\Validator
+    {
+        $attributes = [
+            'id' => ['required', 'uuid', new HasExtentionNotSuperMaster()],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+        ];
+
+        return Validator::make(['id' => $id], $attributes, $messages);
     }
 }

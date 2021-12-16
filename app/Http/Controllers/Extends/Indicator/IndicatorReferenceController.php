@@ -23,11 +23,11 @@ class IndicatorReferenceController extends ApiController
     {
         $indicatorRepository = new IndicatorRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
 
-        $indicatorReferenceService = new IndicatorReferenceService($constructRequenst);
+        $indicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
         $create = $indicatorReferenceService->create();
 
@@ -53,11 +53,11 @@ class IndicatorReferenceController extends ApiController
     {
         $indicatorRepository = new IndicatorRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
 
-        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequenst);
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequest);
 
         $validation = $indicatorReferenceValidationService->storeValidation($request);
 
@@ -71,7 +71,7 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
-        $indicatorReferenceService = new IndicatorReferenceService($constructRequenst);
+        $indicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
         $indicatorReferenceService->store($request->post('indicators'), $request->post('preferences'));
 
@@ -96,13 +96,13 @@ class IndicatorReferenceController extends ApiController
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
-        $constructRequenst->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
 
-        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequenst);
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequest);
 
         $validation = $indicatorReferenceValidationService->editValidation($request);
 
@@ -116,7 +116,7 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
-        $indicatorReferenceService = new IndicatorReferenceService($constructRequenst);
+        $indicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
         $indicators = $indicatorReferenceService->edit($request->query('level'), $request->query('unit'), $request->query('tahun'));
 
@@ -145,13 +145,13 @@ class IndicatorReferenceController extends ApiController
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
-        $constructRequenst = new ConstructRequest();
+        $constructRequest = new ConstructRequest();
 
-        $constructRequenst->indicatorRepository = $indicatorRepository;
-        $constructRequenst->levelRepository = $levelRepository;
-        $constructRequenst->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
 
-        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequenst);
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequest);
 
         $validation = $indicatorReferenceValidationService->updateValidation($request);
 
@@ -165,7 +165,7 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
-        $IndicatorReferenceService = new IndicatorReferenceService($constructRequenst);
+        $IndicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
         $IndicatorReferenceService->update($request->post('indicators'), $request->post('preferences'), $request->post('level'), $request->post('unit'), $request->post('tahun'));
 

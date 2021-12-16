@@ -16,11 +16,11 @@ class IndicatorReferenceValidationService {
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequenst)
+    public function __construct(ConstructRequest $indicatorConstructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequenst->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequenst->levelRepository;
-        $this->unitRepository = $indicatorConstructRequenst->unitRepository;
+        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
+        $this->levelRepository = $indicatorConstructRequest->levelRepository;
+        $this->unitRepository = $indicatorConstructRequest->unitRepository;
     }
 
     public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
@@ -46,7 +46,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                        'indicators', "(ID indikator: $value) tidak cocok dengan kertas kerja (level: super master)."
                     );
                 }
             }
@@ -59,7 +59,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('preferences') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                        'preferences', "(ID referensi: $value) tidak cocok dengan kertas kerja (level: super master)."
                     );
                 }
             }
@@ -124,7 +124,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('indicators') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "'indicator ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                        'indicators', "(ID indikator: $value) tidak cocok dengan kertas kerja (level: super master)."
                     );
                 }
             }
@@ -137,7 +137,7 @@ class IndicatorReferenceValidationService {
             foreach ($request->post('preferences') as $key => $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "'preference ID: $value' tidak cocok dengan kertas kerja 'level: super-master'."
+                        'preferences', "(ID referensi: $value) tidak cocok dengan kertas kerja (level: super-master)."
                     );
                 }
             }
