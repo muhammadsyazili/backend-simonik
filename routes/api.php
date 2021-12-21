@@ -21,58 +21,58 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Route : paper work - indicator
     Route::get('/indicators/paper-work', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'index'])
-    ->middleware([App\Http\Middleware\HasUserId::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
 
     Route::get('/indicators/paper-work/create', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'create'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]);
 
     Route::post('/indicators/paper-work', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'store'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
 
     Route::get('/indicators/paper-work/{level}/{unit}/{year}/edit', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'edit'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]); //belum
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]); //belum
 
     Route::put('/indicators/paper-work/{level}/{unit}/{year}', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'update'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]); //belum
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]); //belum
 
     Route::delete('/indicators/paper-work/{level}/{unit}/{year}', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'destroy'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]);
     //End Route : paper work - indicator
 
     //Route : indicator
     Route::post('/indicator', [App\Http\Controllers\IndicatorController::class, 'store'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdmin::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
 
     Route::get('/indicator/{id}/edit', [App\Http\Controllers\IndicatorController::class, 'edit'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrl::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlById::class]);
 
     Route::put('/indicator/{id}', [App\Http\Controllers\IndicatorController::class, 'update'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrl::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlById::class]);
 
     Route::delete('/indicator/{id}', [App\Http\Controllers\IndicatorController::class, 'destroy'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdmin::class, App\Http\Middleware\IsSuperMaster::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class, App\Http\Middleware\IsSuperMaster::class]);
     //End Route : indicator
 
     //Route : reference - indicator
     Route::get('/indicators/reference/create', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'create'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdmin::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
 
     Route::post('/indicators/reference', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'store'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdmin::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
 
     Route::get('/indicators/reference/edit', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'edit'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromQuery::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromQuery::class]);
 
     Route::put('/indicators/reference', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'update'])
-    ->middleware([App\Http\Middleware\HasUserId::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
     //End Route : reference - indicator
 
     //Route : paper work - target
     Route::get('/targets/paper-work/edit', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'edit'])
-    ->middleware([App\Http\Middleware\HasUserId::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
 
     Route::put('/targets/paper-work', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'update'])
-    ->middleware([App\Http\Middleware\HasUserId::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
     //End Route : paper work - target
 });
 

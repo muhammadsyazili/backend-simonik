@@ -8,12 +8,11 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\UserRepository;
 
-class CurrentLevelNotSameWithUserLevelFromUrl
+class CurrentLevelNotSameWithUserLevelFromUrlByLevel
 {
     use \App\Traits\ApiResponser;
 
     private UserRepository $userRepository;
-    private IndicatorRepository $indicatorRepository;
 
     /**
      * Create a new rule instance.
@@ -23,7 +22,6 @@ class CurrentLevelNotSameWithUserLevelFromUrl
     public function __construct()
     {
         $this->userRepository = new UserRepository();
-        $this->indicatorRepository = new IndicatorRepository();
     }
 
     /**
@@ -40,7 +38,7 @@ class CurrentLevelNotSameWithUserLevelFromUrl
         if ($user->role->name === 'super-admin') {
             return $next($request);
         } else {
-            return $this->indicatorRepository->findWithLevelById($request->id)->level->slug === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
+            return $request->level === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
         }
     }
 }
