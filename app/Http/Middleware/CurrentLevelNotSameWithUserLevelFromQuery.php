@@ -2,19 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Repositories\IndicatorRepository;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\Response;
-use App\Repositories\LevelRepository;
 use App\Repositories\UserRepository;
 
-class IsSuperAdminOrAdminHaveChild
+class CurrentLevelNotSameWithUserLevelFromQuery
 {
     use \App\Traits\ApiResponser;
 
     private UserRepository $userRepository;
-    private LevelRepository $levelRepository;
+    private IndicatorRepository $indicatorRepository;
 
     /**
      * Create a new rule instance.
@@ -24,7 +23,7 @@ class IsSuperAdminOrAdminHaveChild
     public function __construct()
     {
         $this->userRepository = new UserRepository();
-        $this->levelRepository = new LevelRepository();
+        $this->indicatorRepository = new IndicatorRepository();
     }
 
     /**
@@ -37,11 +36,11 @@ class IsSuperAdminOrAdminHaveChild
     public function handle(Request $request, Closure $next)
     {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+
         if ($user->role->name === 'super-admin') {
             return $next($request);
         } else {
-            $childs = Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($user->unit->level->id));
-            return count($childs) > 1 ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+            return $request->query('level') === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
         }
     }
 }

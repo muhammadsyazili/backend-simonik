@@ -9,4 +9,9 @@ class UserRepository {
     {
         return User::with(['role', 'unit.level'])->findOrFail($id);
     }
+
+    public function findWithRoleById(string|int $id)
+    {
+        return User::with(['role'])->findOrFail($id);
+    }
 }

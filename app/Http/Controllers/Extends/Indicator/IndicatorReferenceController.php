@@ -34,7 +34,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indicators referencing showed",
+            "Indikator referensi ditampilkan",
             [
                 'indicators' => $create->indicators,
                 'preferences' => $create->preferences,
@@ -78,7 +78,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indicators referenced successfully",
+            "Indikator berhasil direferensikan",
             null,
             null,
         );
@@ -123,7 +123,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indicators referencing showed",
+            "Indikator referensi ditampilkan",
             [
                 'indicators' => $indicators,
                 'preferences' => $indicators,
@@ -172,7 +172,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indicators referenced successfully",
+            "Indikator berhasil direferensikan",
             null,
             null,
         );

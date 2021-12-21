@@ -17,8 +17,9 @@ use App\Models\Level;
 use App\Models\LevelOnlySlug;
 use App\Models\Realization;
 use App\Models\Target;
-use App\Rules\LevelMatchOnUserRole;
-use App\Rules\UnitMatchOnUserRole;
+use App\Rules\LevelIsChildFromUserRole;
+use App\Rules\LevelIsThisAndChildFromUserRole;
+use App\Rules\UnitIsThisAndChildUserRole;
 use App\Rules\UnitMatchOnRequestLevel;
 
 class PaperWorkIndicatorOldController extends ApiController
@@ -34,8 +35,8 @@ class PaperWorkIndicatorOldController extends ApiController
         $user = User::with(['role', 'unit.level'])->findOrFail($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
+            'level' => ['required', 'string', new LevelIsThisAndChildFromUserRole($user)],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitIsThisAndChildUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -164,7 +165,7 @@ class PaperWorkIndicatorOldController extends ApiController
 
         $attributes = [
             'indicators' => ['required'],
-            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
+            'level' => ['required', 'string', new LevelIsChildFromUserRole($user)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 

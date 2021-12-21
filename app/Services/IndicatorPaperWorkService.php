@@ -41,11 +41,23 @@ class IndicatorPaperWorkService {
 
         $user = $this->userRepository->findWithRoleUnitLevelById($userId);
 
+        $isSuperMaster = $level === 'super-master' ? true : false;
         $isSuperAdmin = $user->role->name === 'super-admin';
         $isSuperAdminOrAdmin = $isSuperAdmin || $user->role->name === 'admin';
 
+        $currentLevelNotSameWithUserLevel = true;
+        if ($user->role->name === 'super-admin') {
+            $currentLevelNotSameWithUserLevel = true;
+        } else {
+            if ($level === $user->unit->level->slug) {
+                $currentLevelNotSameWithUserLevel = false;
+            } else {
+                $currentLevelNotSameWithUserLevel = true;
+            }
+        }
+
         // 'permissions paper work indicator (create, edit, delete)' handler
-        $numberOfLevel = $isSuperAdmin ? count(Arr::flatten($this->levelRepository->findAllSlugWithChildsByRoot())) : count(Arr::flatten($this->levelRepository->findAllSlugWithChildsById($user->unit->level->id)));
+        $numberOfChildLevel = $isSuperAdmin ? count(Arr::flatten($this->levelRepository->findAllSlugWithChildsByRoot())) : count(Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($user->unit->level->id)));
 
         $response->levels = $isSuperAdmin ? $this->levelRepository->findAllWithChildsByRoot() : $this->levelRepository->findAllWithChildsById($user->unit->level->id);
 
@@ -63,18 +75,18 @@ class IndicatorPaperWorkService {
         $response->permissions = [
             'indicator' => [
                 'create' => $isSuperAdmin ? true : false,
-                'edit' => $isSuperAdmin ? true : false,
-                'delete' => $isSuperAdmin ? true : false,
-                'changes_order' => $isSuperAdminOrAdmin ? true : false
+                'edit' => $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
+                'delete' => $isSuperAdmin && $isSuperMaster ? true : false,
+                'changes_order' => $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false
             ],
             'reference' => [
                 'create' => $isSuperAdmin ? true : false,
-                'edit' => ($numberOfLevel > 1 && $isSuperAdminOrAdmin) ? true : false,
+                'edit' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
             ],
             'paper_work' => ['indicator' => [
-                'create' => ($numberOfLevel > 1 && $isSuperAdminOrAdmin) ? true : false,
-                'edit' => ($numberOfLevel > 1 && $isSuperAdminOrAdmin) ? true : false,
-                'delete' => ($numberOfLevel > 1 && $isSuperAdminOrAdmin) ? true : false,
+                'create' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin ? true : false,
+                'edit' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
+                'delete' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
             ]],
         ];
 
@@ -187,7 +199,7 @@ class IndicatorPaperWorkService {
                     $domainIndicator->reviewed = $indicator->reviewed;
                     $domainIndicator->referenced = $indicator->referenced;
                     $domainIndicator->dummy = $indicator->dummy;
-                    $domainIndicator->label = 'master';
+                    $domainIndicator->label = 'child';
                     $domainIndicator->unit_id = $unit->id;
                     $domainIndicator->level_id = $levelId;
                     $domainIndicator->order = $i;

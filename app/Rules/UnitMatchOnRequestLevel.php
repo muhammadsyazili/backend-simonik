@@ -3,10 +3,11 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use App\Models\Unit;
+use App\Repositories\UnitRepository;
 
 class UnitMatchOnRequestLevel implements Rule
 {
+    private UnitRepository $unitRepository;
     private $level;
 
     /**
@@ -18,6 +19,8 @@ class UnitMatchOnRequestLevel implements Rule
     public function __construct($level)
     {
         $this->level = $level;
+
+        $this->unitRepository = new UnitRepository();
     }
 
     /**
@@ -34,7 +37,7 @@ class UnitMatchOnRequestLevel implements Rule
         } else if ($value === 'master') {
             return true;
         } else {
-            $unit = Unit::with('level')->firstWhere(['slug' => $value]);
+            $unit = $this->unitRepository->findIdWithLevelBySlug($value);
             return $unit->level->slug === $this->level ? true : false;
         }
     }
@@ -46,6 +49,6 @@ class UnitMatchOnRequestLevel implements Rule
      */
     public function message()
     {
-        return "Anda tidak memiliki hak akses terhadap fitur. (#VW5pdE1hdGNoT25SZXF1ZXN0TGV2ZWw)";
+        return "Anda tidak memiliki hak akses. (#VW5pdE1hdGNoT25SZXF1ZXN0TGV2ZWw)";
     }
 }

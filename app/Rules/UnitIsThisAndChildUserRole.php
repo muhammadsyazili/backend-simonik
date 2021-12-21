@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 use App\Repositories\UnitRepository;
 
-class UnitMatchOnUserRole implements Rule
+class UnitIsThisAndChildUserRole implements Rule
 {
     private UnitRepository $unitRepository;
     private $user;
@@ -21,7 +21,7 @@ class UnitMatchOnUserRole implements Rule
     {
         $this->user = $user;
 
-        $this->unitRepository = new UnitRepository;
+        $this->unitRepository = new UnitRepository();
     }
 
     /**
@@ -36,8 +36,8 @@ class UnitMatchOnUserRole implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            $childUnits = $this->unitRepository->findAllSlugWithChildsById($this->user->unit->id);
-            return $value === 'master' || in_array($value, Arr::flatten($childUnits)) ? true : false;
+            $chils = $this->unitRepository->findAllSlugWithChildsById($this->user->unit->id);
+            return $value === 'master' || in_array($value, Arr::flatten($chils)) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
             return $value === $this->user->unit->slug ? true : false;
         } else {
@@ -52,6 +52,6 @@ class UnitMatchOnUserRole implements Rule
      */
     public function message()
     {
-        return "Anda tidak memiliki hak akses terhadap fitur. (#VW5pdE1hdGNoT25Vc2VyUm9sZQ=)";
+        return "Anda tidak memiliki hak akses. (#VW5pdE1hdGNoT25Vc2VyUm9sZQ=)";
     }
 }

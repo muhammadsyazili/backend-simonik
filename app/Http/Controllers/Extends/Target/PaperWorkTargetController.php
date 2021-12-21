@@ -11,8 +11,8 @@ use App\Models\Indicator;
 use App\Models\User;
 use App\Models\Level;
 use App\Models\Unit;
-use App\Rules\LevelMatchOnUserRole;
-use App\Rules\UnitMatchOnUserRole;
+use App\Rules\LevelIsThisAndChildFromUserRole;
+use App\Rules\UnitIsThisAndChildUserRole;
 use App\Rules\UnitMatchOnRequestLevel;
 
 class PaperWorkTargetController extends ApiController
@@ -70,8 +70,8 @@ class PaperWorkTargetController extends ApiController
         $user = User::with(['role', 'unit.level'])->findOrFail(request()->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new LevelMatchOnUserRole($user)],
-            'unit' => ['required', 'string', new UnitMatchOnUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
+            'level' => ['required', 'string', new LevelIsThisAndChildFromUserRole($user)],
+            'unit' => ['required', 'string', new UnitIsThisAndChildUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 

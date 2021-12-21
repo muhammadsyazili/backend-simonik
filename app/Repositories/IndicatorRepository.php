@@ -126,12 +126,16 @@ class IndicatorRepository {
         return ModelsIndicator::firstWhere(['id' => $id])->label;
     }
 
-    public function countAllByLabelColumnNotSuperMaster(string|int $id) : int
+    public function countAllByLabelColumnById(string|int $id) : int
     {
         return ModelsIndicator::where([
             'code' => $id
         ])
-        ->whereNotIn('label', ['super-master'])
         ->count();
+    }
+
+    public function findWithLevelById(string|int $id)
+    {
+        return ModelsIndicator::with('level')->findOrFail($id);
     }
 }

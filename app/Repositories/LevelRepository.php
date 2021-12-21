@@ -16,9 +16,14 @@ class LevelRepository {
         return LevelOnlySlug::with('childsRecursive')->whereNull('parent_id')->get()->toArray();
     }
 
-    public function findAllSlugWithChildsById(string|int $id) : array
+    public function findAllSlugWithThisAndChildsById(string|int $id) : array
     {
         return LevelOnlySlug::with('childsRecursive')->where(['id' => $id])->get()->toArray();
+    }
+
+    public function findAllSlugWithChildsById(string|int $id) : array
+    {
+        return LevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
     }
 
     public function findAllWithChildsByRoot()

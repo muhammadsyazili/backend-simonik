@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 use App\Repositories\LevelRepository;
 
-class LevelMatchOnUserRole implements Rule
+class LevelIsThisAndChildFromUserRole implements Rule
 {
     private LevelRepository $levelRepository;
     private $user;
@@ -36,7 +36,7 @@ class LevelMatchOnUserRole implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            $childLevels = $this->levelRepository->findAllSlugWithChildsById($this->user->unit->level->id);
+            $childLevels = $this->levelRepository->findAllSlugWithThisAndChildsById($this->user->unit->level->id);
             return in_array($value, Arr::flatten($childLevels)) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
             return $value === $this->user->unit->level->slug ? true : false;
@@ -52,6 +52,6 @@ class LevelMatchOnUserRole implements Rule
      */
     public function message()
     {
-        return "Anda tidak memiliki hak akses terhadap fitur. (#TGV2ZWxNYXRjaE9uVXNlclJvbGU)";
+        return "Anda tidak memiliki hak akses. (#TGV2ZWxNYXRjaE9uVXNlclJvbGU)";
     }
 }

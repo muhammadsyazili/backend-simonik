@@ -2,16 +2,16 @@
 
 namespace App\Http\Middleware;
 
+use App\Repositories\IndicatorRepository;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Repositories\UserRepository;
 
-class IsSuperAdmin
+class IsSuperMaster
 {
     use \App\Traits\ApiResponser;
 
-    private UserRepository $userRepository;
+    private IndicatorRepository $indicatorRepository;
 
     /**
      * Create a new rule instance.
@@ -20,7 +20,7 @@ class IsSuperAdmin
      */
     public function __construct()
     {
-        $this->userRepository = new UserRepository();
+        $this->indicatorRepository = new IndicatorRepository();
     }
 
     /**
@@ -32,7 +32,6 @@ class IsSuperAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = $this->userRepository->findWithRoleById($request->header('X-User-Id'));
-        return $user->role->name === 'super-admin' ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+        return $this->indicatorRepository->findLabelColumnById($request->id) === 'super-master' ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
     }
 }

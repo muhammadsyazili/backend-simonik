@@ -63,7 +63,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work indicator 'level: %s' 'unit: %s' 'year: %s' showed", $level, $unit, $year),
+            sprintf("Kertas kerja indikator 'level: %s' 'unit: %s' 'year: %s' ditampilkan", $level, $unit, $year),
             [
                 'levels' => $response->levels,
                 'indicators' => $response->indicators,
@@ -99,7 +99,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Paper work indicators showed",
+            "Kertas kerja indikator ditampilkan",
             [
                 'indicators' => $response->indicators,
                 'levels' => $response->levels,
@@ -158,7 +158,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work indicator 'level: %s' 'year: %s' creating successfully.", $request->post('level'), $request->post('year')),
+            sprintf("Kertas kerja indikator 'level: %s' 'year: %s' berhasil dibuat.", $request->post('level'), $request->post('year')),
             null,
             null,
         );
@@ -230,7 +230,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work indicator 'level: %s' 'unit: %s' 'year: %s' deleting successfully.", $level, $unit, $year),
+            sprintf("Kertas kerja indikator 'level: %s' 'unit: %s' 'year: %s' berhasil dihapus.", $level, $unit, $year),
             null,
             null,
         );

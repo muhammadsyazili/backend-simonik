@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorInsertRequest;
+use App\DTO\IndicatorInsertOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Services\IndicatorService;
@@ -44,38 +44,38 @@ class IndicatorController extends ApiController
             );
         }
 
-        $indicatorInsertRequest = new IndicatorInsertRequest();
+        $indicatorInsertOrUpdateRequest = new IndicatorInsertOrUpdateRequest();
 
-        $indicatorInsertRequest->validity = $request->post('validity');
-        $indicatorInsertRequest->weight = $request->post('weight');
-        $indicatorInsertRequest->dummy = $request->post('dummy');
-        $indicatorInsertRequest->reducing_factor = $request->post('reducing_factor');
-        $indicatorInsertRequest->polarity = $request->post('polarity');
-        $indicatorInsertRequest->indicator = $request->post('indicator');
-        $indicatorInsertRequest->formula = $request->post('formula');
-        $indicatorInsertRequest->measure = $request->post('measure');
-        $indicatorInsertRequest->user_id = $request->header('X-User-Id');
+        $indicatorInsertOrUpdateRequest->validity = $request->post('validity');
+        $indicatorInsertOrUpdateRequest->weight = $request->post('weight');
+        $indicatorInsertOrUpdateRequest->dummy = $request->post('dummy');
+        $indicatorInsertOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
+        $indicatorInsertOrUpdateRequest->polarity = $request->post('polarity');
+        $indicatorInsertOrUpdateRequest->indicator = $request->post('indicator');
+        $indicatorInsertOrUpdateRequest->formula = $request->post('formula');
+        $indicatorInsertOrUpdateRequest->measure = $request->post('measure');
+        $indicatorInsertOrUpdateRequest->user_id = $request->header('X-User-Id');
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $insert = $indicatorService->store($indicatorInsertRequest);
+        $insert = $indicatorService->store($indicatorInsertOrUpdateRequest);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indicator creating successfully",
+            "Indikator berhasil dibuat",
             $insert,
             null,
         );
     }
 
     /**
-     * Display the specified resource.
+     * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function edit($id)
     {
         $indicatorRepository = new IndicatorRepository();
 
@@ -85,11 +85,11 @@ class IndicatorController extends ApiController
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicator = $indicatorService->show($id);
+        $indicator = $indicatorService->edit($id);
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indicator creating successfully",
+            "Indikator ditampilkan",
             $indicator,
             null,
         );
@@ -104,7 +104,52 @@ class IndicatorController extends ApiController
      */
     public function update(Request $request, $id)
     {
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
 
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+
+        $indicatorValidationService = new IndicatorValidationService();
+
+        $validation = $indicatorValidationService->updateValidation($request);
+
+        if($validation->fails()){
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $indicatorInsertOrUpdateRequest = new IndicatorInsertOrUpdateRequest();
+
+        $indicatorInsertOrUpdateRequest->id = $id;
+        $indicatorInsertOrUpdateRequest->validity = $request->post('validity');
+        $indicatorInsertOrUpdateRequest->weight = $request->post('weight');
+        $indicatorInsertOrUpdateRequest->dummy = $request->post('dummy');
+        $indicatorInsertOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
+        $indicatorInsertOrUpdateRequest->polarity = $request->post('polarity');
+        $indicatorInsertOrUpdateRequest->indicator = $request->post('indicator');
+        $indicatorInsertOrUpdateRequest->formula = $request->post('formula');
+        $indicatorInsertOrUpdateRequest->measure = $request->post('measure');
+        $indicatorInsertOrUpdateRequest->user_id = $request->header('X-User-Id');
+
+        $indicatorService = new IndicatorService($constructRequest);
+
+        $insert = $indicatorService->update($indicatorInsertOrUpdateRequest);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Indikator berhasil diubah",
+            $insert,
+            null,
+        );
     }
 
     /**
@@ -137,6 +182,14 @@ class IndicatorController extends ApiController
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicator = $indicatorService->destroy($id);
+        $indicatorService->destroy($id);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Indikator berhasil dihapus",
+            null,
+            null,
+        );
     }
 }

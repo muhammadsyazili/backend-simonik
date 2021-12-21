@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-class HasExtentionNotSuperMaster implements Rule
+class IsExtentionNotSuperMaster implements Rule
 {
     private IndicatorRepository $indicatorRepository;
 
@@ -29,7 +29,7 @@ class HasExtentionNotSuperMaster implements Rule
     public function passes($attribute, $value)
     {
         if ($this->indicatorRepository->findLabelColumnById($value) === 'super-master') {
-            return $this->indicatorRepository->countAllByLabelColumnNotSuperMaster($value) > 0 ? false : true;
+            return $this->indicatorRepository->countAllByLabelColumnById($value) > 1 ? false : true;
         } else {
             return false;
         }
@@ -42,6 +42,6 @@ class HasExtentionNotSuperMaster implements Rule
      */
     public function message()
     {
-        return "(ID indikator: :value) tidak bisa dihapus.";
+        return "Indikator tidak bisa dihapus.";
     }
 }

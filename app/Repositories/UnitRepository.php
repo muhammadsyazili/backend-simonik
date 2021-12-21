@@ -29,4 +29,9 @@ class UnitRepository {
     {
         return UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->get()->toArray();
     }
+
+    public function findIdWithLevelBySlug(string $slug)
+    {
+        return Unit::with('level')->firstWhere(['slug' => $slug]);
+    }
 }
