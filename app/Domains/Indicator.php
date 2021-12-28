@@ -3,7 +3,7 @@
 namespace App\Domains;
 
 class Indicator {
-    public string $id;
+    public ?string $id;
     public string $indicator;
     public ?string $formula;
     public ?string $measure;

@@ -144,6 +144,7 @@ class Indicator extends Model
     {
         return $this->hasMany(Indicator::class, 'parent_vertical_id', 'id');
     }
+
     // Vertical recursive, loads all children
     public function childsVerticalRecursive()
     {
@@ -154,6 +155,7 @@ class Indicator extends Model
     {
         return $this->hasMany(Indicator::class, 'parent_horizontal_id', 'id')->referenced();
     }
+    
     // Horizontal recursive, loads all children
     public function childsHorizontalRecursive()
     {

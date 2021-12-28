@@ -46,8 +46,13 @@ class LevelRepository {
         return Level::where(['id' => $id])->get(['id'])->toArray();
     }
 
-    public function findAllWithChildsByParentId(array $parent_id)
+    public function findAllWithChildsByParentIdArray(array $parentId)
     {
-        return Level::with('childsRecursive')->whereIn('parent_id', $parent_id)->get();
+        return Level::with('childsRecursive')->whereIn('parent_id', $parentId)->get();
+    }
+
+    public function findAllWithChildsByParentId(string|int $parentId)
+    {
+        return Level::with('childsRecursive')->where(['parent_id' => $parentId])->get();
     }
 }

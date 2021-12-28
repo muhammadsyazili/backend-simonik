@@ -8,6 +8,8 @@ use App\DTO\ConstructRequest;
 use App\DTO\IndicatorInsertOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
+use App\Repositories\RealizationRepository;
+use App\Repositories\TargetRepository;
 use App\Services\IndicatorService;
 use App\Services\IndicatorValidationService;
 
@@ -17,7 +19,7 @@ class IndicatorController extends ApiController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -72,8 +74,8 @@ class IndicatorController extends ApiController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
@@ -99,18 +101,20 @@ class IndicatorController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
         $indicatorRepository = new IndicatorRepository();
-        $levelRepository = new LevelRepository();
+        $targetRepository = new TargetRepository();
+        $realizationRepository = new RealizationRepository();
 
         $constructRequest = new ConstructRequest();
 
         $constructRequest->indicatorRepository = $indicatorRepository;
-        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->targetRepository = $targetRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
 
         $indicatorValidationService = new IndicatorValidationService();
 
@@ -129,25 +133,24 @@ class IndicatorController extends ApiController
         $indicatorInsertOrUpdateRequest = new IndicatorInsertOrUpdateRequest();
 
         $indicatorInsertOrUpdateRequest->id = $id;
-        $indicatorInsertOrUpdateRequest->validity = $request->post('validity');
-        $indicatorInsertOrUpdateRequest->weight = $request->post('weight');
+        $indicatorInsertOrUpdateRequest->indicator = $request->post('indicator');
         $indicatorInsertOrUpdateRequest->dummy = $request->post('dummy');
         $indicatorInsertOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
         $indicatorInsertOrUpdateRequest->polarity = $request->post('polarity');
-        $indicatorInsertOrUpdateRequest->indicator = $request->post('indicator');
         $indicatorInsertOrUpdateRequest->formula = $request->post('formula');
         $indicatorInsertOrUpdateRequest->measure = $request->post('measure');
-        $indicatorInsertOrUpdateRequest->user_id = $request->header('X-User-Id');
+        $indicatorInsertOrUpdateRequest->validity = $request->post('validity');
+        $indicatorInsertOrUpdateRequest->weight = $request->post('weight');
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $insert = $indicatorService->update($indicatorInsertOrUpdateRequest);
+        $indicatorService->update($indicatorInsertOrUpdateRequest, $id);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Indikator berhasil diubah",
-            $insert,
+            null,
             null,
         );
     }
@@ -155,8 +158,8 @@ class IndicatorController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {

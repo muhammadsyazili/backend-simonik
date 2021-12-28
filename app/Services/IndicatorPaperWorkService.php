@@ -25,14 +25,14 @@ class IndicatorPaperWorkService {
     private ?TargetRepository $targetRepository;
     private ?RealizationRepository $realizationRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequest)
+    public function __construct(ConstructRequest $constructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequest->levelRepository;
-        $this->unitRepository = $indicatorConstructRequest->unitRepository;
-        $this->userRepository = $indicatorConstructRequest->userRepository;
-        $this->targetRepository = $indicatorConstructRequest->targetRepository;
-        $this->realizationRepository = $indicatorConstructRequest->realizationRepository;
+        $this->indicatorRepository = $constructRequest->indicatorRepository;
+        $this->levelRepository = $constructRequest->levelRepository;
+        $this->unitRepository = $constructRequest->unitRepository;
+        $this->userRepository = $constructRequest->userRepository;
+        $this->targetRepository = $constructRequest->targetRepository;
+        $this->realizationRepository = $constructRequest->realizationRepository;
     }
 
     public function index(string|int $userId, string $level, ?string $unit, ?string $year) : IndicatorPaperWorkIndexResponse
@@ -59,7 +59,16 @@ class IndicatorPaperWorkService {
         // 'permissions paper work indicator (create, edit, delete)' handler
         $numberOfChildLevel = $isSuperAdmin ? count(Arr::flatten($this->levelRepository->findAllSlugWithChildsByRoot())) : count(Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($user->unit->level->id)));
 
-        $response->levels = $isSuperAdmin ? $this->levelRepository->findAllWithChildsByRoot() : $this->levelRepository->findAllWithChildsById($user->unit->level->id);
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $this->userRepository;
+        $constructRequest->levelRepository = $this->levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $response->levels = $levelService->levelsOfUser($userId, true);
+
+        //$response->levels = $isSuperAdmin ? $this->levelRepository->findAllWithChildsByRoot() : $this->levelRepository->findAllWithChildsById($user->unit->level->id);
 
         $response->indicators = $this->indicatorRepository->findAllReferencedWithChildsByWhere(
             $level === 'super-master' ?
@@ -99,9 +108,9 @@ class IndicatorPaperWorkService {
 
         $user = $this->userRepository->findWithRoleUnitLevelById($userId);
 
-        $parent_id = $user->role->name === 'super-admin' ? $this->levelRepository->findAllIdByRoot() : $this->levelRepository->findAllIdById($user->unit->level->id);
+        $parentId = $user->role->name === 'super-admin' ? $this->levelRepository->findAllIdByRoot() : $this->levelRepository->findAllIdById($user->unit->level->id);
 
-        $response->levels = $this->levelRepository->findAllWithChildsByParentId(Arr::flatten($parent_id));
+        $response->levels = $this->levelRepository->findAllWithChildsByParentIdArray(Arr::flatten($parentId));
         $response->indicators = $this->indicatorRepository->findAllReferencedWithChildsByWhere(['label' => 'super-master']);
 
         return $response;
@@ -109,59 +118,59 @@ class IndicatorPaperWorkService {
 
     public function store(array $indicators, string $level, string $year, string|int $userId) : void
     {
-        $levelId = $this->levelRepository->findIdBySlug($level);
+        DB::transaction(function () use ($indicators, $level, $year, $userId) {
+            $levelId = $this->levelRepository->findIdBySlug($level);
 
-        //cek indikator yang dipilih punya urutan sampai ke ROOT
-        $childsOfSelectedIndicator = [];
-        foreach ($indicators as $key => $value) {
-            $childsOfSelectedIndicator = array_merge($childsOfSelectedIndicator, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
-        }
+            //cek indikator yang dipilih punya urutan sampai ke ROOT
+            $familiesOfSelectedIndicator = [];
+            foreach ($indicators as $key => $value) {
+                $familiesOfSelectedIndicator = array_merge($familiesOfSelectedIndicator, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
+            }
 
-        $paperWorkIndicators = $this->indicatorRepository->findAllById(array_unique($childsOfSelectedIndicator));
+            $familiesIndicator = $this->indicatorRepository->findAllById(array_unique($familiesOfSelectedIndicator));
 
-        $domainIndicator = new Indicator();
-        $target = new Target();
-        $realization = new Realization();
+            $indicator = new Indicator();
+            $target = new Target();
+            $realization = new Realization();
 
-        DB::transaction(function () use ($domainIndicator, $target, $realization, $paperWorkIndicators, $levelId, $userId, $year) {
             //section: paper work 'MASTER' creating
 
             //build ID
             $idListMaster = [];
-            foreach ($paperWorkIndicators as $indicator) {
-                $idListMaster[$indicator->id] = (string) Str::orderedUuid();
+            foreach ($familiesIndicator as $familyIndicator) {
+                $idListMaster[$familyIndicator->id] = (string) Str::orderedUuid();
             }
 
             $i = 0;
-            foreach ($paperWorkIndicators as $indicator) {
-                $domainIndicator->id = $idListMaster[$indicator->id];
-                $domainIndicator->indicator = $indicator->indicator;
-                $domainIndicator->formula = $indicator->formula;
-                $domainIndicator->measure = $indicator->measure;
-                $domainIndicator->weight = $indicator->getRawOriginal('weight');
-                $domainIndicator->polarity = $indicator->getRawOriginal('polarity');
-                $domainIndicator->year = $year;
-                $domainIndicator->reducing_factor = $indicator->reducing_factor;
-                $domainIndicator->validity = $indicator->getRawOriginal('validity');
-                $domainIndicator->reviewed = $indicator->reviewed;
-                $domainIndicator->referenced = $indicator->referenced;
-                $domainIndicator->dummy = $indicator->dummy;
-                $domainIndicator->label = 'master';
-                $domainIndicator->unit_id = null;
-                $domainIndicator->level_id = $levelId;
-                $domainIndicator->order = $i;
-                $domainIndicator->code = $indicator->code;
-                $domainIndicator->parent_vertical_id = $indicator->id;
-                $domainIndicator->parent_horizontal_id = is_null($indicator->parent_horizontal_id) ? null : $idListMaster[$indicator->parent_horizontal_id];
-                $domainIndicator->created_by = $userId;
+            foreach ($familiesIndicator as $familyIndicator) {
+                $indicator->id = $idListMaster[$familyIndicator->id];
+                $indicator->indicator = $familyIndicator->indicator;
+                $indicator->formula = $familyIndicator->formula;
+                $indicator->measure = $familyIndicator->measure;
+                $indicator->weight = $familyIndicator->getRawOriginal('weight');
+                $indicator->polarity = $familyIndicator->getRawOriginal('polarity');
+                $indicator->year = $year;
+                $indicator->reducing_factor = $familyIndicator->reducing_factor;
+                $indicator->validity = $familyIndicator->getRawOriginal('validity');
+                $indicator->reviewed = $familyIndicator->reviewed;
+                $indicator->referenced = $familyIndicator->referenced;
+                $indicator->dummy = $familyIndicator->dummy;
+                $indicator->label = 'master';
+                $indicator->unit_id = null;
+                $indicator->level_id = $levelId;
+                $indicator->order = $i;
+                $indicator->code = $familyIndicator->code;
+                $indicator->parent_vertical_id = $familyIndicator->id;
+                $indicator->parent_horizontal_id = is_null($familyIndicator->parent_horizontal_id) ? null : $idListMaster[$familyIndicator->parent_horizontal_id];
+                $indicator->created_by = $userId;
 
-                $this->indicatorRepository->save($domainIndicator);
+                $this->indicatorRepository->save($indicator);
 
                 //target 'MASTER' creating
-                if (!is_null($indicator->validity)) {
-                    foreach ($indicator->validity as $key => $value) {
+                if (!is_null($familyIndicator->validity)) {
+                    foreach ($familyIndicator->validity as $key => $value) {
                         $target->id = (string) Str::orderedUuid();
-                        $target->indicator_id = $idListMaster[$indicator->id];
+                        $target->indicator_id = $idListMaster[$familyIndicator->id];
                         $target->month = $key;
                         $target->value = 0;
                         $target->locked = true;
@@ -176,45 +185,45 @@ class IndicatorPaperWorkService {
 
             //section: paper work 'CHILD' creating
             $units = $this->unitRepository->findAllByLevelId($levelId);
-            $paperWorkIndicators = $this->indicatorRepository->findAllByWhere(['level_id' => $levelId, 'label' => 'master', 'year' => $year]);
+            $familiesIndicator = $this->indicatorRepository->findAllByWhere(['level_id' => $levelId, 'label' => 'master', 'year' => $year]);
 
             foreach ($units as $unit) {
                 //build ID
                 $idListChild = [];
-                foreach ($paperWorkIndicators as $indicator) {
-                    $idListChild[$indicator->id] = (string) Str::orderedUuid();
+                foreach ($familiesIndicator as $familyIndicator) {
+                    $idListChild[$familyIndicator->id] = (string) Str::orderedUuid();
                 }
 
                 $i = 0;
-                foreach ($paperWorkIndicators as $indicator) {
-                    $domainIndicator->id = $idListChild[$indicator->id];
-                    $domainIndicator->indicator = $indicator->indicator;
-                    $domainIndicator->formula = $indicator->formula;
-                    $domainIndicator->measure = $indicator->measure;
-                    $domainIndicator->weight = $indicator->getRawOriginal('weight');
-                    $domainIndicator->polarity = $indicator->getRawOriginal('polarity');
-                    $domainIndicator->year = $year;
-                    $domainIndicator->reducing_factor = $indicator->reducing_factor;
-                    $domainIndicator->validity = $indicator->getRawOriginal('validity');
-                    $domainIndicator->reviewed = $indicator->reviewed;
-                    $domainIndicator->referenced = $indicator->referenced;
-                    $domainIndicator->dummy = $indicator->dummy;
-                    $domainIndicator->label = 'child';
-                    $domainIndicator->unit_id = $unit->id;
-                    $domainIndicator->level_id = $levelId;
-                    $domainIndicator->order = $i;
-                    $domainIndicator->code = $indicator->code;
-                    $domainIndicator->parent_vertical_id = $indicator->id;
-                    $domainIndicator->parent_horizontal_id = is_null($indicator->parent_horizontal_id) ? null : $idListChild[$indicator->parent_horizontal_id];
-                    $domainIndicator->created_by = $userId;
+                foreach ($familiesIndicator as $familyIndicator) {
+                    $indicator->id = $idListChild[$familyIndicator->id];
+                    $indicator->indicator = $familyIndicator->indicator;
+                    $indicator->formula = $familyIndicator->formula;
+                    $indicator->measure = $familyIndicator->measure;
+                    $indicator->weight = $familyIndicator->getRawOriginal('weight');
+                    $indicator->polarity = $familyIndicator->getRawOriginal('polarity');
+                    $indicator->year = $year;
+                    $indicator->reducing_factor = $familyIndicator->reducing_factor;
+                    $indicator->validity = $familyIndicator->getRawOriginal('validity');
+                    $indicator->reviewed = $familyIndicator->reviewed;
+                    $indicator->referenced = $familyIndicator->referenced;
+                    $indicator->dummy = $familyIndicator->dummy;
+                    $indicator->label = 'child';
+                    $indicator->unit_id = $unit->id;
+                    $indicator->level_id = $levelId;
+                    $indicator->order = $i;
+                    $indicator->code = $familyIndicator->code;
+                    $indicator->parent_vertical_id = $familyIndicator->id;
+                    $indicator->parent_horizontal_id = is_null($familyIndicator->parent_horizontal_id) ? null : $idListChild[$familyIndicator->parent_horizontal_id];
+                    $indicator->created_by = $userId;
 
-                    $this->indicatorRepository->save($domainIndicator);
+                    $this->indicatorRepository->save($indicator);
 
                     //target & realization 'CHILD' creating
-                    if (!is_null($indicator->validity)) {
-                        foreach ($indicator->validity as $key => $value) {
+                    if (!is_null($familyIndicator->validity)) {
+                        foreach ($familyIndicator->validity as $key => $value) {
                             $target->id = (string) Str::orderedUuid();
-                            $target->indicator_id = $idListChild[$indicator->id];
+                            $target->indicator_id = $idListChild[$familyIndicator->id];
                             $target->month = $key;
                             $target->value = 0;
                             $target->locked = true;
@@ -223,7 +232,7 @@ class IndicatorPaperWorkService {
                             $this->targetRepository->save($target);
 
                             $realization->id = (string) Str::orderedUuid();
-                            $realization->indicator_id = $idListChild[$indicator->id];
+                            $realization->indicator_id = $idListChild[$familyIndicator->id];
                             $realization->month = $key;
                             $realization->value = 0;
                             $realization->locked = true;
@@ -241,12 +250,12 @@ class IndicatorPaperWorkService {
 
     public function destroy(string $level, string $unit, string $year) : void
     {
-        $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
-
-        $indicators = $this->indicatorRepository->findAllWithTargetsAndRealizationsByWhere($where);
-
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        DB::transaction(function () use ($indicators, $level, $unit, $year) {
+        DB::transaction(function () use ($level, $unit, $year) {
+            $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
+
+            $indicators = $this->indicatorRepository->findAllWithTargetsAndRealizationsByWhere($where);
+
             //deleting target & realization
             foreach ($indicators as $indicator) {
                 foreach ($indicator->targets as $target) {

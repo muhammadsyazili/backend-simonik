@@ -21,7 +21,7 @@ class PaperWorkIndicatorController extends ApiController
      * Display a listing of the resource.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -63,7 +63,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator 'level: %s' 'unit: %s' 'year: %s' ditampilkan", $level, $unit, $year),
+            sprintf("Kertas kerja indikator (Level: %s) (Unit: %s) (Tahun: %s) ditampilkan", $level, $unit, $year),
             [
                 'levels' => $response->levels,
                 'indicators' => $response->indicators,
@@ -76,7 +76,7 @@ class PaperWorkIndicatorController extends ApiController
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create(Request $request)
     {
@@ -112,7 +112,7 @@ class PaperWorkIndicatorController extends ApiController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -158,7 +158,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator 'level: %s' 'year: %s' berhasil dibuat.", $request->post('level'), $request->post('year')),
+            sprintf("Kertas kerja indikator (Level: %s) (Tahun: %s) berhasil dibuat.", $request->post('level'), $request->post('year')),
             null,
             null,
         );
@@ -168,7 +168,7 @@ class PaperWorkIndicatorController extends ApiController
      * Show the form for editing the specified resource.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit(Request $request)
     {
@@ -180,7 +180,7 @@ class PaperWorkIndicatorController extends ApiController
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -190,8 +190,10 @@ class PaperWorkIndicatorController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string  $level
+     * @param  string  $unit
+     * @param  string  $year
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($level, $unit, $year)
     {
@@ -230,7 +232,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator 'level: %s' 'unit: %s' 'year: %s' berhasil dihapus.", $level, $unit, $year),
+            sprintf("Kertas kerja indikator (Level: %s) (Unit: %s) (Tahun: %s) berhasil dihapus.", $level, $unit, $year),
             null,
             null,
         );

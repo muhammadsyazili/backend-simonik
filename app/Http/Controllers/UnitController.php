@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Level;
+use App\DTO\ConstructRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Arr;
-use App\Models\LevelOnlyId;
-use App\Models\Unit;
+use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
+use App\Services\UnitService;
 
 class UnitController extends ApiController
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -24,7 +25,7 @@ class UnitController extends ApiController
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create()
     {
@@ -35,7 +36,7 @@ class UnitController extends ApiController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -46,7 +47,7 @@ class UnitController extends ApiController
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -57,7 +58,7 @@ class UnitController extends ApiController
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
@@ -69,7 +70,7 @@ class UnitController extends ApiController
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -80,7 +81,7 @@ class UnitController extends ApiController
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
@@ -90,17 +91,32 @@ class UnitController extends ApiController
     /**
      * Display a listing of units by level the resource.
      *
-     * @param  String  $slug
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $slug
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function unitsOfLevel($slug)
+    public function unitsOfLevel(Request $request, $slug)
     {
-        $units = Unit::where(['level_id' => Level::firstWhere(['slug' => $slug])->id])->orderBy('name', 'asc')->get(['slug', 'name']);
+        //logging
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
+
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $unitService = new UnitService($constructRequest);
+
+        $units = $unitService->unitsOfLevel($slug);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Units of '$slug'",
+            "Unit: $slug",
             $units,
             null,
         );

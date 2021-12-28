@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Extends\Target;
 
+use App\DTO\ConstructRequest;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,16 +12,22 @@ use App\Models\Indicator;
 use App\Models\User;
 use App\Models\Level;
 use App\Models\Unit;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
 use App\Rules\LevelIsThisAndChildFromUserRole;
 use App\Rules\UnitIsThisAndChildUserRole;
 use App\Rules\UnitMatchOnRequestLevel;
+use App\Services\TargetPaperWorkService;
+use App\Services\TargetPaperWorkValidationService;
 
 class PaperWorkTargetController extends ApiController
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -30,7 +37,7 @@ class PaperWorkTargetController extends ApiController
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create()
     {
@@ -41,7 +48,7 @@ class PaperWorkTargetController extends ApiController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -52,7 +59,7 @@ class PaperWorkTargetController extends ApiController
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -63,11 +70,11 @@ class PaperWorkTargetController extends ApiController
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit(Request $request)
+    public function editOld(Request $request)
     {
-        $user = User::with(['role', 'unit.level'])->findOrFail(request()->header('X-User-Id'));
+        $user = User::with(['role', 'unit.level'])->findOrFail($request->header('X-User-Id'));
 
         $attributes = [
             'level' => ['required', 'string', new LevelIsThisAndChildFromUserRole($user)],
@@ -99,7 +106,7 @@ class PaperWorkTargetController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work target 'level: %s' 'unit: %s' 'year: %s' showed", $request->query('level'), $request->query('unit'), $request->query('tahun')),
+            sprintf("Paper work target (Level: %s) (Unit: %s) (Tahun: %s) showed", $request->query('level'), $request->query('unit'), $request->query('tahun')),
             [
                 'levels' => $isSuperAdmin ?
                     Level::with('childsRecursive')->where(['parent_id' => Level::firstWhere(['slug' => 'super-master'])->id])->get() :
@@ -122,11 +129,65 @@ class PaperWorkTargetController extends ApiController
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function edit(Request $request)
+    {
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+
+        $targetPaperWorkValidationService = new TargetPaperWorkValidationService($constructRequest);
+
+        $validation = $targetPaperWorkValidationService->editValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $targetPaperWorkService = new TargetPaperWorkService($constructRequest);
+
+        $userId = $request->header('X-User-Id');
+        $level = $request->query('level');
+        $unit = $request->query('unit');
+        $year = $request->query('tahun');
+
+        $response = $targetPaperWorkService->edit($userId, $level, $unit, $year);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Paper work target (Level: %s) (Unit: %s) (Tahun: %s) showed", $level, $unit, $year),
+            [
+                'levels' => $response->levels,
+                'indicators' => $response->indicators,
+            ],
+            null,
+        );
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -137,7 +198,7 @@ class PaperWorkTargetController extends ApiController
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {

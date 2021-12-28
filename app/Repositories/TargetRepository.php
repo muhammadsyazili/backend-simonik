@@ -22,4 +22,14 @@ class TargetRepository {
     {
         ModelsTarget::where(['id' => $id])->forceDelete();
     }
+
+    public function deleteByMonthAndIndicatorId(string $month, string|int $indicatorId) : void
+    {
+        ModelsTarget::where(['indicator_id' => $indicatorId, 'month' => $month])->forceDelete();
+    }
+
+    public function findAllByIndicatorId(string|int $indicatorId)
+    {
+        return ModelsTarget::where(['indicator_id' => $indicatorId])->get();
+    }
 }

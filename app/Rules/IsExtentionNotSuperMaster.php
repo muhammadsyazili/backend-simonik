@@ -29,7 +29,7 @@ class IsExtentionNotSuperMaster implements Rule
     public function passes($attribute, $value)
     {
         if ($this->indicatorRepository->findLabelColumnById($value) === 'super-master') {
-            return $this->indicatorRepository->countAllByLabelColumnById($value) > 1 ? false : true;
+            return $this->indicatorRepository->countCodeColumnById($value) > 1 ? false : true;
         } else {
             return false;
         }

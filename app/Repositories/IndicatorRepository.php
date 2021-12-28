@@ -36,9 +36,44 @@ class IndicatorRepository {
         DB::table('indicators')->insert($data);
     }
 
+    public function updateById(Indicator $indicator, string|int $id) : void
+    {
+        $data['indicator'] = $indicator->indicator;
+        $data['formula'] = $indicator->formula;
+        $data['measure'] = $indicator->measure;
+        $data['weight'] =  $indicator->weight;
+        $data['polarity'] = $indicator->polarity;
+        $data['year'] = $indicator->year;
+        $data['reducing_factor'] = $indicator->reducing_factor;
+        $data['validity'] = $indicator->validity;
+        $data['reviewed'] = $indicator->reviewed;
+        $data['referenced'] = $indicator->referenced;
+        $data['dummy'] = $indicator->dummy;
+        $data['label'] = $indicator->label;
+        $data['unit_id'] = $indicator->unit_id;
+        $data['level_id'] = $indicator->level_id;
+        $data['order'] = $indicator->order;
+        $data['parent_vertical_id'] = $indicator->parent_vertical_id;
+        $data['parent_horizontal_id'] = $indicator->parent_horizontal_id;
+
+        $data['updated_at'] = \Carbon\Carbon::now();
+
+        DB::table('indicators')->where(['id' => $id])->update($data);
+    }
+
     public function countOrderColumn() : int
     {
         return ModelsIndicator::withTrashed()->count()+1;
+    }
+
+    public function countCodeColumnById(string|int $id) : int
+    {
+        return ModelsIndicator::where(['code' => $id])->count();
+    }
+
+    public function countByWhere(array $where) : int
+    {
+        return ModelsIndicator::where($where)->count();
     }
 
     public function updateCodeColumnById(string|int $id) : void
@@ -46,34 +81,29 @@ class IndicatorRepository {
         DB::table('indicators')->where(['id' => $id])->update(['code' => $id]);
     }
 
+    public function updateReferenceById(string|int $id, string|int|null $parentHorizontalId) : void
+    {
+        ModelsIndicator::where(['id' => $id])->update(['parent_horizontal_id' => $parentHorizontalId, 'referenced' => 1]);
+    }
+
+    public function deleteByWhere(array $where) : void
+    {
+        ModelsIndicator::where($where)->forceDelete();
+    }
+
     public function findById(string|int $id)
     {
         return ModelsIndicator::findOrFail($id);
     }
 
-    public function findAllNotReferencedBySuperMasterLabel()
+    public function findLabelColumnById(string|int $id) : string
     {
-        return ModelsIndicator::notReferenced()->where(['label' => 'super-master'])->get();
+        return ModelsIndicator::firstWhere(['id' => $id])->label;
     }
 
-    public function findAllWithChildsBySuperMasterLabel()
+    public function findWithLevelById(string|int $id)
     {
-        return ModelsIndicator::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->get();
-    }
-
-    public function findAllIdBySuperMasterLabel() : array
-    {
-        return ModelsIndicator::where(['label' => 'super-master'])->get(['id'])->toArray();
-    }
-
-    public function updateReferenceById(string|int $id, string|int|null $parent_horizontal_id) : void
-    {
-        ModelsIndicator::where(['id' => $id])->update(['parent_horizontal_id' => $parent_horizontal_id, 'referenced' => 1]);
-    }
-
-    public function findAllReferencedWithChildsByWhere(array $where)
-    {
-        return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where($where)->get();
+        return ModelsIndicator::with('level')->findOrFail($id);
     }
 
     public function findIdAndParentHorizontalIdByWhere(array $where) : array
@@ -86,9 +116,34 @@ class IndicatorRepository {
         return ModelsIndicator::firstWhere($where)->id;
     }
 
-    public function countByWhere(array $where) : int
+    public function findAllNotReferencedBySuperMasterLabel()
     {
-        return ModelsIndicator::where($where)->count();
+        return ModelsIndicator::notReferenced()->where(['label' => 'super-master'])->get();
+    }
+
+    public function findAllWithChildsBySuperMasterLabel()
+    {
+        return ModelsIndicator::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->get();
+    }
+
+    public function findAllReferencedWithChildsByWhere(array $where)
+    {
+        return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where($where)->get();
+    }
+
+    public function findAllWithTargetsAndRealizationsByWhere(array $where)
+    {
+        return ModelsIndicator::with(['targets', 'realizations'])->where($where)->get();
+    }
+
+    public function findAllWithChildsTargetsRealizationsByWhere(array $where)
+    {
+        return ModelsIndicator::with(['targets', 'realizations', 'childsHorizontalRecursive'])->referenced()->rootHorizontal()->where($where)->get();
+    }
+
+    public function findAllIdBySuperMasterLabel() : array
+    {
+        return ModelsIndicator::where(['label' => 'super-master'])->get(['id'])->toArray();
     }
 
     public function findAllIdReferencedBySuperMasterLabel() : array
@@ -111,31 +166,8 @@ class IndicatorRepository {
         return ModelsIndicator::where($where)->get();
     }
 
-    public function findAllWithTargetsAndRealizationsByWhere(array $where)
+    public function findAllByParentVerticalId(string|int $parentVerticalId)
     {
-        return ModelsIndicator::with(['targets', 'realizations'])->where($where)->get();
-    }
-
-    public function deleteByWhere(array $where) : void
-    {
-        ModelsIndicator::where($where)->forceDelete();
-    }
-
-    public function findLabelColumnById(string|int $id) : string
-    {
-        return ModelsIndicator::firstWhere(['id' => $id])->label;
-    }
-
-    public function countAllByLabelColumnById(string|int $id) : int
-    {
-        return ModelsIndicator::where([
-            'code' => $id
-        ])
-        ->count();
-    }
-
-    public function findWithLevelById(string|int $id)
-    {
-        return ModelsIndicator::with('level')->findOrFail($id);
+        return ModelsIndicator::where(['parent_vertical_id' => $parentVerticalId])->get();
     }
 }

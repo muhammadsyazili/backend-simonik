@@ -16,11 +16,11 @@ class IndicatorReferenceValidationService {
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequest)
+    public function __construct(ConstructRequest $constructRequest)
     {
-        $this->indicatorRepository = $indicatorConstructRequest->indicatorRepository;
-        $this->levelRepository = $indicatorConstructRequest->levelRepository;
-        $this->unitRepository = $indicatorConstructRequest->unitRepository;
+        $this->indicatorRepository = $constructRequest->indicatorRepository;
+        $this->levelRepository = $constructRequest->levelRepository;
+        $this->unitRepository = $constructRequest->unitRepository;
     }
 
     public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator

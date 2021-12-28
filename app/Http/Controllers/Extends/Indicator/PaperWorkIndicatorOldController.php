@@ -81,7 +81,7 @@ class PaperWorkIndicatorOldController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work indicator 'level: %s' 'unit: %s' 'year: %s' showed", $request->query('level'), $request->query('unit'), $request->query('tahun')),
+            sprintf("Paper work indicator (Level: %s) (Unit: %s) (Tahun: %s) showed", $request->query('level'), $request->query('unit'), $request->query('tahun')),
             [
                 'levels' => $isSuperAdmin ?
                     Level::with('childsRecursive')->whereNull('parent_id')->get() :
@@ -186,7 +186,7 @@ class PaperWorkIndicatorOldController extends ApiController
         $validator->after(function ($validator) use ($sumOfIndicator, $request) {
             if ($sumOfIndicator > 0) {
                 $validator->errors()->add(
-                    'level', sprintf("Kertas kerja 'level: %s' 'year: %s' sudah tersedia.", $request->post('level'), $request->post('year'))
+                    'level', sprintf("Kertas kerja (Level: %s) (Tahun: %s) sudah tersedia.", $request->post('level'), $request->post('year'))
                 );
             }
         });
@@ -353,7 +353,7 @@ class PaperWorkIndicatorOldController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work indicator 'level: %s' 'year: %s' creating successfully.", $request->post('level'), $request->post('year')),
+            sprintf("Paper work indicator (Level: %s) (Tahun: %s) creating successfully.", $request->post('level'), $request->post('year')),
             null,
             null,
         );
@@ -408,7 +408,7 @@ class PaperWorkIndicatorOldController extends ApiController
         $validator->after(function ($validator) use ($level) {
             if ($level === 'super-master') {
                 $validator->errors()->add(
-                    'level', sprintf("Kertas Kerja 'level: %s' tidak bisa dihapus.", $level)
+                    'level', sprintf("Kertas Kerja (Level: %s) tidak bisa dihapus.", $level)
                 );
             }
         });
@@ -455,7 +455,7 @@ class PaperWorkIndicatorOldController extends ApiController
         if (!$is_default) {
             $validator->after(function ($validator) use ($level, $unit, $year) {
                 $validator->errors()->add(
-                    'level', sprintf("Kertas kerja 'level: %s' 'unit: %s' 'year: %s' tidak bisa dihapus, karena sudah ada kertas kerja target atau realisasi.", $level, $unit, $year)
+                    'level', sprintf("Kertas kerja (Level: %s) (Unit: %s) (Tahun: %s) tidak bisa dihapus, karena sudah ada kertas kerja target atau realisasi.", $level, $unit, $year)
                 );
             });
         }
@@ -504,7 +504,7 @@ class PaperWorkIndicatorOldController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Paper work indicator 'level: %s' 'unit: %s' 'year: %s' deleting successfully.", $level, $unit, $year),
+            sprintf("Paper work indicator (Level: %s) (Unit: %s) (Tahun: %s) deleting successfully.", $level, $unit, $year),
             null,
             null,
         );

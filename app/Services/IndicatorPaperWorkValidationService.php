@@ -19,9 +19,9 @@ use Illuminate\Support\Facades\Validator;
 class IndicatorPaperWorkValidationService {
     private ?UserRepository $userRepository;
 
-    public function __construct(ConstructRequest $indicatorConstructRequest)
+    public function __construct(ConstructRequest $constructRequest)
     {
-        $this->userRepository = $indicatorConstructRequest->userRepository;
+        $this->userRepository = $constructRequest->userRepository;
     }
 
     public function indexValidation(Request $request) : \Illuminate\Contracts\Validation\Validator

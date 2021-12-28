@@ -11,18 +11,18 @@ class UnitRepository {
         return Unit::firstWhere(['slug' => $slug])->id;
     }
 
-    public function findAllWithIndicatorByLevelIdAndYear(string|int $level_id, string|int $year)
+    public function findAllWithIndicatorByLevelIdAndYear(string|int $levelId, string|int $year)
     {
         return Unit::with(['indicators' => function ($query) use ($year) {
             $query->where([
                 'year' => $year,
             ]);
-        }])->where(['level_id' => $level_id])->get();
+        }])->where(['level_id' => $levelId])->get();
     }
 
-    public function findAllByLevelId(string|int $level_id)
+    public function findAllByLevelId(string|int $levelId)
     {
-        return Unit::where(['level_id' => $level_id])->get();
+        return Unit::where(['level_id' => $levelId])->get();
     }
 
     public function findAllSlugWithChildsById(string|int $id) : array
@@ -33,5 +33,10 @@ class UnitRepository {
     public function findIdWithLevelBySlug(string $slug)
     {
         return Unit::with('level')->firstWhere(['slug' => $slug]);
+    }
+
+    public function findAllSlugNameByLevelId(string|int $levelId)
+    {
+        return Unit::where(['level_id' => $levelId])->orderBy('name', 'asc')->get(['slug', 'name']);
     }
 }
