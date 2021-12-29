@@ -167,12 +167,41 @@ class PaperWorkIndicatorController extends ApiController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $level
+     * @param  string  $unit
+     * @param  string  $year
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit(Request $request)
+    public function edit($level, $unit, $year)
     {
-        //
+        //logging
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output->writeln(sprintf('level: %s, unit: %s, year: %s', $level, $unit, $year));
+
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+
+        $response = $indicatorPaperWorkService->edit($level, $unit, $year);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Kertas kerja indikator ditampilkan",
+            [
+                'super_master_indicators' => $response->super_master_indicators,
+                'indicators' => $response->indicators,
+            ],
+            null,
+        );
     }
 
     /**

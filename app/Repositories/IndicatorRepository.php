@@ -26,6 +26,7 @@ class IndicatorRepository {
         $data['unit_id'] = $indicator->unit_id;
         $data['level_id'] = $indicator->level_id;
         $data['order'] = $indicator->order;
+        $data['code'] = is_null($indicator->code) ? null : $indicator->code;
         $data['parent_vertical_id'] = $indicator->parent_vertical_id;
         $data['parent_horizontal_id'] = $indicator->parent_horizontal_id;
         $data['created_by'] = $indicator->created_by;
@@ -131,6 +132,11 @@ class IndicatorRepository {
         return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where($where)->get();
     }
 
+    public function findAllReferencedBySuperMasterLabel()
+    {
+        return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => 'super-master'])->get();
+    }
+
     public function findAllWithTargetsAndRealizationsByWhere(array $where)
     {
         return ModelsIndicator::with(['targets', 'realizations'])->where($where)->get();
@@ -169,5 +175,10 @@ class IndicatorRepository {
     public function findAllByParentVerticalId(string|int $parentVerticalId)
     {
         return ModelsIndicator::where(['parent_vertical_id' => $parentVerticalId])->get();
+    }
+
+    public function findAllIsChildByLevelIdAndUnitIdAndYear(string|int $levelId, string|int|null $unitId, string $year)
+    {
+        return is_null($unitId) ? ModelsIndicator::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->get() : ModelsIndicator::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->get();
     }
 }

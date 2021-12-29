@@ -24,6 +24,7 @@ class IndicatorPaperWorkValidationService {
         $this->userRepository = $constructRequest->userRepository;
     }
 
+    //use repo UserRepository
     public function indexValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
@@ -45,6 +46,7 @@ class IndicatorPaperWorkValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
+    //use repo UserRepository
     public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));

@@ -21,6 +21,7 @@ class IndicatorReferenceService {
         $this->unitRepository = $constructRequest->unitRepository;
     }
 
+    //use repo IndicatorRepository
     public function create() : IndicatorPreferencesCreateResponse
     {
         $response = new IndicatorPreferencesCreateResponse();
@@ -30,6 +31,7 @@ class IndicatorReferenceService {
         return $response;
     }
 
+    //use repo IndicatorRepository
     public function store(array $indicator, array $preference) : void
     {
         DB::transaction(function () use ($indicator, $preference) {
@@ -39,6 +41,7 @@ class IndicatorReferenceService {
         });
     }
 
+    //use repo IndicatorRepository, LevelRepository, UnitRepository
     public function edit(string $level, ?string $unit = null, ?string $year = null)
     {
         return $this->indicatorRepository->findAllReferencedWithChildsByWhere(
@@ -53,6 +56,7 @@ class IndicatorReferenceService {
         );
     }
 
+    //use repo IndicatorRepository, LevelRepository, UnitRepository
     public function update(array $indicators, array $preferences, string $level, ?string $unit = null, ?string $year = null) : void
     {
         $indicatorsModel = $this->indicatorRepository->findIdAndParentHorizontalIdByWhere(

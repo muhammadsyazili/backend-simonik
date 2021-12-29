@@ -6,6 +6,7 @@ use App\Domains\Indicator;
 use App\Domains\Realization;
 use App\Domains\Target;
 use App\DTO\ConstructRequest;
+use App\DTO\IndicatorPaperWorkEditResponse;
 use App\DTO\IndicatorPaperWorkIndexResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
@@ -35,6 +36,7 @@ class IndicatorPaperWorkService {
         $this->realizationRepository = $constructRequest->realizationRepository;
     }
 
+    //use IndicatorRepository, LevelRepository, UnitRepository, UserRepository
     public function index(string|int $userId, string $level, ?string $unit, ?string $year) : IndicatorPaperWorkIndexResponse
     {
         $response = new IndicatorPaperWorkIndexResponse();
@@ -102,6 +104,7 @@ class IndicatorPaperWorkService {
         return $response;
     }
 
+    //use IndicatorRepository, LevelRepository, UserRepository
     public function create(string|int $userId) : IndicatorPaperWorkIndexResponse
     {
         $response = new IndicatorPaperWorkIndexResponse();
@@ -116,6 +119,7 @@ class IndicatorPaperWorkService {
         return $response;
     }
 
+    //use IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
     public function store(array $indicators, string $level, string $year, string|int $userId) : void
     {
         DB::transaction(function () use ($indicators, $level, $year, $userId) {
@@ -158,7 +162,7 @@ class IndicatorPaperWorkService {
                 $indicator->label = 'master';
                 $indicator->unit_id = null;
                 $indicator->level_id = $levelId;
-                $indicator->order = $i;
+                $indicator->order = $i+1;
                 $indicator->code = $familyIndicator->code;
                 $indicator->parent_vertical_id = $familyIndicator->id;
                 $indicator->parent_horizontal_id = is_null($familyIndicator->parent_horizontal_id) ? null : $idListMaster[$familyIndicator->parent_horizontal_id];
@@ -211,7 +215,7 @@ class IndicatorPaperWorkService {
                     $indicator->label = 'child';
                     $indicator->unit_id = $unit->id;
                     $indicator->level_id = $levelId;
-                    $indicator->order = $i;
+                    $indicator->order = $i+1;
                     $indicator->code = $familyIndicator->code;
                     $indicator->parent_vertical_id = $familyIndicator->id;
                     $indicator->parent_horizontal_id = is_null($familyIndicator->parent_horizontal_id) ? null : $idListChild[$familyIndicator->parent_horizontal_id];
@@ -248,6 +252,21 @@ class IndicatorPaperWorkService {
         });
     }
 
+    //use IndicatorRepository, LevelRepository, UnitRepository
+    public function edit(string $level, string $unit, string $year) : IndicatorPaperWorkEditResponse
+    {
+        $response = new IndicatorPaperWorkEditResponse;
+
+        $response->super_master_indicators = $this->indicatorRepository->findAllReferencedBySuperMasterLabel();
+
+        $levelId = $this->levelRepository->findIdBySlug($level);
+
+        $response->indicators = $unit === 'master' ? $this->indicatorRepository->findAllIsChildByLevelIdAndUnitIdAndYear($levelId, null, $year) : $this->indicatorRepository->findAllIsChildByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year);
+
+        return $response;
+    }
+
+    //use IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
     public function destroy(string $level, string $unit, string $year) : void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');

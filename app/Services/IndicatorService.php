@@ -69,6 +69,7 @@ class IndicatorService {
             $indicator->unit_id = null;
             $indicator->level_id = $this->levelRepository->findIdBySlug('super-master');
             $indicator->order = $this->indicatorRepository->countOrderColumn();
+            $indicator->code = null;
             $indicator->parent_vertical_id = null;
             $indicator->parent_horizontal_id = null;
             $indicator->created_by = $indicatorNew->user_id;
@@ -605,11 +606,9 @@ class IndicatorService {
             $WEIGHT = [];
             $VALIDITY = [];
             foreach ($validity as $key => $value) {
-                $WEIGHT[Str::replace("'", null, $key)] = is_null($weight || !array_key_exists($key, $weight)) ?
-                    (float) 0 :
-                    (float) $weight[$key];
+                $WEIGHT[$key] = is_null($weight) || !array_key_exists($key, $weight) ? (float) 0 : (float) $weight[$key];
 
-                $VALIDITY[Str::replace("'", null, $key)] = (int) $value;
+                $VALIDITY[$key] = true;
             }
             $jsonString['validity'] = collect($VALIDITY)->toJson();
             $jsonString['weight'] = collect($WEIGHT)->toJson();

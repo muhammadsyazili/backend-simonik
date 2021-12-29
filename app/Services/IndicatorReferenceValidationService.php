@@ -23,6 +23,7 @@ class IndicatorReferenceValidationService {
         $this->unitRepository = $constructRequest->unitRepository;
     }
 
+    //use repo IndicatorRepository
     public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
@@ -87,6 +88,7 @@ class IndicatorReferenceValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
+    //use repo IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [

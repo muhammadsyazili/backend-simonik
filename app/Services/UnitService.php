@@ -17,6 +17,7 @@ class UnitService {
         $this->levelRepository = $constructRequest->levelRepository;
     }
 
+    //use repo UnitRepository, LevelRepository
     public function unitsOfLevel(string $level)
     {
         return $this->unitRepository->findAllSlugNameByLevelId($this->levelRepository->findIdBySlug($level));

@@ -52,6 +52,6 @@ class LevelIsThisAndChildFromUserRole implements Rule
      */
     public function message()
     {
-        return "Anda tidak memiliki hak akses. (#TGV2ZWxNYXRjaE9uVXNlclJvbGU)";
+        return "Anda tidak memiliki hak akses. (5e3902b24b1f2501ff6976bd79b314e0)";
     }
 }

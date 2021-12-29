@@ -12,7 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 class TargetPaperWorkValidationService {
-    
+
     private ?UserRepository $userRepository;
 
     public function __construct(ConstructRequest $constructRequest)
@@ -20,6 +20,7 @@ class TargetPaperWorkValidationService {
         $this->userRepository = $constructRequest->userRepository;
     }
 
+    //use repo UserRepository
     public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));

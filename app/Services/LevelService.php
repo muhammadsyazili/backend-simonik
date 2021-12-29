@@ -17,6 +17,7 @@ class LevelService {
         $this->userRepository = $constructRequest->userRepository;
     }
 
+    //use repo LevelRepository, UserRepository
     public function levelsOfUser(string|int $id, bool $withSuperMaster)
     {
         $user = $this->userRepository->findWithRoleUnitLevelById($id);
