@@ -68,7 +68,7 @@ class IndicatorService {
             $indicator->label = 'super-master';
             $indicator->unit_id = null;
             $indicator->level_id = $this->levelRepository->findIdBySlug('super-master');
-            $indicator->order = $this->indicatorRepository->countOrderColumn();
+            $indicator->order = $this->indicatorRepository->countOrderColumn('super-master');
             $indicator->code = null;
             $indicator->parent_vertical_id = null;
             $indicator->parent_horizontal_id = null;
@@ -190,9 +190,7 @@ class IndicatorService {
 
                 if (count($indicatorOld->validity) > 0) { //masa berlaku lama tidak nol
                     $output->writeln('--------------------------------');
-                    $output->writeln('masa berlaku lama tidak nol');
-                    $output->writeln(sprintf('masa berlaku lama: %s', json_encode(array_keys($indicatorOld->validity))));
-                    $output->writeln(sprintf('masa berlaku baru: %s', json_encode(array_keys($indicatorNew->validity))));
+                    $output->writeln('master, masa berlaku lama tidak nol');
                     $output->writeln('--------------------------------');
 
                     $monthsOld = array_keys($indicatorOld->validity);
@@ -202,7 +200,7 @@ class IndicatorService {
                     $new = [];
                     $i = 0;
                     foreach ($monthsNew as $monthNew) {
-                        if (array_search($monthNew, $monthsOld) === false) {
+                        if (in_array($monthNew, $monthsOld) === false) {
                             $new[$i] = $monthNew;
                             $i++;
                         }
@@ -210,8 +208,7 @@ class IndicatorService {
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         $output->writeln('--------------------------------');
-                        $output->writeln('terdapat selisih antara masa berlaku baru dengan lama');
-                        $output->writeln(sprintf('masa berlaku baru yang selisih: %s', json_encode($new)));
+                        $output->writeln('master, terdapat selisih antara masa berlaku baru dengan lama');
                         $output->writeln('--------------------------------');
 
                         foreach ($new as $v) {
@@ -239,7 +236,7 @@ class IndicatorService {
                     $old = [];
                     $i = 0;
                     foreach ($monthsOld as $monthOld) {
-                        if (array_search($monthOld, $monthsNew) === false) {
+                        if (in_array($monthOld, $monthsNew) === false) {
                             $old[$i] = $monthOld;
                             $i++;
                         }
@@ -247,8 +244,7 @@ class IndicatorService {
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                         $output->writeln('--------------------------------');
-                        $output->writeln('terdapat selisih antara masa berlaku lama dengan baru');
-                        $output->writeln(sprintf('masa berlaku lama yang selisih: %s', json_encode($old)));
+                        $output->writeln('master, terdapat selisih antara masa berlaku lama dengan baru');
                         $output->writeln('--------------------------------');
 
                         foreach ($old as $v) {
@@ -258,12 +254,12 @@ class IndicatorService {
                     }
                 } else { //masa berlaku lama nol
                     $output->writeln('--------------------------------');
-                    $output->writeln('masa berlaku lama nol');
+                    $output->writeln('master, masa berlaku lama nol');
                     $output->writeln('--------------------------------');
 
                     if (count($indicatorNew->validity) > 0) {
                         $output->writeln('--------------------------------');
-                        $output->writeln('masa berlaku baru tidak nol');
+                        $output->writeln('master, masa berlaku baru tidak nol');
                         $output->writeln('--------------------------------');
 
                         foreach ($indicatorNew->validity as $key => $value) {
@@ -298,7 +294,7 @@ class IndicatorService {
                 $familiesIndicatorOld = $this->indicatorRepository->findAllByParentVerticalId($id);
 
                 $output->writeln('--------------------------------');
-                $output->writeln(sprintf('jumlah keluarga indikator: %d', count($familiesIndicatorOld)));
+                $output->writeln(sprintf('childs, jumlah keluarga indikator: %d', count($familiesIndicatorOld)));
                 $output->writeln('--------------------------------');
 
                 if (count($familiesIndicatorOld) > 0) {
@@ -341,9 +337,7 @@ class IndicatorService {
 
                         if (count($familyIndicatorOld->validity) > 0) { //masa berlaku lama tidak nol
                             $output->writeln('--------------------------------');
-                            $output->writeln('masa berlaku lama tidak nol');
-                            $output->writeln(sprintf('masa berlaku lama: %s', json_encode(array_keys($familyIndicatorOld->validity))));
-                            $output->writeln(sprintf('masa berlaku baru: %s', json_encode(array_keys($indicatorNew->validity))));
+                            $output->writeln('childs, masa berlaku lama tidak nol');
                             $output->writeln('--------------------------------');
 
                             $monthsOld = array_keys($familyIndicatorOld->validity);
@@ -353,7 +347,7 @@ class IndicatorService {
                             $new = [];
                             $i = 0;
                             foreach ($monthsNew as $monthNew) {
-                                if (array_search($monthNew, $monthsOld) === false) {
+                                if (in_array($monthNew, $monthsOld) === false) {
                                     $new[$i] = $monthNew;
                                     $i++;
                                 }
@@ -361,8 +355,7 @@ class IndicatorService {
 
                             if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                                 $output->writeln('--------------------------------');
-                                $output->writeln('terdapat selisih antara masa berlaku baru dengan lama');
-                                $output->writeln(sprintf('masa berlaku baru yang selisih: %s', json_encode($new)));
+                                $output->writeln('childs, terdapat selisih antara masa berlaku baru dengan lama');
                                 $output->writeln('--------------------------------');
 
                                 foreach ($new as $v) {
@@ -390,7 +383,7 @@ class IndicatorService {
                             $old = [];
                             $i = 0;
                             foreach ($monthsOld as $monthOld) {
-                                if (array_search($monthOld, $monthsNew) === false) {
+                                if (in_array($monthOld, $monthsNew) === false) {
                                     $old[$i] = $monthOld;
                                     $i++;
                                 }
@@ -398,8 +391,7 @@ class IndicatorService {
 
                             if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                                 $output->writeln('--------------------------------');
-                                $output->writeln('terdapat selisih antara masa berlaku lama dengan baru');
-                                $output->writeln(sprintf('masa berlaku lama yang selisih: %s', json_encode($old)));
+                                $output->writeln('childs, terdapat selisih antara masa berlaku lama dengan baru');
                                 $output->writeln('--------------------------------');
 
                                 foreach ($old as $v) {
@@ -409,12 +401,12 @@ class IndicatorService {
                             }
                         } else { //masa berlaku lama nol
                             $output->writeln('--------------------------------');
-                            $output->writeln('masa berlaku lama nol');
+                            $output->writeln('childs, masa berlaku lama nol');
                             $output->writeln('--------------------------------');
 
                             if (count($indicatorNew->validity) > 0) {
                                 $output->writeln('--------------------------------');
-                                $output->writeln('masa berlaku baru tidak nol');
+                                $output->writeln('childs, masa berlaku baru tidak nol');
                                 $output->writeln('--------------------------------');
 
                                 foreach ($indicatorNew->validity as $key => $value) {
@@ -486,8 +478,6 @@ class IndicatorService {
                 if (count($indicatorOld->validity) > 0) { //masa berlaku lama tidak nol
                     $output->writeln('--------------------------------');
                     $output->writeln('masa berlaku lama tidak nol');
-                    $output->writeln(sprintf('masa berlaku lama: %s', json_encode(array_keys($indicatorOld->validity))));
-                    $output->writeln(sprintf('masa berlaku baru: %s', json_encode(array_keys($indicatorNew->validity))));
                     $output->writeln('--------------------------------');
 
                     $monthsOld = array_keys($indicatorOld->validity);
@@ -497,7 +487,7 @@ class IndicatorService {
                     $new = [];
                     $i = 0;
                     foreach ($monthsNew as $monthNew) {
-                        if (array_search($monthNew, $monthsOld) === false) {
+                        if (in_array($monthNew, $monthsOld) === false) {
                             $new[$i] = $monthNew;
                             $i++;
                         }
@@ -506,7 +496,6 @@ class IndicatorService {
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         $output->writeln('--------------------------------');
                         $output->writeln('terdapat selisih antara masa berlaku baru dengan lama');
-                        $output->writeln(sprintf('masa berlaku baru yang selisih: %s', json_encode($new)));
                         $output->writeln('--------------------------------');
 
                         foreach ($new as $v) {
@@ -534,7 +523,7 @@ class IndicatorService {
                     $old = [];
                     $i = 0;
                     foreach ($monthsOld as $monthOld) {
-                        if (array_search($monthOld, $monthsNew) === false) {
+                        if (in_array($monthOld, $monthsNew) === false) {
                             $old[$i] = $monthOld;
                             $i++;
                         }
@@ -543,7 +532,6 @@ class IndicatorService {
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                         $output->writeln('--------------------------------');
                         $output->writeln('terdapat selisih antara masa berlaku lama dengan baru');
-                        $output->writeln(sprintf('masa berlaku lama yang selisih: %s', json_encode($old)));
                         $output->writeln('--------------------------------');
 
                         foreach ($old as $v) {

@@ -5,7 +5,8 @@ namespace App\Rules;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-class IsExtentionNotSuperMaster implements Rule
+//Indikator tidak berlabel 'super-master'
+class IndicatorIsNotSuperMaster implements Rule
 {
     private IndicatorRepository $indicatorRepository;
 

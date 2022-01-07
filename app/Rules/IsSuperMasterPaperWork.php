@@ -4,6 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
+//Merupakan kertas kerja 'super-master'
 class IsSuperMasterPaperWork implements Rule
 {
     /**
@@ -35,6 +36,6 @@ class IsSuperMasterPaperWork implements Rule
      */
     public function message()
     {
-        return 'Kertas kerja tidak bisa dihapus.';
+        return "Anda tidak memiliki hak akses. (070ea66524fec89074ec95d24c427a21)";
     }
 }

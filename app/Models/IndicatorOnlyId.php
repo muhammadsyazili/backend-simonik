@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Casts\JsonToArrayCastsAttribute;
+use App\Casts\PolarityCastsAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Casts\PolarityCastsAttribute;
 
 class IndicatorOnlyId extends Model
 {
@@ -87,8 +88,12 @@ class IndicatorOnlyId extends Model
      * @var array
      */
     protected $casts = [
-        'weight' => 'array',
-        'validity' => 'array',
+        'reducing_factor' => 'boolean',
+        'reviewed' => 'boolean',
+        'referenced' => 'boolean',
+        'dummy' => 'boolean',
+        'weight' => JsonToArrayCastsAttribute::class,
+        'validity' => JsonToArrayCastsAttribute::class,
         'polarity' => PolarityCastsAttribute::class,
     ];
 

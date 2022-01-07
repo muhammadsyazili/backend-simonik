@@ -28,6 +28,11 @@ class RealizationRepository {
         ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->forceDelete();
     }
 
+    public function deleteByIndicatorId(string|int $indicatorId) : void
+    {
+        ModelsRealization::where(['indicator_id' => $indicatorId])->forceDelete();
+    }
+
     public function findAllByIndicatorId(string|int $indicatorId)
     {
         return ModelsRealization::where(['indicator_id' => $indicatorId])->get();

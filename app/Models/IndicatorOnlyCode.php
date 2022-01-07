@@ -2,17 +2,56 @@
 
 namespace App\Models;
 
-use App\Casts\PolarityCastsAttribute;
 use App\Casts\JsonToArrayCastsAttribute;
+use App\Casts\PolarityCastsAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Indicator extends Model
+class IndicatorOnlyCode extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'indicators';
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'id',
+        'indicator',
+        'formula',
+        'measure',
+        'weight',
+        'polarity',
+        'year',
+        'reducing_factor',
+        'validity',
+        'reviewed',
+        'referenced',
+        'dummy',
+
+        'label',
+        'unit_id',
+        'level_id',
+        'order',
+        'parent_vertical_id',
+        'parent_horizontal_id',
+        'created_by',
+
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -28,10 +67,10 @@ class Indicator extends Model
         'polarity',
         'year',
         'reducing_factor',
-        'dummy',
         'validity',
         'reviewed',
         'referenced',
+        'dummy',
 
         'label',
         'unit_id',
@@ -142,9 +181,8 @@ class Indicator extends Model
 
     public function childsVertical()
     {
-        return $this->hasMany(Indicator::class, 'parent_vertical_id', 'id');
+        return $this->hasMany(IndicatorOnlyCode::class, 'parent_vertical_id', 'id');
     }
-
     // Vertical recursive, loads all children
     public function childsVerticalRecursive()
     {
@@ -153,23 +191,27 @@ class Indicator extends Model
 
     public function childsHorizontal()
     {
-        return $this->hasMany(Indicator::class, 'parent_horizontal_id', 'id')->referenced();
+        return $this->hasMany(IndicatorOnlyCode::class, 'parent_horizontal_id', 'id')->referenced();
     }
-
     // Horizontal recursive, loads all children
     public function childsHorizontalRecursive()
     {
-        return $this->childsHorizontal()->with(['targets', 'realizations', 'childsHorizontalRecursive']);
+        return $this->childsHorizontal()->with('childsHorizontalRecursive');
     }
 
     public function parentVertical()
     {
-        return $this->belongsTo(Indicator::class, 'parent_vertical_id', 'id');
+        return $this->belongsTo(IndicatorOnlyCode::class, 'parent_vertical_id', 'id');
     }
 
     public function parentHorizontal()
     {
-        return $this->belongsTo(Indicator::class, 'parent_horizontal_id', 'id');
+        return $this->belongsTo(IndicatorOnlyCode::class, 'parent_horizontal_id', 'id');
+    }
+    // Horizontal recursive, loads all parent
+    public function parentHorizontalRecursive()
+    {
+        return $this->parentHorizontal()->with('parentHorizontalRecursive');
     }
 
     public function createdBy()

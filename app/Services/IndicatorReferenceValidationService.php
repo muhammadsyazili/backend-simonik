@@ -44,10 +44,10 @@ class IndicatorReferenceValidationService {
 
         //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('indicators') as $key => $value) {
+            foreach ($request->post('indicators') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "Terdapat ID indikator yang tidak sesuai dengan ID pada kertas kerja."
+                        'indicators', "Ilegal akses."
                     );
                 }
             }
@@ -57,10 +57,10 @@ class IndicatorReferenceValidationService {
 
         //memastikan semua ID preferensi dari request ada pada daftar ID indikator kertas kerja 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('preferences') as $key => $value) {
+            foreach ($request->post('preferences') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "Terdapat ID referensi yang tidak sesuai dengan ID pada kertas kerja."
+                        'preferences', "Ilegal akses."
                     );
                 }
             }
@@ -123,10 +123,10 @@ class IndicatorReferenceValidationService {
 
         //memastikan semua ID indikator dari request ada pada daftar ID indikator kertas kerja
         $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('indicators') as $key => $value) {
+            foreach ($request->post('indicators') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'indicators', "Terdapat ID indikator yang tidak sesuai dengan ID pada kertas kerja."
+                        'indicators', "Ilegal akses."
                     );
                 }
             }
@@ -136,10 +136,10 @@ class IndicatorReferenceValidationService {
 
         //memastikan semua ID preferensi dari request ada pada daftar ID indikator kertas kerja
         $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('preferences') as $key => $value) {
+            foreach ($request->post('preferences') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
                     $validator->errors()->add(
-                        'preferences', "Terdapat ID referensi yang tidak sesuai dengan ID pada kertas kerja."
+                        'preferences', "Ilegal akses."
                     );
                 }
             }

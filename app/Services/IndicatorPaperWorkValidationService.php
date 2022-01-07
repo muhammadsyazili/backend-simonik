@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\HasIndicatorIdNotMatchOnPaperWork;
-use App\Rules\HasTargetAndRealization;
+use App\Rules\HaveIndicatorsNotMatchInSuperMaterPaperWork;
+use App\Rules\IndicatorsHaveTargetAndRealization;
 use App\Rules\IsSuperMasterPaperWork;
 use App\Rules\LevelIsChildFromUserRole;
 use App\Rules\LevelIsThisAndChildFromUserRole;
@@ -18,10 +21,16 @@ use Illuminate\Support\Facades\Validator;
 
 class IndicatorPaperWorkValidationService {
     private ?UserRepository $userRepository;
+    private ?IndicatorRepository $indicatorRepository;
+    private ?LevelRepository $levelRepository;
+    private ?UnitRepository $unitRepository;
 
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->userRepository = $constructRequest->userRepository;
+        $this->indicatorRepository = $constructRequest->indicatorRepository;
+        $this->levelRepository = $constructRequest->levelRepository;
+        $this->unitRepository = $constructRequest->unitRepository;
     }
 
     //use repo UserRepository
@@ -52,7 +61,7 @@ class IndicatorPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'indicators' => ['required', new HasIndicatorIdNotMatchOnPaperWork($request->post('indicators'))],
+            'indicators' => ['required', new HaveIndicatorsNotMatchInSuperMaterPaperWork($request->post('indicators'))],
             'level' => ['required', 'string', new LevelIsChildFromUserRole($user), new PaperWorkAvailable($request->post('level'), $request->post('year'))],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
@@ -67,10 +76,66 @@ class IndicatorPaperWorkValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
+    //use repo IndicatorRepository, LevelRepository, UnitRepository
+    public function updateValidation(Request $request, string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
+    {
+        //logging
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+
+        $attributes = [
+            'level' => ['required', 'string', new IsSuperMasterPaperWork()],
+            'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
+            'year' => ['required', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
+        $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        $levelId = $this->levelRepository->findIdBySlug($level);
+        $indicators = $unit === 'master' ? Arr::flatten($this->indicatorRepository->findAllIdIsByLevelIdAndUnitIdAndYear($levelId, null, $year)) : Arr::flatten($this->indicatorRepository->findAllIdIsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year));
+
+        $new = [];
+        $i = 0;
+        foreach ($request->post('indicators') as $value) {
+            if (!in_array($value, $indicators)) {
+                $new[$i] = $value;
+                $i++;
+            }
+        }
+
+        $res = $this->indicatorRepository->countByIdListAndSuperMasterLabel($new);
+
+        $validator->after(function ($validator) use ($new, $res) {
+            if (count($new) !== $res) {
+                $validator->errors()->add(
+                    'indicators', "Ilegal akses."
+                );
+            }
+        });
+
+        // $output->writeln('--------------------------------');
+        // $output->writeln(sprintf('old indicator: %s', json_encode($indicators)));
+        // $output->writeln('--------------------------------');
+        // $output->writeln(sprintf('new indicator: %s', json_encode($request->post('indicators'))));
+        // $output->writeln('--------------------------------');
+        // $output->writeln(sprintf('delta indicator: %s', json_encode($new)));
+        // $output->writeln('--------------------------------');
+        // $output->writeln(sprintf('sum of delta: %s', json_encode($res)));
+        // $output->writeln('--------------------------------');
+
+        return $validator;
+    }
+
     public function destroyValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'level' => ['required', 'string', new IsSuperMasterPaperWork(), new HasTargetAndRealization($level, $unit, $year)],
+            'level' => ['required', 'string', new IsSuperMasterPaperWork(), new IndicatorsHaveTargetAndRealization($level, $unit, $year)],
             'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Rules\IsExtentionNotSuperMaster;
+use App\Rules\IndicatorIsNotSuperMaster;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -99,7 +99,7 @@ class IndicatorValidationService {
     public function destroyValidation(string|int $id) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'id' => ['required', 'uuid', new IsExtentionNotSuperMaster()],
+            'id' => ['required', 'uuid', new IndicatorIsNotSuperMaster()],
         ];
 
         $messages = [

@@ -6,6 +6,7 @@ use App\Domains\Indicator;
 use Illuminate\Support\Facades\DB;
 use App\Models\Indicator as ModelsIndicator;
 use App\Models\IndicatorOnlyId as ModelsIndicatorOnlyId;
+use App\Models\IndicatorOnlyCode as ModelsIndicatorOnlyCode;
 
 class IndicatorRepository {
     public function save(Indicator $indicator) : void
@@ -62,14 +63,27 @@ class IndicatorRepository {
         DB::table('indicators')->where(['id' => $id])->update($data);
     }
 
-    public function countOrderColumn() : int
+    public function countOrderColumn(string|int $levelId, string|int|null $unitId = null, string|null $year = null) : int
     {
-        return ModelsIndicator::withTrashed()->count()+1;
+        if ($levelId === 'super-master') {
+            return ModelsIndicator::where(['label' => 'super-master'])->withTrashed()->count()+1;
+        } else {
+            if (is_null($unitId)) {
+                return ModelsIndicator::where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->count()+1;
+            } else {
+                return ModelsIndicator::where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->count()+1;
+            }
+        }
     }
 
     public function countCodeColumnById(string|int $id) : int
     {
         return ModelsIndicator::where(['code' => $id])->count();
+    }
+
+    public function countByIdListAndSuperMasterLabel(array $idList) : int
+    {
+        return ModelsIndicator::where(['label' => 'super-master'])->whereIn('id', $idList)->count();
     }
 
     public function countByWhere(array $where) : int
@@ -92,6 +106,11 @@ class IndicatorRepository {
         ModelsIndicator::where($where)->forceDelete();
     }
 
+    public function deleteById(string|int $id) : void
+    {
+        ModelsIndicator::where(['id' => $id])->forceDelete();
+    }
+
     public function findById(string|int $id)
     {
         return ModelsIndicator::findOrFail($id);
@@ -100,6 +119,45 @@ class IndicatorRepository {
     public function findLabelColumnById(string|int $id) : string
     {
         return ModelsIndicator::firstWhere(['id' => $id])->label;
+    }
+
+    public function findCodeColumnById(string|int $id) : string|int
+    {
+        return ModelsIndicator::firstWhere(['id' => $id])->code;
+    }
+
+    public function findIdColumnByCodeMaster(string|int $code, string|int $levelId, string $year) : string|int
+    {
+        return ModelsIndicator::firstWhere(['label' => 'master', 'code' => $code, 'level_id' => $levelId, 'year' => $year])->id;
+    }
+
+    public function findIdColumnByCodeChild(string|int $code, string|int $levelId, string|int $unitId, string $year) : string|int
+    {
+        return ModelsIndicator::firstWhere(['label' => 'child', 'code' => $code, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->id;
+    }
+
+    public function findAllByCodeAndLevelIdAndUnitIdAndYear(string|int $code, string|int $levelId, string|int|null $unitId, string $year)
+    {
+        return is_null($unitId) ?
+        ModelsIndicator::with(['targets'])->firstWhere(['label' => 'master', 'code' => $code, 'level_id' => $levelId, 'year' => $year]) :
+        ModelsIndicator::with(['targets', 'realizations'])->firstWhere(['label' => 'child', 'code' => $code, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year]);
+    }
+
+    public function findCodeByIdAndLevelIdAndUnitIdAndYear(string|int $id, string|int $levelId, string|int|null $unitId, string $year)
+    {
+        return is_null($unitId) ?
+        ModelsIndicator::firstWhere(['label' => 'master', 'id' => $id, 'level_id' => $levelId, 'year' => $year])->code :
+        ModelsIndicator::firstWhere(['label' => 'child', 'id' => $id, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->code;
+    }
+
+    public function findIdByCodeAndLevelIdAndYear(string|int $code, string|int $levelId, string $year) : string|int
+    {
+        return ModelsIndicator::firstWhere(['label' => 'master', 'code' => $code, 'level_id' => $levelId, 'year' => $year])->id;
+    }
+
+    public function findByCodeAndLevelIdAndYear(string|int $code, string|int $levelId, string $year)
+    {
+        return ModelsIndicator::firstWhere(['label' => 'master', 'code' => $code, 'level_id' => $levelId, 'year' => $year]);
     }
 
     public function findWithLevelById(string|int $id)
@@ -162,9 +220,14 @@ class IndicatorRepository {
         return ModelsIndicatorOnlyId::with('parentHorizontalRecursive')->where(['id' => $id])->get()->toArray();
     }
 
-    public function findAllById(array $id)
+    public function findAllByIdList(array $idList)
     {
-        return ModelsIndicator::whereIn('id', $id)->get();
+        return ModelsIndicator::whereIn('id', $idList)->get();
+    }
+
+    public function findIdByCodeList(array $codeList, string|int $levelId, string|int|null $unitId, string $year)
+    {
+        return ModelsIndicator::where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->whereIn('code', $codeList)->get(['id']);
     }
 
     public function findAllByWhere(array $where)
@@ -177,8 +240,31 @@ class IndicatorRepository {
         return ModelsIndicator::where(['parent_vertical_id' => $parentVerticalId])->get();
     }
 
-    public function findAllIsChildByLevelIdAndUnitIdAndYear(string|int $levelId, string|int|null $unitId, string $year)
+    public function findAllByLevelIdAndUnitIdAndYear(string|int $levelId, string|int|null $unitId, string $year)
     {
-        return is_null($unitId) ? ModelsIndicator::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->get() : ModelsIndicator::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->get();
+        return is_null($unitId) ?
+        ModelsIndicator::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->get() :
+        ModelsIndicator::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->get();
+    }
+
+    public function findAllCodeByLevelIdAndUnitIdAndYear(string|int $levelId, string|int|null $unitId, string $year)
+    {
+        return is_null($unitId) ?
+        ModelsIndicator::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->get(['id', 'code']) :
+        ModelsIndicator::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->get(['id', 'code']);
+    }
+
+    public function findAllIdIsByLevelIdAndUnitIdAndYear(string|int $levelId, string|int|null $unitId, string $year) : array
+    {
+        return is_null($unitId) ?
+        ModelsIndicatorOnlyId::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->get()->toArray() :
+        ModelsIndicatorOnlyId::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->get()->toArray();
+    }
+
+    public function findAllCodeIsByLevelIdAndUnitIdAndYear(string|int $levelId, string|int|null $unitId, string $year) : array
+    {
+        return is_null($unitId) ?
+        ModelsIndicatorOnlyCode::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->get()->toArray() :
+        ModelsIndicatorOnlyCode::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->get()->toArray();
     }
 }

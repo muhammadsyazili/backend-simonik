@@ -174,10 +174,6 @@ class PaperWorkIndicatorController extends ApiController
      */
     public function edit($level, $unit, $year)
     {
-        //logging
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $output->writeln(sprintf('level: %s, unit: %s, year: %s', $level, $unit, $year));
-
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
@@ -208,12 +204,52 @@ class PaperWorkIndicatorController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  string  $level
+     * @param  string  $unit
+     * @param  string  $year
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $level, $unit, $year)
     {
-        //
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $targetRepository = new TargetRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->targetRepository = $targetRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
+
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
+
+        $validation = $indicatorPaperWorkValidationService->updateValidation($request, $level, $unit, $year);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+
+        $indicatorPaperWorkService->update($request->post('indicators'), $level, $unit, $year, $request->header('X-User-Id'));
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Kertas kerja indikator (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah.", $level, $unit, $year),
+            null,
+            null,
+        );
     }
 
     /**

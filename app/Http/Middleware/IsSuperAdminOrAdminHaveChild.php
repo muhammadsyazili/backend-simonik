@@ -39,9 +39,11 @@ class IsSuperAdminOrAdminHaveChild
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
         if ($user->role->name === 'super-admin') {
             return $next($request);
-        } else {
+        } else if ($user->role->name === 'admin') {
             $childs = Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($user->unit->level->id));
             return count($childs) > 1 ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+        } else {
+            return $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
         }
     }
 }

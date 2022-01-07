@@ -7,7 +7,8 @@ use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-class HasTargetAndRealization implements Rule
+//Terdapat indikator yang sudah punya kertas kerja target & realisasi
+class IndicatorsHaveTargetAndRealization implements Rule
 {
     private IndicatorRepository $indicatorRepository;
     private LevelRepository $levelRepository;

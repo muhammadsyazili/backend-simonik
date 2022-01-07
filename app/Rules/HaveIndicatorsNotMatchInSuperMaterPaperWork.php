@@ -6,7 +6,8 @@ use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 
-class HasIndicatorIdNotMatchOnPaperWork implements Rule
+//Terdapat indikator yang tidak cocok dengan kertas kerja 'super-master'
+class HaveIndicatorsNotMatchInSuperMaterPaperWork implements Rule
 {
     private IndicatorRepository $indicatorRepository;
     private array $indicators;
@@ -48,6 +49,6 @@ class HasIndicatorIdNotMatchOnPaperWork implements Rule
      */
     public function message()
     {
-        return 'Terdapat ID indikator yang tidak sesuai dengan ID pada kertas kerja.';
+        return 'Terdapat ID indikator yang tidak sesuai dengan kertas kerja indikator seharusnya.';
     }
 }
