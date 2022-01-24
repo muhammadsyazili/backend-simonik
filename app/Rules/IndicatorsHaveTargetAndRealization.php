@@ -7,7 +7,7 @@ use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-//Terdapat indikator yang sudah punya kertas kerja target & realisasi
+//Terdapat KPI yang sudah punya kertas kerja target & realisasi
 class IndicatorsHaveTargetAndRealization implements Rule
 {
     private IndicatorRepository $indicatorRepository;
@@ -43,9 +43,11 @@ class IndicatorsHaveTargetAndRealization implements Rule
      */
     public function passes($attribute, $value)
     {
-        $where = $this->unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($this->level), 'year' => $this->year] : ['level_id' => $this->levelRepository->findIdBySlug($this->level), 'unit_id' => $this->unitRepository->findIdBySlug($this->unit), 'year' => $this->year];
+        $levelId = $this->levelRepository->findIdBySlug($this->level);
 
-        $indicators = $this->indicatorRepository->findAllWithTargetsAndRealizationsByWhere($where);
+        $indicators = $this->unit === 'master' ?
+        $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, null, $this->year) :
+        $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
 
         //cek apakah target or realization sudah ada yang di-edit
         $isDefault = true;
@@ -77,6 +79,6 @@ class IndicatorsHaveTargetAndRealization implements Rule
      */
     public function message()
     {
-        return 'Kertas kerja tidak bisa dihapus, karena sudah memiliki target atau realisasi.';
+        return 'Kertas kerja KPI tidak bisa dihapus !';
     }
 }

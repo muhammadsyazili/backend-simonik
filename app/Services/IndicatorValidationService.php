@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Rules\IndicatorIsNotSuperMaster;
+use App\Rules\IndicatorNotHaveChilds;
+use App\Rules\NotSuperMaster;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -99,7 +100,7 @@ class IndicatorValidationService {
     public function destroyValidation(string|int $id) : \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'id' => ['required', 'uuid', new IndicatorIsNotSuperMaster()],
+            'id' => ['required', 'uuid', new NotSuperMaster(), new IndicatorNotHaveChilds()],
         ];
 
         $messages = [

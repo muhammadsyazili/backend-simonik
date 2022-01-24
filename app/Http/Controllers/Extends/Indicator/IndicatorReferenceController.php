@@ -34,7 +34,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator referensi ditampilkan",
+            "Kertas kerja KPI referensi ditampilkan !",
             [
                 'indicators' => $create->indicators,
                 'preferences' => $create->preferences,
@@ -78,7 +78,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator berhasil direferensikan",
+            "Kertas kerja KPI (Level: SUPER-MASTER) berhasil direferensikan !",
             null,
             null,
         );
@@ -102,7 +102,7 @@ class IndicatorReferenceController extends ApiController
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
-        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequest);
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService();
 
         $validation = $indicatorReferenceValidationService->editValidation($request);
 
@@ -123,7 +123,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator referensi ditampilkan",
+            "Kertas kerja KPI referensi ditampilkan !",
             [
                 'indicators' => $indicators,
                 'preferences' => $indicators,
@@ -171,7 +171,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator berhasil direferensikan",
+            $request->post('level') === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil direferensikan", strtoupper($request->post('level'))) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil direferensikan", strtoupper($request->post('level')), strtoupper($request->post('unit')), strtoupper($request->post('tahun'))),
             null,
             null,
         );

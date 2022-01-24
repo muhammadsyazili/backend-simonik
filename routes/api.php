@@ -37,6 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::delete('/indicators/paper-work/{level}/{unit}/{year}', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'destroy'])
     ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]);
+
+    Route::put('/indicators/paper-work/reorder', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'reorder'])
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
     //End Route : paper work - indicator
 
     //Route : indicator
@@ -74,6 +77,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/targets/paper-work', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'update'])
     ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
     //End Route : paper work - target
+
+    //Route : paper work - realization
+    Route::get('/realizations/paper-work/edit', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'edit'])
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
+
+    Route::put('/realizations/paper-work', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'update'])
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
+    //End Route : paper work - realization
 });
 
 Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'unitsOfLevel']);

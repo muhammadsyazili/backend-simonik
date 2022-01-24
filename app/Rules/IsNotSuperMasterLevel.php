@@ -4,8 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-//Merupakan kertas kerja 'super-master'
-class IsSuperMasterPaperWork implements Rule
+class IsNotSuperMasterLevel implements Rule
 {
     /**
      * Create a new rule instance.
@@ -26,7 +25,7 @@ class IsSuperMasterPaperWork implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $value === 'super-master' ? false : true;
+        $value === 'super-master' ? false : true;
     }
 
     /**
@@ -36,6 +35,6 @@ class IsSuperMasterPaperWork implements Rule
      */
     public function message()
     {
-        return "(#1) : Anda tidak memiliki hak akses !";
+        return 'Akses Ilegal !';
     }
 }

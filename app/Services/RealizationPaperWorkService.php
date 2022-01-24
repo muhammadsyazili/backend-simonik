@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\TargetPaperWorkEditResponse;
+use App\DTO\RealizationPaperWorkEditResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 
-class TargetPaperWorkService {
+class RealizationPaperWorkService {
 
     private ?UserRepository $userRepository;
     private ?LevelRepository $levelRepository;
@@ -25,9 +25,9 @@ class TargetPaperWorkService {
     }
 
     //use repo UserRepository, LevelRepository, IndicatorRepository, UnitRepository
-    public function edit(string|int $userId, string $level, string $unit, string $year) : TargetPaperWorkEditResponse
+    public function edit(string|int $userId, string $level, string $unit, string $year) : RealizationPaperWorkEditResponse
     {
-        $response = new TargetPaperWorkEditResponse();
+        $response = new RealizationPaperWorkEditResponse();
 
         $constructRequest = new ConstructRequest();
 
@@ -40,9 +40,7 @@ class TargetPaperWorkService {
 
         $levelId = $this->levelRepository->findIdBySlug($level);
 
-        $response->indicators = $unit === 'master' ?
-        $this->indicatorRepository->findAllWithChildsAndTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, null, $year) :
-        $this->indicatorRepository->findAllWithChildsAndTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year);
+        $response->indicators = $this->indicatorRepository->findAllWithChildsAndTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year);
 
         return $response;
     }

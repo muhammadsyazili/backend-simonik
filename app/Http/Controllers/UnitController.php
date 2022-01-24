@@ -98,8 +98,8 @@ class UnitController extends ApiController
     public function unitsOfLevel(Request $request, $slug)
     {
         //logging
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
+        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
 
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();

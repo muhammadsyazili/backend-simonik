@@ -51,11 +51,7 @@ class IndicatorPaperWorkService {
         if ($user->role->name === 'super-admin') {
             $currentLevelNotSameWithUserLevel = true;
         } else {
-            if ($level === $user->unit->level->slug) {
-                $currentLevelNotSameWithUserLevel = false;
-            } else {
-                $currentLevelNotSameWithUserLevel = true;
-            }
+            $currentLevelNotSameWithUserLevel = $level === $user->unit->level->slug ? false : true;
         }
 
         // 'permissions paper work indicator (create, edit, delete)' handler
@@ -70,18 +66,7 @@ class IndicatorPaperWorkService {
 
         $response->levels = $levelService->levelsOfUser($userId, true);
 
-        //$response->levels = $isSuperAdmin ? $this->levelRepository->findAllWithChildsByRoot() : $this->levelRepository->findAllWithChildsById($user->unit->level->id);
-
-        $response->indicators = $this->indicatorRepository->findAllReferencedWithChildsByWhere(
-            $level === 'super-master' ?
-            ['label' => 'super-master'] :
-            [
-                'level_id' => $this->levelRepository->findIdBySlug($level),
-                'label' => $unit === 'master' ? 'master' : 'child',
-                'unit_id' => $unit === 'master' ? null : $this->unitRepository->findIdBySlug($unit),
-                'year' => $year
-            ]
-        );
+        $response->indicators = $level === 'super-master' ? $this->indicatorRepository->findAllReferencedAndRootHorizontalWithChildsByLabelAndLevelIdAndUnitIdAndYear('super-master', null, null, null) : $this->indicatorRepository->findAllReferencedAndRootHorizontalWithChildsByLabelAndLevelIdAndUnitIdAndYear($unit === 'master' ? 'master' : 'child', $this->levelRepository->findIdBySlug($level), $unit === 'master' ? null : $this->unitRepository->findIdBySlug($unit), $year);
 
         $response->permissions = [
             'indicator' => [
@@ -114,7 +99,7 @@ class IndicatorPaperWorkService {
         $parentId = $user->role->name === 'super-admin' ? $this->levelRepository->findAllIdByRoot() : $this->levelRepository->findAllIdById($user->unit->level->id);
 
         $response->levels = $this->levelRepository->findAllWithChildsByParentIdList(Arr::flatten($parentId));
-        $response->indicators = $this->indicatorRepository->findAllReferencedWithChildsByWhere(['label' => 'super-master']);
+        $response->indicators = $this->indicatorRepository->findAllReferencedAndRootHorizontalWithChildsByLabelAndLevelIdAndUnitIdAndYear('super-master', null, null, null);
 
         return $response;
     }
@@ -125,13 +110,13 @@ class IndicatorPaperWorkService {
         DB::transaction(function () use ($indicators, $level, $year, $userId) {
             $levelId = $this->levelRepository->findIdBySlug($level);
 
-            //membuat nasab indikator
+            //membuat nasab KPI
             $pathsOfSelectedIndicator = [];
             foreach ($indicators as $value) {
                 $pathsOfSelectedIndicator = array_merge($pathsOfSelectedIndicator, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
             }
 
-            //nasab indikator
+            //nasab KPI
             $pathsIndicator = $this->indicatorRepository->findAllByIdList(array_unique($pathsOfSelectedIndicator));
 
             $indicator = new Indicator();
@@ -173,10 +158,10 @@ class IndicatorPaperWorkService {
 
                 //target 'MASTER' creating
                 if (!is_null($pathIndicator->validity)) {
-                    foreach ($pathIndicator->validity as $key => $value) {
+                    foreach ($pathIndicator->validity as $validityKey => $validityValue) {
                         $target->id = (string) Str::orderedUuid();
                         $target->indicator_id = $idListMaster[$pathIndicator->id];
-                        $target->month = $key;
+                        $target->month = $validityKey;
                         $target->value = 0;
                         $target->locked = true;
                         $target->default = true;
@@ -190,7 +175,7 @@ class IndicatorPaperWorkService {
 
             //section: paper work 'CHILD' creating ----------------------------------------------------------------------
             $units = $this->unitRepository->findAllByLevelId($levelId);
-            $pathsIndicator = $this->indicatorRepository->findAllByWhere(['level_id' => $levelId, 'label' => 'master', 'year' => $year]);
+            $pathsIndicator = $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYear($levelId, null, $year);
 
             foreach ($units as $unit) {
                 //build ID
@@ -224,12 +209,12 @@ class IndicatorPaperWorkService {
 
                     $this->indicatorRepository->save($indicator);
 
-                    //target & realization 'CHILD' creating
+                    //target & realisasi 'CHILD' creating
                     if (!is_null($pathIndicator->validity)) {
-                        foreach ($pathIndicator->validity as $key => $value) {
+                        foreach ($pathIndicator->validity as $validityKey => $validityValue) {
                             $target->id = (string) Str::orderedUuid();
                             $target->indicator_id = $idListChild[$pathIndicator->id];
-                            $target->month = $key;
+                            $target->month = $validityKey;
                             $target->value = 0;
                             $target->locked = true;
                             $target->default = true;
@@ -238,7 +223,7 @@ class IndicatorPaperWorkService {
 
                             $realization->id = (string) Str::orderedUuid();
                             $realization->indicator_id = $idListChild[$pathIndicator->id];
-                            $realization->month = $key;
+                            $realization->month = $validityKey;
                             $realization->value = 0;
                             $realization->locked = true;
                             $realization->default = true;
@@ -258,7 +243,7 @@ class IndicatorPaperWorkService {
     {
         $response = new IndicatorPaperWorkEditResponse;
 
-        $response->super_master_indicators = $this->indicatorRepository->findAllReferencedBySuperMasterLabel();
+        $response->super_master_indicators = $this->indicatorRepository->findAllWithChildsAndReferencedBySuperMasterLabel();
 
         $levelId = $this->levelRepository->findIdBySlug($level);
 
@@ -280,527 +265,102 @@ class IndicatorPaperWorkService {
             //logging.
             $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
-            $output->writeln('--------------------------------');
-            $output->writeln(sprintf('indicators: %s', json_encode($indicatorsFromInput)));
-            $output->writeln('--------------------------------');
+            // $output->writeln('--------------------------------');
+            // $output->writeln(sprintf('indicators: %s', json_encode($indicatorsFromInput)));
+            // $output->writeln('--------------------------------');
 
             $levelId = $this->levelRepository->findIdBySlug($level);
             $unitId = $unit === 'master' ? null : $this->unitRepository->findIdBySlug($unit);
 
             if ($unit === 'master') {
+                //section: 'MASTER' updating ----------------------------------------------------------------------
 
-                //mengambil daftar 'id' indikator lama sesuai 'level_id', 'unit_id' & 'year'.
-                $indicatorsOldOnlyIdForMaster = Arr::flatten($this->indicatorRepository->findAllIdIsByLevelIdAndUnitIdAndYear($levelId, $unitId, $year));
+                //daftar 'id' dari KPI-KPI 'master'
+                $oldIndicatorsMasterOnlyId = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, null, $year));
 
-                //mencari selisih 'id' indikator dengan cara membandingkan 'id' dari indikator request dengan 'id' dari indikator lama.
-                //kemudian, selisih 'id' indikator yang diperoleh diasumsikan sebagai 'id' indikator baru.
-                $newForMaster = [];
+                //daftar 'code' dari KPI-KPI 'master'
+                $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, null, $year));
+
+                $newIndicatorsMaster = [];
                 $i = 0;
-                foreach ($indicatorsFromInput as $value) {
-                    if (!in_array($value, $indicatorsOldOnlyIdForMaster)) {
-                        $newForMaster[$i] = $value;
+                foreach ($indicatorsFromInput as $indicatorFromInput) {
+                    if (!in_array($indicatorFromInput, $oldIndicatorsMasterOnlyId)) {
+                        $newIndicatorsMaster[$i] = $indicatorFromInput;
                         $i++;
                     }
                 }
 
-                //mencari selisih 'id' indikator dengan cara membandingkan 'id' dari indikator lama dengan 'id' dari indikator request.
-                //kemudian, selisih 'id' indikator yang diperoleh diasumsikan sebagai 'id' indikator lama.
-                $oldForMaster = [];
+                $newIndicatorsChild = $newIndicatorsMaster;
+
+                $oldIndicatorsMaster = [];
                 $i = 0;
-                foreach ($indicatorsOldOnlyIdForMaster as $value) {
-                    if (!in_array($value, $indicatorsFromInput)) {
-                        $oldForMaster[$i] = $value;
+                foreach ($oldIndicatorsMasterOnlyId as $oldIndicatorMasterOnlyId) {
+                    if (!in_array($oldIndicatorMasterOnlyId, $indicatorsFromInput)) {
+                        $oldIndicatorsMaster[$i] = $oldIndicatorMasterOnlyId;
                         $i++;
                     }
                 }
 
-                if (count($newForMaster) > 0) { //terdapat 'id' indikator baru.
+                $newIndicatorsNotExisInMaster = []; //daftar KPI baru yang belum terdaftar di 'master'
+                $i = 0;
+                foreach ($newIndicatorsMaster as $newIndicatorMaster) {
+                    if (!in_array($newIndicatorMaster, $oldIndicatorsMasterOnlyCode)) {
+                        $newIndicatorsNotExisInMaster[$i] = $newIndicatorMaster;
+                        $i++;
+                    }
+                }
 
-                    //nasab 'id' indikator baru.
-                    //nasab berupa daftar 'id' indikator yang mencerminkan jalur keturunan ke atas dari 'id' indikator baru.
-                    $familiesOfIndicatorNewForMaster = [];
-                    foreach ($newForMaster as $value) {
-                        $familiesOfIndicatorNewForMaster = array_merge($familiesOfIndicatorNewForMaster, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
+                if (count($newIndicatorsNotExisInMaster) > 0) {
+
+                    //nasab KPI baru yang belum terdaftar di 'master'.
+                    $pathsNewIndicators = [];
+                    foreach ($newIndicatorsNotExisInMaster as $newIndicatorNotExisInMaster) {
+                        $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->findAllWithParentsById($newIndicatorNotExisInMaster)));
                     }
 
-                    //daftar 'code' dari 'id' indikator lama sesuai 'level_id', 'unit_id' & 'year' yang masih di checked.
-                    //daftar 'code' mencerminkan 'id' indikator pada 'super-master'.
-                    $indicatorsOnlyIdAndCodeForMaster = $this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unitId, $year);
-                    $codesIndicatorOldForMaster = [];
+                    //gabungan daftar KPI master & KPI baru yang belum terdaftar di 'master'.
+                    $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsMasterOnlyCode));
+
+                    //menghapus item yang 'null'
+                    $temp = [];
                     $i = 0;
-                    foreach ($indicatorsOnlyIdAndCodeForMaster as $indicatorOnlyIdAndCode) {
-                        if (!in_array($indicatorOnlyIdAndCode->id, $oldForMaster)) { //seleksi 'id' indikator lama yang masih di checked.
-                            $codesIndicatorOldForMaster[$i] = $indicatorOnlyIdAndCode->code;
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!is_null($mergePathNewAndOldIndicator)) {
+                            $temp[$i] = $mergePathNewAndOldIndicator;
                             $i++;
                         }
                     }
 
-                    //gabungan 'id' indikator lama yang masih di checked & 'id' indikator baru.
-                    $familiesIndicatorForMaster = array_unique(array_merge($familiesOfIndicatorNewForMaster, $codesIndicatorOldForMaster));
-
-                    //section: paper work 'MASTER' updating ----------------------------------------------------------------------
+                    $mergePathsNewAndOldIndicator = $temp;
 
                     //build ID
                     $idListMaster = [];
-                    foreach ($familiesIndicatorForMaster as $familyId) {
-                        if (!is_null($familyId)) {
-                            $idListMaster[$familyId] = (string) Str::orderedUuid();
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!is_null($mergePathNewAndOldIndicator)) {
+                            $idListMaster[$mergePathNewAndOldIndicator] = (string) Str::orderedUuid();
                         }
                     }
 
+                    $indicatorsIdSuspended = [];
                     $i = 0;
-                    foreach ($familiesIndicatorForMaster as $familyId) {
-                        if (!is_null($familyId)) { //mencegah array gabungan 'id' indikator master & 'id' indikator baru yang belum terdaftar di 'master' item-nya ada null
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //KPI belum terdaftar di 'master'
 
-                            $indicatorSuperMaster = $this->indicatorRepository->findById($familyId); //indikator dari 'super-master'
+                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($mergePathNewAndOldIndicator));
 
-                            if (in_array($familyId, $codesIndicatorOldForMaster)) {
-                                $indicatorOld = $this->indicatorRepository->findAllByCodeAndLevelIdAndUnitIdAndYear($familyId, $levelId, $unitId, $year); //indikator dari 'master'
-
-                                //salin indikator lama
-                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorOld->indicator;
-                                $indicatorDomains->formula = $indicatorOld->formula;
-                                $indicatorDomains->measure = $indicatorOld->measure;
-                                $indicatorDomains->weight = $indicatorOld->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorOld->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorOld->reducing_factor;
-                                $indicatorDomains->validity = $indicatorOld->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorOld->reviewed;
-                                $indicatorDomains->referenced = $indicatorOld->referenced;
-                                $indicatorDomains->dummy = $indicatorOld->dummy;
-                                $indicatorDomains->label = 'master';
-                                $indicatorDomains->unit_id = null;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $i+1;
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $idListMaster[$indicatorSuperMaster->parent_horizontal_id];
-                                $indicatorDomains->created_by = $indicatorOld->created_by;
-
-                                $this->indicatorRepository->save($indicatorDomains); //membuat indikator baru
-
-                                if (!$indicatorOld->dummy) {
-                                    //target 'MASTER' creating
-                                    if (!is_null($indicatorOld->validity)) {
-                                        foreach ($indicatorOld->validity as $key => $value) {
-                                            $targetDomains->id = (string) Str::orderedUuid();
-                                            $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                            $targetDomains->month = $key;
-                                            $targetDomains->value = 0;
-                                            $targetDomains->locked = true;
-                                            $targetDomains->default = true;
-
-                                            $this->targetRepository->save($targetDomains); //membuat target baru
-                                        }
-                                    }
-                                }
-
-                                foreach ($indicatorOld->targets as $target) {
-                                    $this->targetRepository->deleteById($target->id); //hapus target lama
-                                }
-
-                                $this->indicatorRepository->deleteById($indicatorOld->id); //hapus indikator lama
-                            } else {
-                                //buat baru
-                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'master';
-                                $indicatorDomains->unit_id = null;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $i+1;
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $idListMaster[$indicatorSuperMaster->parent_horizontal_id];
-                                $indicatorDomains->created_by = $userId;
-
-                                $this->indicatorRepository->save($indicatorDomains);
-
-                                //target 'MASTER' creating
-                                if (!is_null($indicatorSuperMaster->validity)) {
-                                    foreach ($indicatorSuperMaster->validity as $key => $value) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $key;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
-                                        $targetDomains->default = true;
-
-                                        $this->targetRepository->save($targetDomains);
-                                    }
-                                }
-                            }
-                            $i++;
-                        }
-                    }
-                    //end section: paper work 'MASTER' updating ----------------------------------------------------------------------
-
-                    //section: paper work 'CHILD' updating ----------------------------------------------------------------------
-                    $units = $this->unitRepository->findAllByLevelId($levelId);
-
-                    foreach ($units as $unit) {
-
-                        //mengambil daftar 'id' indikator lama sesuai 'level_id', 'unit_id' & 'year'.
-                        $indicatorsOldOnlyIdForChild = Arr::flatten($this->indicatorRepository->findAllIdIsByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year));
-
-                        //gabungan daftar 'id' indikator lama milik 'master' & daftar 'id' indikator lama milik 'chlid'
-                        $indicatorsOldMasterAndChild = array_merge($indicatorsOldOnlyIdForMaster, $indicatorsOldOnlyIdForChild);
-
-                        //mencari selisih 'id' indikator dengan cara membandingkan 'id' dari indikator request dengan 'id' dari indikator lama.
-                        //kemudian, selisih 'id' indikator yang diperoleh diasumsikan sebagai 'id' indikator baru.
-                        $newForChild = [];
-                        $i = 0;
-                        foreach ($indicatorsFromInput as $value) {
-                            if (!in_array($value, $indicatorsOldMasterAndChild)) {
-                                $newForChild[$i] = $value;
-                                $i++;
-                            }
-                        }
-
-                        //mencari daftar 'code' dari 'id' indikator lama 'master' yang di un-checked.
-                        //daftar 'code' cerminan 'id' indikator dari 'super-master'.
-                        $codesOldUnchecked = [];
-                        $i = 0;
-                        foreach ($oldForMaster as $value) {
-                            $codesOldUnchecked[$i] = $this->indicatorRepository->findCodeColumnById($value);
-                            $i++;
-                        }
-
-                        //mencari daftar 'id indikator 'child' dari 'id' indikator lama 'master' yang di un-checked.
-                        $indicatorsUncheckedAtChild = $this->indicatorRepository->findIdByCodeList($codesOldUnchecked, $levelId, $unit->id, $year);
-
-                        //mencari selisih 'id' indikator dengan cara membandingkan 'id' dari indikator lama dengan 'id' dari indikator request.
-                        //kemudian, selisih 'id' indikator yang diperoleh diasumsikan sebagai 'id' indikator lama.
-                        $oldForChild = [];
-                        $i = 0;
-                        foreach ($indicatorsUncheckedAtChild as $indicatorUncheckedAtChild) {
-                            $oldForChild[$i] = $indicatorUncheckedAtChild->id;
-                            $i++;
-                        }
-
-                        if (count($newForChild) > 0) { //terdapat 'id' indikator baru.
-
-                            //nasab 'id' indikator baru.
-                            //nasab berupa daftar 'id' indikator yang mencerminkan jalur keturunan ke atas dari 'id' indikator baru.
-                            $familiesOfIndicatorNewForChild = [];
-                            foreach ($newForChild as $value) {
-                                $familiesOfIndicatorNewForChild = array_merge($familiesOfIndicatorNewForChild, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
-                            }
-
-                            //daftar 'code' dari 'id' indikator lama sesuai 'level_id', 'unit_id' & 'year' yang masih di checked.
-                            //daftar 'code' mencerminkan 'id' indikator pada 'super-master'.
-                            $indicatorsOnlyCodeForChild = $this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year);
-                            $codesIndicatorOldForChild = [];
-                            $i = 0;
-                            foreach ($indicatorsOnlyCodeForChild as $indicatorOnlyCode) {
-                                if (!in_array($indicatorOnlyCode->id, $oldForChild)) { //seleksi 'id' indikator lama yang masih di checked.
-                                    $codesIndicatorOldForChild[$i] = $indicatorOnlyCode->code;
-                                    $i++;
-                                }
-                            }
-
-                            ///gabungan 'id' indikator lama yang masih di checked & 'id' indikator baru.
-                            $familiesIndicatorForChild = array_unique(array_merge($familiesOfIndicatorNewForChild, $codesIndicatorOldForChild));
-
-                            //build ID
-                            $idListChild = [];
-                            foreach ($familiesIndicatorForChild as $familyId) {
-                                if (!is_null($familyId)) {
-                                    $idListChild[$familyId] = (string) Str::orderedUuid();
-                                }
-                            }
-
-                            $i = 0;
-                            foreach ($familiesIndicatorForChild as $familyId) {
-                                if (!is_null($familyId)) {
-
-                                    $indicatorSuperMaster = $this->indicatorRepository->findById($familyId); //indikator dari 'super-master'
-
-                                    if (in_array($familyId, $codesIndicatorOldForChild)) {
-                                        $indicatorOld = $this->indicatorRepository->findAllByCodeAndLevelIdAndUnitIdAndYear($familyId, $levelId, $unit->id, $year); //indikator dari 'child'
-
-                                        //salin indikator lama
-                                        $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                        $indicatorDomains->indicator = $indicatorOld->indicator;
-                                        $indicatorDomains->formula = $indicatorOld->formula;
-                                        $indicatorDomains->measure = $indicatorOld->measure;
-                                        $indicatorDomains->weight = $indicatorOld->getRawOriginal('weight');
-                                        $indicatorDomains->polarity = $indicatorOld->getRawOriginal('polarity');
-                                        $indicatorDomains->year = $year;
-                                        $indicatorDomains->reducing_factor = $indicatorOld->reducing_factor;
-                                        $indicatorDomains->validity = $indicatorOld->getRawOriginal('validity');
-                                        $indicatorDomains->reviewed = $indicatorOld->reviewed;
-                                        $indicatorDomains->referenced = $indicatorOld->referenced;
-                                        $indicatorDomains->dummy = $indicatorOld->dummy;
-                                        $indicatorDomains->label = 'child';
-                                        $indicatorDomains->unit_id = $unit->id;
-                                        $indicatorDomains->level_id = $levelId;
-                                        $indicatorDomains->order = $i+1;
-                                        $indicatorDomains->code = $indicatorSuperMaster->code;
-                                        $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndYear($indicatorSuperMaster->id, $levelId, $year);
-                                        $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $idListChild[$indicatorSuperMaster->parent_horizontal_id];
-                                        $indicatorDomains->created_by = $indicatorOld->created_by;
-
-                                        $this->indicatorRepository->save($indicatorDomains); //membuat indikator baru
-
-                                        if (!$indicatorOld->dummy) {
-                                            //target & realisasi 'CHILD' creating
-                                            if (!is_null($indicatorOld->validity)) {
-                                                foreach ($indicatorOld->validity as $key => $value) {
-                                                    $targetDomains->id = (string) Str::orderedUuid();
-                                                    $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $targetDomains->month = $key;
-                                                    $targetDomains->value = 0;
-                                                    $targetDomains->locked = true;
-                                                    $targetDomains->default = true;
-
-                                                    $this->targetRepository->save($targetDomains); //membuat target baru
-
-                                                    $realizationDomains->id = (string) Str::orderedUuid();
-                                                    $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $realizationDomains->month = $key;
-                                                    $realizationDomains->value = 0;
-                                                    $realizationDomains->locked = true;
-                                                    $realizationDomains->default = true;
-
-                                                    $this->realizationRepository->save($realizationDomains); //membuat realisasi baru
-                                                }
-                                            }
-                                        }
-
-                                        foreach ($indicatorOld->targets as $target) {
-                                            $this->targetRepository->deleteById($target->id); //hapus target lama
-                                        }
-
-                                        foreach ($indicatorOld->realizations as $realization) {
-                                            $this->realizationRepository->deleteById($realization->id); //hapus realisasi lama
-                                        }
-
-                                        $this->indicatorRepository->deleteById($indicatorOld->id); //hapus indikator lama
-                                    } else {
-                                        //buat baru
-                                        $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                        $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                        $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                        $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                        $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                        $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                        $indicatorDomains->year = $year;
-                                        $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                        $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                        $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                        $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                        $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                        $indicatorDomains->label = 'child';
-                                        $indicatorDomains->unit_id = $unit->id;
-                                        $indicatorDomains->level_id = $levelId;
-                                        $indicatorDomains->order = $i+1;
-                                        $indicatorDomains->code = $indicatorSuperMaster->code;
-                                        $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndYear($indicatorSuperMaster->id, $levelId, $year);
-                                        $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $idListChild[$indicatorSuperMaster->parent_horizontal_id];
-                                        $indicatorDomains->created_by = $userId;
-
-                                        $this->indicatorRepository->save($indicatorDomains);
-
-                                        //target & realisasi 'CHILD' creating
-                                        if (!is_null($indicatorSuperMaster->validity)) {
-                                            foreach ($indicatorSuperMaster->validity as $key => $value) {
-                                                $targetDomains->id = (string) Str::orderedUuid();
-                                                $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $targetDomains->month = $key;
-                                                $targetDomains->value = 0;
-                                                $targetDomains->locked = true;
-                                                $targetDomains->default = true;
-
-                                                $this->targetRepository->save($targetDomains);
-
-                                                $realizationDomains->id = (string) Str::orderedUuid();
-                                                $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $realizationDomains->month = $key;
-                                                $realizationDomains->value = 0;
-                                                $realizationDomains->locked = true;
-                                                $realizationDomains->default = true;
-
-                                                $this->realizationRepository->save($realizationDomains);
-                                            }
-                                        }
-                                    }
-                                    $i++;
-                                }
-                            }
-                        }
-
-                        if (count($oldForChild) > 0) { //terdapat 'id' indikator lama yang di un-checked.
-                            foreach ($oldForChild as $v) {
-                                $this->targetRepository->deleteByIndicatorId($v); //delete target
-                                $this->realizationRepository->deleteByIndicatorId($v); //delete realisasi
-                                $this->indicatorRepository->deleteById($v); //delete indikator
-                            }
-                        }
-                    }
-                    //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
-                }
-
-                if (count($oldForMaster) > 0) { //terdapat 'id' indikator lama yang di un-checked.
-                    foreach ($oldForMaster as $v) {
-                        $this->targetRepository->deleteByIndicatorId($v); //delete target
-                        $this->indicatorRepository->deleteById($v); //delete indikator
-                    }
-                }
-            } else {
-                $indicatorsOldOnlyIdForChild = Arr::flatten($this->indicatorRepository->findAllIdIsByLevelIdAndUnitIdAndYear($levelId, $unitId, $year));
-
-                $newForMaster = [];
-                $i = 0;
-                foreach ($indicatorsFromInput as $value) {
-                    if (!in_array($value, $indicatorsOldOnlyIdForChild)) {
-                        $newForMaster[$i] = $value;
-                        $i++;
-                    }
-                }
-
-                $indicatorsOldOnlyCodeForMaster = Arr::flatten($this->indicatorRepository->findAllCodeIsByLevelIdAndUnitIdAndYear($levelId, null, $year));
-
-                $newIndicatorIsExisInMaster = [];
-                $newIndicatorNotExisInMaster = [];
-                $i = 0;
-                $j = 0;
-                foreach ($newForMaster as $value) {
-                    if (in_array($value, $indicatorsOldOnlyCodeForMaster)) { //'id' indikator sudah terdaftar di 'master'
-                        $newIndicatorIsExisInMaster[$i] = $value;
-                        $i++;
-                    } else { //'id' indikator belum terdaftar di 'master'
-                        $newIndicatorNotExisInMaster[$j] = $value;
-                        $j++;
-                    }
-                }
-
-                if (count($newIndicatorNotExisInMaster) > 0) { //terdapat 'id' indikator baru yang belum terdaftar di 'master'.
-
-                    //nasab 'id' indikator baru yang belum terdaftar di 'master'.
-                    //nasab berupa daftar 'id' indikator yang mencerminkan jalur keturunan ke atas dari 'id' indikator baru yang belum terdaftar di 'master'.
-                    $pathsOfIndicatorNewForMaster = [];
-                    foreach ($newIndicatorNotExisInMaster as $value) {
-                        $pathsOfIndicatorNewForMaster = array_merge($pathsOfIndicatorNewForMaster, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
-                    }
-
-                    //gabungan 'id' indikator master & 'id' indikator baru yang belum terdaftar di 'master'.
-                    $pathsIndicatorForMaster = array_unique(array_merge($pathsOfIndicatorNewForMaster, $indicatorsOldOnlyCodeForMaster));
-
-                    //section: paper work 'MASTER' updating ----------------------------------------------------------------------
-
-                    //build ID
-                    $idListMaster = [];
-                    foreach ($pathsIndicatorForMaster as $familyId) {
-                        if (!is_null($familyId)) {
-                            $idListMaster[$familyId] = (string) Str::orderedUuid();
-                        }
-                    }
-
-                    $indicatorsSuspended = [];
-                    $i = 0;
-                    $j = 0;
-                    foreach ($pathsIndicatorForMaster as $familyId) {
-                        if (!is_null($familyId)) { //mencegah array gabungan 'id' indikator master & 'id' indikator baru yang belum terdaftar di 'master' item-nya ada null
-                            if (!in_array($familyId, $indicatorsOldOnlyCodeForMaster)) { //indikator tidak ada pada daftar indikator master
-
-                                $familiesOfIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($familyId));
-
-                                $haveFamiliesIndicatorNotRegisted = [];
-                                $k = 0;
-                                foreach ($familiesOfIndicator as $familyOfIndicator) {
-                                    if ($familyOfIndicator !== $familyId) {
-                                        if (!in_array($familyOfIndicator, Arr::flatten($this->indicatorRepository->findAllCodeIsByLevelIdAndUnitIdAndYear($levelId, null, $year)))) {
-                                            $haveFamiliesIndicatorNotRegisted[$k] = $familyOfIndicator;
-                                            $k++;
-                                        }
-                                    }
-                                }
-
-                                $indicatorSuperMaster = $this->indicatorRepository->findById($familyId); //indikator dari 'super-master'
-
-                                if (count($haveFamiliesIndicatorNotRegisted) === 0) {
-                                    //buat baru
-                                    $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                    $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                    $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                    $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                    $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                    $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                    $indicatorDomains->year = $year;
-                                    $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                    $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                    $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                    $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                    $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                    $indicatorDomains->label = 'master';
-                                    $indicatorDomains->unit_id = null;
-                                    $indicatorDomains->level_id = $levelId;
-                                    $indicatorDomains->order = $i+1;
-                                    $indicatorDomains->code = $indicatorSuperMaster->code;
-                                    $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                    $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdColumnByCodeMaster($indicatorSuperMaster->parent_horizontal_id, $levelId, $year);
-                                    $indicatorDomains->created_by = $userId;
-
-                                    $this->indicatorRepository->save($indicatorDomains);
-
-                                    //target 'MASTER' creating
-                                    if (!is_null($indicatorSuperMaster->validity)) {
-                                        foreach ($indicatorSuperMaster->validity as $key => $value) {
-                                            $targetDomains->id = (string) Str::orderedUuid();
-                                            $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                            $targetDomains->month = $key;
-                                            $targetDomains->value = 0;
-                                            $targetDomains->locked = true;
-                                            $targetDomains->default = true;
-
-                                            $this->targetRepository->save($targetDomains);
-                                        }
-                                    }
-                                } else {
-                                    $indicatorsSuspended[$j]['id'] = $familyId;
-                                    $indicatorsSuspended[$j]['order'] = $i+1;
+                            $havePathsIndicatorNotRegistedInMaster = [];
+                            $j = 0;
+                            foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                if (($pathNewIndicator !== $mergePathNewAndOldIndicator) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode) && !is_null($pathNewIndicator)) {
+                                    $havePathsIndicatorNotRegistedInMaster[$j] = $pathNewIndicator;
                                     $j++;
                                 }
                             }
-                            $i++;
-                        }
-                    }
 
-                    dump("indikator suspended");
-                    dump($indicatorsSuspended);
+                            if (count($havePathsIndicatorNotRegistedInMaster) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) {
 
-                    while (count($indicatorsSuspended) !== 0) {
-                        for ($i=0; $i < count($indicatorsSuspended); $i++) {
+                                $indicatorSuperMaster = $this->indicatorRepository->findById($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
 
-                            $familiesOfIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($indicatorsSuspended[$i]['id']));
-
-                            $haveFamiliesIndicatorNotRegisted = [];
-                            $k = 0;
-                            foreach ($familiesOfIndicator as $familyOfIndicator) {
-                                if ($familyOfIndicator !== $indicatorsSuspended[$i]['id']) {
-                                    if (!in_array($familyOfIndicator, Arr::flatten($this->indicatorRepository->findAllCodeIsByLevelIdAndUnitIdAndYear($levelId, null, $year)))) {
-                                        $haveFamiliesIndicatorNotRegisted[$k] = $familyOfIndicator;
-                                        $k++;
-                                    }
-                                }
-                            }
-
-                            $indicatorSuperMaster = $this->indicatorRepository->findById($indicatorsSuspended[$i]['id']); //indikator dari 'super-master'
-
-                            if (count($haveFamiliesIndicatorNotRegisted) === 0) {
-                                //buat baru
                                 $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
                                 $indicatorDomains->formula = $indicatorSuperMaster->formula;
@@ -816,20 +376,20 @@ class IndicatorPaperWorkService {
                                 $indicatorDomains->label = 'master';
                                 $indicatorDomains->unit_id = null;
                                 $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $indicatorsSuspended[$i]['order'];
+                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, null, $year);
                                 $indicatorDomains->code = $indicatorSuperMaster->code;
                                 $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdColumnByCodeMaster($indicatorSuperMaster->parent_horizontal_id, $levelId, $year);
+                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
                                 $indicatorDomains->created_by = $userId;
 
                                 $this->indicatorRepository->save($indicatorDomains);
 
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
-                                    foreach ($indicatorSuperMaster->validity as $key => $value) {
+                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityvalue) {
                                         $targetDomains->id = (string) Str::orderedUuid();
                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $key;
+                                        $targetDomains->month = $validityKey;
                                         $targetDomains->value = 0;
                                         $targetDomains->locked = true;
                                         $targetDomains->default = true;
@@ -837,78 +397,238 @@ class IndicatorPaperWorkService {
                                         $this->targetRepository->save($targetDomains);
                                     }
                                 }
-                                unset($indicatorsSuspended[$i]);
+                            } else {
+                                $indicatorsIdSuspended[$i] = $mergePathNewAndOldIndicator;
+                                $i++;
                             }
                         }
                     }
-                    //end section: paper work 'MASTER' updating ----------------------------------------------------------------------
 
-                    //section: paper work 'CHILD' updating ----------------------------------------------------------------------
-                    $indicatorsOldOnlyCodeForMaster = Arr::flatten($this->indicatorRepository->findAllCodeIsByLevelIdAndUnitIdAndYear($levelId, null, $year));
+                    while (count($indicatorsIdSuspended) > 0) {
+                        for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
 
-                    $newForChild = [];
+                            $indicatorSuperMaster = $this->indicatorRepository->findById($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+
+                            if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
+                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomains->year = $year;
+                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomains->label = 'master';
+                                $indicatorDomains->unit_id = null;
+                                $indicatorDomains->level_id = $levelId;
+                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, null, $year);
+                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomains->parent_horizontal_id = null;
+                                $indicatorDomains->created_by = $userId;
+
+                                $this->indicatorRepository->save($indicatorDomains);
+
+                                //target 'MASTER' creating
+                                if (!is_null($indicatorSuperMaster->validity)) {
+                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                        $targetDomains->id = (string) Str::orderedUuid();
+                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomains->month = $validityKey;
+                                        $targetDomains->value = 0;
+                                        $targetDomains->locked = true;
+                                        $targetDomains->default = true;
+
+                                        $this->targetRepository->save($targetDomains);
+                                    }
+                                }
+
+                                //remove & replace KPI suspended
+                                $temp = [];
+                                $j = 0;
+                                foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                    if ($indicatorSuspended !== $indicatorsIdSuspended[$i]) {
+                                        $temp[$j] = $indicatorSuspended;
+                                        $j++;
+                                    }
+                                }
+                                $indicatorsIdSuspended = $temp;
+                            } else {
+                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($indicatorsIdSuspended[$i]));
+
+                                foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                    if (!is_null($pathNewIndicator)) {
+
+                                        $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, null, $year));
+
+                                        $indicatorSuperMaster = $this->indicatorRepository->findById($pathNewIndicator); //get KPI 'super-master' by id
+
+                                        if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
+
+                                            //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'master'
+                                            $sum = $this->indicatorRepository->countAllByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+
+                                            if (($sum > 0) && !in_array($indicatorSuperMaster->id, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
+                                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
+                                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                $indicatorDomains->year = $year;
+                                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                                $indicatorDomains->label = 'master';
+                                                $indicatorDomains->unit_id = null;
+                                                $indicatorDomains->level_id = $levelId;
+                                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, null, $year);
+                                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
+                                                $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                                $indicatorDomains->created_by = $userId;
+
+                                                $this->indicatorRepository->save($indicatorDomains);
+
+                                                //target 'MASTER' creating
+                                                if (!is_null($indicatorSuperMaster->validity)) {
+                                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                                        $targetDomains->id = (string) Str::orderedUuid();
+                                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                                        $targetDomains->month = $validityKey;
+                                                        $targetDomains->value = 0;
+                                                        $targetDomains->locked = true;
+                                                        $targetDomains->default = true;
+
+                                                        $this->targetRepository->save($targetDomains);
+                                                    }
+                                                }
+
+                                                //remove & replace KPI suspended
+                                                $temp = [];
+                                                $j = 0;
+                                                foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                                    if ($indicatorSuspended !== $pathNewIndicator) {
+                                                        $temp[$j] = $indicatorSuspended;
+                                                        $j++;
+                                                    }
+                                                }
+                                                $indicatorsIdSuspended = $temp;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //section: 'CHILD' updating ----------------------------------------------------------------------
+
+                $units = $this->unitRepository->findAllByLevelId($levelId);
+
+                //daftar 'code' dari KPI-KPI 'child'
+                $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, null, $year));
+
+                //daftar 'id' dari KPI-KPI 'master' yang di un-checked
+                $oldIndicatorsMasterUnchecked = $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYearAndIdList($oldIndicatorsMaster, $levelId, null, $year);
+
+                foreach ($units as $unit) {
+                    //daftar 'id' dari KPI-KPI 'child'
+                    $oldIndicatorsChildOnlyId = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year));
+
+                    //daftar 'code' dari KPI-KPI 'child'
+                    $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year));
+
+                    $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
                     $i = 0;
-                    foreach ($indicatorsFromInput as $value) {
-                        if (!in_array($value, $indicatorsOldOnlyIdForChild)) {
-                            $newForChild[$i] = $value;
+                    foreach ($newIndicatorsChild as $newIndicatorChild) {
+                        if (!in_array($newIndicatorChild, $oldIndicatorsChildOnlyCode)) {
+                            $newIndicatorsNotExisInChild[$i] = $newIndicatorChild;
                             $i++;
                         }
                     }
 
-                    $oldForChild = [];
+                    $indicatorsExisInMasterButNotExisInChild = []; //daftar KPI sudah terdaftar di 'master', tapi belum terdaftar di 'child'
                     $i = 0;
-                    foreach ($indicatorsOldOnlyIdForChild as $value) {
-                        if (!in_array($value, $indicatorsFromInput)) {
-                            $oldForChild[$i] = $value;
+                    foreach ($oldIndicatorsMasterOnlyCode as $oldIndicatorMasterOnlyCode) {
+                        if (!in_array($oldIndicatorMasterOnlyCode, $oldIndicatorsChildOnlyCode)) {
+                            $indicatorsExisInMasterButNotExisInChild[$i] = $oldIndicatorMasterOnlyCode;
                             $i++;
                         }
                     }
 
-                    if (count($newForChild) > 0) { //terdapat 'id' indikator baru.
+                    $newIndicatorsNotExisInChild = array_unique(array_merge($newIndicatorsNotExisInChild, $indicatorsExisInMasterButNotExisInChild));
 
-                        //nasab 'id' indikator baru.
-                        //nasab berupa daftar 'id' indikator yang mencerminkan jalur keturunan ke atas dari 'id' indikator baru.
-                        $familiesOfIndicatorNewForChild = [];
-                        foreach ($newForChild as $value) {
-                            $familiesOfIndicatorNewForChild = array_merge($familiesOfIndicatorNewForChild, Arr::flatten($this->indicatorRepository->findAllWithParentsById($value)));
+                    //menghapus item yang 'null'
+                    $temp = [];
+                    $i = 0;
+                    foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
+                        if (!is_null($newIndicatorNotExisInChild)) {
+                            $temp[$i] = $newIndicatorNotExisInChild;
+                            $i++;
+                        }
+                    }
+
+                    $newIndicatorsNotExisInChild = $temp;
+
+                    if (count($newIndicatorsNotExisInChild) > 0) {
+
+                        //nasab KPI baru yang belum terdaftar di 'child'.
+                        $pathsNewIndicators = [];
+                        foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
+                            $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->findAllWithParentsById($newIndicatorNotExisInChild)));
                         }
 
-                        //daftar 'code' dari 'id' indikator lama sesuai 'level_id', 'unit_id' & 'year' yang masih di checked.
-                        //daftar 'code' mencerminkan 'id' indikator pada 'super-master'.
-                        $indicatorsOnlyIdAndCodeForChild = $this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unitId, $year);
-                        $codesIndicatorOldCheckedForChild = [];
+                        //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
+                        $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsChildOnlyCode));
+
+                        //menghapus item yang 'null'
+                        $temp = [];
                         $i = 0;
-                        foreach ($indicatorsOnlyIdAndCodeForChild as $indicatorOnlyIdAndCode) {
-                            if (!in_array($indicatorOnlyIdAndCode->id, $oldForChild)) { //seleksi 'id' indikator lama yang masih di checked.
-                                $codesIndicatorOldCheckedForChild[$i] = $indicatorOnlyIdAndCode->code;
+                        foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                            if (!is_null($mergePathNewAndOldIndicator)) {
+                                $temp[$i] = $mergePathNewAndOldIndicator;
                                 $i++;
                             }
                         }
 
-                        //gabungan 'id' indikator child & 'id' indikator baru yang belum terdaftar di 'child'.
-                        $familiesIndicatorForChild = array_unique(array_merge($familiesOfIndicatorNewForChild, $codesIndicatorOldCheckedForChild));
-
-                        //section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                        $mergePathsNewAndOldIndicator = $temp;
 
                         //build ID
                         $idListChild = [];
-                        foreach ($familiesIndicatorForChild as $familyId) {
-                            if (!is_null($familyId)) {
-                                $idListChild[$familyId] = (string) Str::orderedUuid();
+                        foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                            if (!is_null($mergePathNewAndOldIndicator)) {
+                                $idListChild[$mergePathNewAndOldIndicator] = (string) Str::orderedUuid();
                             }
                         }
 
+                        $indicatorsIdSuspended = [];
                         $i = 0;
-                        foreach ($familiesIndicatorForChild as $familyId) {
-                            if (!is_null($familyId)) { //mencegah array gabungan 'id' indikator child & 'id' indikator baru yang belum terdaftar di 'child' item-nya ada null
+                        foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                            if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
 
-                                $indicatorSuperMaster = $this->indicatorRepository->findById($familyId); //indikator dari 'super-master'
+                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($mergePathNewAndOldIndicator));
 
-                                if (!in_array($familyId, $codesIndicatorOldCheckedForChild)) { //indikator tidak ada pada daftar indikator child
+                                $havePathsIndicatorNotRegistedInChild = [];
+                                $j = 0;
+                                foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                    if (!is_null($pathNewIndicator) && ($pathNewIndicator !== $mergePathNewAndOldIndicator) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) {
+                                        $havePathsIndicatorNotRegistedInChild[$j] = $pathNewIndicator;
+                                        $j++;
+                                    }
+                                }
 
-                                    $indicator = $this->indicatorRepository->findByCodeAndLevelIdAndYear($indicatorSuperMaster->id, $levelId, $year);
+                                if (count($havePathsIndicatorNotRegistedInChild) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) {
 
-                                    //buat baru
+                                    $indicatorSuperMaster = $this->indicatorRepository->findById($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+
                                     $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
                                     $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
                                     $indicatorDomains->formula = $indicatorSuperMaster->formula;
@@ -922,22 +642,22 @@ class IndicatorPaperWorkService {
                                     $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
                                     $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
                                     $indicatorDomains->label = 'child';
-                                    $indicatorDomains->unit_id = $unitId;
+                                    $indicatorDomains->unit_id = $unit->id;
                                     $indicatorDomains->level_id = $levelId;
-                                    $indicatorDomains->order = $i+1;
+                                    $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year);
                                     $indicatorDomains->code = $indicatorSuperMaster->code;
-                                    $indicatorDomains->parent_vertical_id = $indicator->id;
-                                    $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdColumnByCodeChild($indicator->code, $levelId, $unitId, $year);
+                                    $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->id, $levelId, null, $year);
+                                    $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
                                     $indicatorDomains->created_by = $userId;
 
                                     $this->indicatorRepository->save($indicatorDomains);
 
-                                    //target 'MASTER' creating
+                                    //target & realisasi 'CHILD' creating
                                     if (!is_null($indicatorSuperMaster->validity)) {
-                                        foreach ($indicatorSuperMaster->validity as $key => $value) {
+                                        foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
                                             $targetDomains->id = (string) Str::orderedUuid();
                                             $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                            $targetDomains->month = $key;
+                                            $targetDomains->month = $validitykey;
                                             $targetDomains->value = 0;
                                             $targetDomains->locked = true;
                                             $targetDomains->default = true;
@@ -946,7 +666,7 @@ class IndicatorPaperWorkService {
 
                                             $realizationDomains->id = (string) Str::orderedUuid();
                                             $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                            $realizationDomains->month = $key;
+                                            $realizationDomains->month = $validitykey;
                                             $realizationDomains->value = 0;
                                             $realizationDomains->locked = true;
                                             $realizationDomains->default = true;
@@ -954,22 +674,709 @@ class IndicatorPaperWorkService {
                                             $this->realizationRepository->save($realizationDomains);
                                         }
                                     }
+                                } else {
+                                    $indicatorsIdSuspended[$i] = $mergePathNewAndOldIndicator;
+                                    $i++;
                                 }
+                            }
+                        }
+
+                        while (count($indicatorsIdSuspended) > 0) {
+                            for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+
+                                $indicatorSuperMaster = $this->indicatorRepository->findById($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+
+                                if ($indicatorSuperMaster->parent_horizontal_id === null) {
+                                    $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
+                                    $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                    $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                    $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                    $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                    $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                    $indicatorDomains->year = $year;
+                                    $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                    $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                    $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                    $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                    $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                    $indicatorDomains->label = 'child';
+                                    $indicatorDomains->unit_id = $unit->id;
+                                    $indicatorDomains->level_id = $levelId;
+                                    $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year);
+                                    $indicatorDomains->code = $indicatorSuperMaster->code;
+                                    $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->id, $levelId, null, $year);
+                                    $indicatorDomains->parent_horizontal_id = null;
+                                    $indicatorDomains->created_by = $userId;
+
+                                    $this->indicatorRepository->save($indicatorDomains);
+
+                                    //target & realisasi 'CHILD' creating
+                                    if (!is_null($indicatorSuperMaster->validity)) {
+                                        foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                            $targetDomains->id = (string) Str::orderedUuid();
+                                            $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                            $targetDomains->month = $validityKey;
+                                            $targetDomains->value = 0;
+                                            $targetDomains->locked = true;
+                                            $targetDomains->default = true;
+
+                                            $this->targetRepository->save($targetDomains);
+
+                                            $realizationDomains->id = (string) Str::orderedUuid();
+                                            $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                            $realizationDomains->month = $validityKey;
+                                            $realizationDomains->value = 0;
+                                            $realizationDomains->locked = true;
+                                            $realizationDomains->default = true;
+
+                                            $this->realizationRepository->save($realizationDomains);
+                                        }
+                                    }
+
+                                    //remove & replace KPI suspended
+                                    $temp = [];
+                                    $j = 0;
+                                    foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                        if ($indicatorSuspended !== $indicatorsIdSuspended[$i]) {
+                                            $temp[$j] = $indicatorSuspended;
+                                            $j++;
+                                        }
+                                    }
+                                    $indicatorsIdSuspended = $temp;
+                                } else {
+
+                                    $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($indicatorsIdSuspended[$i]));
+
+                                    foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                        if (!is_null($pathNewIndicator)) {
+
+                                            $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year));
+
+                                            $indicatorSuperMaster = $this->indicatorRepository->findById($pathNewIndicator); //get KPI 'super-master' by id
+
+                                            if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
+
+                                                //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child'
+                                                $sum = $this->indicatorRepository->countAllByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
+
+                                                if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
+                                                    $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
+                                                    $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                                    $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                                    $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                                    $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                    $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                    $indicatorDomains->year = $year;
+                                                    $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                    $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                    $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                                    $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                                    $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                                    $indicatorDomains->label = 'child';
+                                                    $indicatorDomains->unit_id = $unit->id;
+                                                    $indicatorDomains->level_id = $levelId;
+                                                    $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, $unit->id, $year);
+                                                    $indicatorDomains->code = $indicatorSuperMaster->code;
+                                                    $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->id, $levelId, null, $year);
+                                                    $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
+                                                    $indicatorDomains->created_by = $userId;
+
+                                                    $this->indicatorRepository->save($indicatorDomains);
+
+                                                    //target & realisasi 'CHILD' creating
+                                                    if (!is_null($indicatorSuperMaster->validity)) {
+                                                        foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                                            $targetDomains->id = (string) Str::orderedUuid();
+                                                            $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                            $targetDomains->month = $validityKey;
+                                                            $targetDomains->value = 0;
+                                                            $targetDomains->locked = true;
+                                                            $targetDomains->default = true;
+
+                                                            $this->targetRepository->save($targetDomains);
+
+                                                            $realizationDomains->id = (string) Str::orderedUuid();
+                                                            $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                            $realizationDomains->month = $validityKey;
+                                                            $realizationDomains->value = 0;
+                                                            $realizationDomains->locked = true;
+                                                            $realizationDomains->default = true;
+
+                                                            $this->realizationRepository->save($realizationDomains);
+                                                        }
+                                                    }
+
+                                                    //remove & replace KPI suspended
+                                                    $temp = [];
+                                                    $j = 0;
+                                                    foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                                        if ($indicatorSuspended !== $pathNewIndicator) {
+                                                            $temp[$j] = $indicatorSuspended;
+                                                            $j++;
+                                                        }
+                                                    }
+                                                    $indicatorsIdSuspended = $temp;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $oldIndicatorsChild = [];
+                    $i = 0;
+                    foreach ($oldIndicatorsMasterUnchecked as $oldIndicatorMasterUnchecked) {
+                        $indicator = $this->indicatorRepository->findByCodeAndLevelIdAndUnitIdAndYear($oldIndicatorMasterUnchecked->code, $levelId, $unit->id, $year);
+                        if (!is_null($indicator)) {
+                            $oldIndicatorsChild[$i] = $indicator->id;
+                            $i++;
+                        }
+                    }
+
+                    if (count($oldIndicatorsChild) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                        foreach ($oldIndicatorsChild as $oldIndicatorChild) {
+                            $this->targetRepository->deleteByIndicatorId($oldIndicatorChild); //target deleting
+                            $this->realizationRepository->deleteByIndicatorId($oldIndicatorChild); //realisasi deleting
+                            $this->indicatorRepository->deleteById($oldIndicatorChild); //KPI deleting
+                        }
+                    }
+                }
+                //end section: 'CHILD' updating ----------------------------------------------------------------------
+
+                if (count($oldIndicatorsMaster) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                    foreach ($oldIndicatorsMaster as $oldIndicatorMaster) {
+                        $this->targetRepository->deleteByIndicatorId($oldIndicatorMaster); //target deleting
+                        $this->indicatorRepository->deleteById($oldIndicatorMaster); //KPI deleting
+                    }
+                }
+                //end section: 'MASTER' updating ----------------------------------------------------------------------
+            } else {
+                //daftar 'id' dari KPI-KPI 'child'
+                $oldIndicatorsChildOnlyId = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $unitId, $year));
+
+                $newIndicatorsChild = [];
+                $i = 0;
+                foreach ($indicatorsFromInput as $indicatorFromInput) {
+                    if (!in_array($indicatorFromInput, $oldIndicatorsChildOnlyId)) {
+                        $newIndicatorsChild[$i] = $indicatorFromInput;
+                        $i++;
+                    }
+                }
+
+                //section: 'MASTER' updating ----------------------------------------------------------------------
+
+                //daftar 'code' dari KPI-KPI 'master'
+                $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, null, $year));
+
+                $newIndicatorsNotExisInMaster = []; //daftar KPI baru yang belum terdaftar di 'master'
+                $i = 0;
+                foreach ($newIndicatorsChild as $newIndicatorChild) {
+                    if (!in_array($newIndicatorChild, $oldIndicatorsMasterOnlyCode)) {
+                        $newIndicatorsNotExisInMaster[$i] = $newIndicatorChild;
+                        $i++;
+                    }
+                }
+
+                if (count($newIndicatorsNotExisInMaster) > 0) {
+
+                    //nasab KPI baru yang belum terdaftar di 'master'.
+                    $pathsNewIndicators = [];
+                    foreach ($newIndicatorsNotExisInMaster as $newIndicatorNotExisInMaster) {
+                        $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->findAllWithParentsById($newIndicatorNotExisInMaster)));
+                    }
+
+                    //gabungan daftar KPI master & KPI baru yang belum terdaftar di 'master'.
+                    $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsMasterOnlyCode));
+
+                    //menghapus item yang 'null'
+                    $temp = [];
+                    $i = 0;
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!is_null($mergePathNewAndOldIndicator)) {
+                            $temp[$i] = $mergePathNewAndOldIndicator;
+                            $i++;
+                        }
+                    }
+
+                    $mergePathsNewAndOldIndicator = $temp;
+
+                    //build ID
+                    $idListMaster = [];
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!is_null($mergePathNewAndOldIndicator)) {
+                            $idListMaster[$mergePathNewAndOldIndicator] = (string) Str::orderedUuid();
+                        }
+                    }
+
+                    $indicatorsIdSuspended = [];
+                    $i = 0;
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //KPI belum terdaftar di 'master'
+
+                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($mergePathNewAndOldIndicator));
+
+                            $havePathsIndicatorNotRegistedInMaster = [];
+                            $j = 0;
+                            foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                if (!is_null($pathNewIndicator) && ($pathNewIndicator !== $mergePathNewAndOldIndicator) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode)) {
+                                    $havePathsIndicatorNotRegistedInMaster[$j] = $pathNewIndicator;
+                                    $j++;
+                                }
+                            }
+
+                            if (count($havePathsIndicatorNotRegistedInMaster) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) {
+
+                                $indicatorSuperMaster = $this->indicatorRepository->findById($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+
+                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomains->year = $year;
+                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomains->label = 'master';
+                                $indicatorDomains->unit_id = null;
+                                $indicatorDomains->level_id = $levelId;
+                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, null, $year);
+                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                $indicatorDomains->created_by = $userId;
+
+                                $this->indicatorRepository->save($indicatorDomains);
+
+                                //target 'MASTER' creating
+                                if (!is_null($indicatorSuperMaster->validity)) {
+                                    foreach ($indicatorSuperMaster->validity as $validitykey => $validityvalue) {
+                                        $targetDomains->id = (string) Str::orderedUuid();
+                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomains->month = $validitykey;
+                                        $targetDomains->value = 0;
+                                        $targetDomains->locked = true;
+                                        $targetDomains->default = true;
+
+                                        $this->targetRepository->save($targetDomains);
+                                    }
+                                }
+                            } else {
+                                $indicatorsIdSuspended[$i] = $mergePathNewAndOldIndicator;
                                 $i++;
                             }
                         }
-                        //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
                     }
 
-                    if (count($oldForChild) > 0) { //terdapat 'id' indikator lama yang di un-checked.
-                        foreach ($oldForChild as $v) {
-                            $this->targetRepository->deleteByIndicatorId($v); //delete target
-                            $this->realizationRepository->deleteByIndicatorId($v); //delete realisasi
-                            $this->indicatorRepository->deleteById($v); //delete indikator
+                    while (count($indicatorsIdSuspended) > 0) {
+                        for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+
+                            $indicatorSuperMaster = $this->indicatorRepository->findById($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+
+                            if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
+                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomains->year = $year;
+                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomains->label = 'master';
+                                $indicatorDomains->unit_id = null;
+                                $indicatorDomains->level_id = $levelId;
+                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, null, $year);
+                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomains->parent_horizontal_id = null;
+                                $indicatorDomains->created_by = $userId;
+
+                                $this->indicatorRepository->save($indicatorDomains);
+
+                                //target 'MASTER' creating
+                                if (!is_null($indicatorSuperMaster->validity)) {
+                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                        $targetDomains->id = (string) Str::orderedUuid();
+                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomains->month = $validityKey;
+                                        $targetDomains->value = 0;
+                                        $targetDomains->locked = true;
+                                        $targetDomains->default = true;
+
+                                        $this->targetRepository->save($targetDomains);
+                                    }
+                                }
+
+                                //remove & replace KPI suspended
+                                $temp = [];
+                                $j = 0;
+                                foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                    if ($indicatorSuspended !== $indicatorsIdSuspended[$i]) {
+                                        $temp[$j] = $indicatorSuspended;
+                                        $j++;
+                                    }
+                                }
+                                $indicatorsIdSuspended = $temp;
+                            } else {
+                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($indicatorsIdSuspended[$i]));
+
+                                foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                    if (!is_null($pathNewIndicator)) {
+
+                                        $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, null, $year));
+
+                                        $indicatorSuperMaster = $this->indicatorRepository->findById($pathNewIndicator); //get KPI 'super-master' by id
+
+                                        if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
+
+                                            //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'master'
+                                            $sum = $this->indicatorRepository->countAllByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+
+                                            if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
+                                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
+                                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                $indicatorDomains->year = $year;
+                                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                                $indicatorDomains->label = 'master';
+                                                $indicatorDomains->unit_id = null;
+                                                $indicatorDomains->level_id = $levelId;
+                                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, null, $year);
+                                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
+                                                $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                                $indicatorDomains->created_by = $userId;
+
+                                                $this->indicatorRepository->save($indicatorDomains);
+
+                                                //target 'MASTER' creating
+                                                if (!is_null($indicatorSuperMaster->validity)) {
+                                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                                        $targetDomains->id = (string) Str::orderedUuid();
+                                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                                        $targetDomains->month = $validityKey;
+                                                        $targetDomains->value = 0;
+                                                        $targetDomains->locked = true;
+                                                        $targetDomains->default = true;
+
+                                                        $this->targetRepository->save($targetDomains);
+                                                    }
+                                                }
+
+                                                //remove & replace KPI suspended
+                                                $temp = [];
+                                                $j = 0;
+                                                foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                                    if ($indicatorSuspended !== $pathNewIndicator) {
+                                                        $temp[$j] = $indicatorSuspended;
+                                                        $j++;
+                                                    }
+                                                }
+                                                $indicatorsIdSuspended = $temp;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    //end section: paper work 'MASTER' updating ----------------------------------------------------------------------
                 }
+                //end section: 'MASTER' updating ----------------------------------------------------------------------
+
+                //section: 'CHILD' updating ----------------------------------------------------------------------
+
+                //daftar 'code' dari KPI-KPI 'child'
+                $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unitId, $year));
+
+                $oldIndicatorsChild = [];
+                $i = 0;
+                foreach ($oldIndicatorsChildOnlyId as $oldIndicatorChildOnlyId) {
+                    if (!in_array($oldIndicatorChildOnlyId, $indicatorsFromInput)) {
+                        $oldIndicatorsChild[$i] = $oldIndicatorChildOnlyId;
+                        $i++;
+                    }
+                }
+
+                $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
+                $i = 0;
+                foreach ($newIndicatorsChild as $newIndicatorChild) {
+                    if (!in_array($newIndicatorChild, $oldIndicatorsChildOnlyCode)) {
+                        $newIndicatorsNotExisInChild[$i] = $newIndicatorChild;
+                        $i++;
+                    }
+                }
+
+                if (count($newIndicatorsNotExisInChild) > 0) {
+
+                    //nasab KPI baru yang belum terdaftar di 'child'.
+                    $pathsNewIndicators = [];
+                    foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
+                        $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->findAllWithParentsById($newIndicatorNotExisInChild)));
+                    }
+
+                    //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
+                    $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsChildOnlyCode));
+
+                    //menghapus item yang 'null'
+                    $temp = [];
+                    $i = 0;
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!is_null($mergePathNewAndOldIndicator)) {
+                            $temp[$i] = $mergePathNewAndOldIndicator;
+                            $i++;
+                        }
+                    }
+
+                    $mergePathsNewAndOldIndicator = $temp;
+
+                    //build ID
+                    $idListChild = [];
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!is_null($mergePathNewAndOldIndicator)) {
+                            $idListChild[$mergePathNewAndOldIndicator] = (string) Str::orderedUuid();
+                        }
+                    }
+
+                    $indicatorsIdSuspended = [];
+                    $i = 0;
+                    foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
+                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
+
+                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($mergePathNewAndOldIndicator));
+
+                            $havePathsIndicatorNotRegistedInChild = [];
+                            $j = 0;
+                            foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                if (!is_null($pathNewIndicator) && ($pathNewIndicator !== $mergePathNewAndOldIndicator) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) {
+                                    $havePathsIndicatorNotRegistedInChild[$j] = $pathNewIndicator;
+                                    $j++;
+                                }
+                            }
+
+                            if (count($havePathsIndicatorNotRegistedInChild) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) {
+
+                                $indicatorSuperMaster = $this->indicatorRepository->findById($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+
+                                $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
+                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomains->year = $year;
+                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomains->label = 'child';
+                                $indicatorDomains->unit_id = $unitId;
+                                $indicatorDomains->level_id = $levelId;
+                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, $unitId, $year);
+                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->id, $levelId, null, $year);
+                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
+                                $indicatorDomains->created_by = $userId;
+
+                                $this->indicatorRepository->save($indicatorDomains);
+
+                                //target & realisasi 'CHILD' creating
+                                if (!is_null($indicatorSuperMaster->validity)) {
+                                    foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
+                                        $targetDomains->id = (string) Str::orderedUuid();
+                                        $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $targetDomains->month = $validitykey;
+                                        $targetDomains->value = 0;
+                                        $targetDomains->locked = true;
+                                        $targetDomains->default = true;
+
+                                        $this->targetRepository->save($targetDomains);
+
+                                        $realizationDomains->id = (string) Str::orderedUuid();
+                                        $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $realizationDomains->month = $validitykey;
+                                        $realizationDomains->value = 0;
+                                        $realizationDomains->locked = true;
+                                        $realizationDomains->default = true;
+
+                                        $this->realizationRepository->save($realizationDomains);
+                                    }
+                                }
+                            } else {
+                                $indicatorsIdSuspended[$i] = $mergePathNewAndOldIndicator;
+                                $i++;
+                            }
+                        }
+                    }
+
+                    while (count($indicatorsIdSuspended) > 0) {
+                        for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+
+                            $indicatorSuperMaster = $this->indicatorRepository->findById($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+
+                            if ($indicatorSuperMaster->parent_horizontal_id === null) {
+                                $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
+                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomains->year = $year;
+                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomains->label = 'child';
+                                $indicatorDomains->unit_id = $unitId;
+                                $indicatorDomains->level_id = $levelId;
+                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, $unitId, $year);
+                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->id, $levelId, null, $year);
+                                $indicatorDomains->parent_horizontal_id = null;
+                                $indicatorDomains->created_by = $userId;
+
+                                $this->indicatorRepository->save($indicatorDomains);
+
+                                //target & realisasi 'CHILD' creating
+                                if (!is_null($indicatorSuperMaster->validity)) {
+                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                        $targetDomains->id = (string) Str::orderedUuid();
+                                        $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $targetDomains->month = $validityKey;
+                                        $targetDomains->value = 0;
+                                        $targetDomains->locked = true;
+                                        $targetDomains->default = true;
+
+                                        $this->targetRepository->save($targetDomains);
+
+                                        $realizationDomains->id = (string) Str::orderedUuid();
+                                        $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $realizationDomains->month = $validityKey;
+                                        $realizationDomains->value = 0;
+                                        $realizationDomains->locked = true;
+                                        $realizationDomains->default = true;
+
+                                        $this->realizationRepository->save($realizationDomains);
+                                    }
+                                }
+
+                                //remove & replace KPI suspended
+                                $temp = [];
+                                $j = 0;
+                                foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                    if ($indicatorSuspended !== $indicatorsIdSuspended[$i]) {
+                                        $temp[$j] = $indicatorSuspended;
+                                        $j++;
+                                    }
+                                }
+                                $indicatorsIdSuspended = $temp;
+                            } else {
+
+                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->findAllWithParentsById($indicatorsIdSuspended[$i]));
+
+                                foreach ($pathsNewIndicator as $pathNewIndicator) {
+                                    if (!is_null($pathNewIndicator)) {
+
+                                        $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->findAllCodeByLevelIdAndUnitIdAndYear($levelId, $unitId, $year));
+
+                                        $indicatorSuperMaster = $this->indicatorRepository->findById($pathNewIndicator); //get KPI 'super-master' by id
+
+                                        if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
+
+                                            //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child'
+                                            $sum = $this->indicatorRepository->countAllByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
+
+                                            if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
+                                                $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
+                                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
+                                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
+                                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                $indicatorDomains->year = $year;
+                                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
+                                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
+                                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
+                                                $indicatorDomains->label = 'child';
+                                                $indicatorDomains->unit_id = $unitId;
+                                                $indicatorDomains->level_id = $levelId;
+                                                $indicatorDomains->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear($levelId, $unitId, $year);
+                                                $indicatorDomains->code = $indicatorSuperMaster->code;
+                                                $indicatorDomains->parent_vertical_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->id, $levelId, null, $year);
+                                                $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->findIdByCodeAndLevelIdAndUnitIdAndYear($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
+                                                $indicatorDomains->created_by = $userId;
+
+                                                $this->indicatorRepository->save($indicatorDomains);
+
+                                                //target & realisasi 'CHILD' creating
+                                                if (!is_null($indicatorSuperMaster->validity)) {
+                                                    foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
+                                                        $targetDomains->id = (string) Str::orderedUuid();
+                                                        $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                        $targetDomains->month = $validityKey;
+                                                        $targetDomains->value = 0;
+                                                        $targetDomains->locked = true;
+                                                        $targetDomains->default = true;
+
+                                                        $this->targetRepository->save($targetDomains);
+
+                                                        $realizationDomains->id = (string) Str::orderedUuid();
+                                                        $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                        $realizationDomains->month = $validityKey;
+                                                        $realizationDomains->value = 0;
+                                                        $realizationDomains->locked = true;
+                                                        $realizationDomains->default = true;
+
+                                                        $this->realizationRepository->save($realizationDomains);
+                                                    }
+                                                }
+
+                                                //remove & replace KPI suspended
+                                                $temp = [];
+                                                $j = 0;
+                                                foreach ($indicatorsIdSuspended as $indicatorSuspended) {
+                                                    if ($indicatorSuspended !== $pathNewIndicator) {
+                                                        $temp[$j] = $indicatorSuspended;
+                                                        $j++;
+                                                    }
+                                                }
+                                                $indicatorsIdSuspended = $temp;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (count($oldIndicatorsChild) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                    foreach ($oldIndicatorsChild as $oldIndicatorChild) {
+                        $this->targetRepository->deleteByIndicatorId($oldIndicatorChild); //target deleting
+                        $this->realizationRepository->deleteByIndicatorId($oldIndicatorChild); //realisasi deleting
+                        $this->indicatorRepository->deleteById($oldIndicatorChild); //KPI deleting
+                    }
+                }
+                //end section: 'CHILD' updating ----------------------------------------------------------------------
             }
         });
     }
@@ -979,11 +1386,13 @@ class IndicatorPaperWorkService {
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::transaction(function () use ($level, $unit, $year) {
-            $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
+            $levelId = $this->levelRepository->findIdBySlug($level);
 
-            $indicators = $this->indicatorRepository->findAllWithTargetsAndRealizationsByWhere($where);
+            $indicators = $unit === 'master' ?
+            $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, null, $year) :
+            $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year);
 
-            //deleting target & realization
+            //target & realisasi deleting
             foreach ($indicators as $indicator) {
                 foreach ($indicator->targets as $target) {
                     $this->targetRepository->deleteById($target->id);
@@ -994,11 +1403,32 @@ class IndicatorPaperWorkService {
                 }
             }
 
-            //deleting indicator
-            $where = $unit === 'master' ? ['level_id' => $this->levelRepository->findIdBySlug($level), 'year' => $year] : ['level_id' => $this->levelRepository->findIdBySlug($level), 'unit_id' => $this->unitRepository->findIdBySlug($unit), 'year' => $year];
-
-            $this->indicatorRepository->deleteByWhere($where);
+            //KPI deleting
+            $unit === 'master' ? $this->indicatorRepository->deleteByLevelIdAndUnitIdAndYear($this->levelRepository->findIdBySlug($level), null, $year) : $this->indicatorRepository->deleteByLevelIdAndUnitIdAndYear($this->levelRepository->findIdBySlug($level), $this->unitRepository->findIdBySlug($unit), $year);
         });
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
+    }
+
+    //use repo IndicatorRepository
+    public function reorder(array $indicators, string $level, ?string $unit, ?string $year) : void
+    {
+        DB::transaction(function () use ($indicators, $level, $unit) {
+            if ($level === 'super-master') {
+                foreach ($indicators as $indicatorKey => $indicatorValue) {
+                    $this->indicatorRepository->updateOrderById($indicatorKey+1, $indicatorValue); //'SUPER-MASTER' updating
+                }
+            } else {
+                if ($unit === 'master') {
+                    foreach ($indicators as $indicatorKey => $indicatorValue) {
+                        $this->indicatorRepository->updateOrderById($indicatorKey+1, $indicatorValue); //'MASTER' updating
+                        $this->indicatorRepository->updateOrderByParentVerticalId($indicatorKey+1, $indicatorValue); //'CHILD' updating
+                    }
+                } else {
+                    foreach ($indicators as $indicatorKey => $indicatorValue) {
+                        $this->indicatorRepository->updateOrderById($indicatorKey+1, $indicatorValue); //'CHILD' updating
+                    }
+                }
+            }
+        });
     }
 }

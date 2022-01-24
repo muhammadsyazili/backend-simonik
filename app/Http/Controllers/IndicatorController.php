@@ -65,7 +65,7 @@ class IndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator berhasil dibuat",
+            "KPI berhasil ditambahkan",
             $insert,
             null,
         );
@@ -91,7 +91,7 @@ class IndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator ditampilkan",
+            "KPI ditampilkan",
             $indicator,
             null,
         );
@@ -149,7 +149,7 @@ class IndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator berhasil diubah",
+            "KPI berhasil diubah",
             null,
             null,
         );
@@ -190,7 +190,7 @@ class IndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Indikator berhasil dihapus",
+            "KPI berhasil dihapus",
             null,
             null,
         );

@@ -36,7 +36,7 @@ class PaperWorkAvailable implements Rule
      */
     public function passes($attribute, $value)
     {
-        $sumOfIndicator = $this->indicatorRepository->countByWhere(['level_id' => $this->levelRepository->findIdBySlug($this->level), 'year' => $this->year]);
+        $sumOfIndicator = $this->indicatorRepository->countAllByLevelIdAndYear($this->levelRepository->findIdBySlug($this->level), $this->year);
 
         return $sumOfIndicator > 0 ? false : true;
     }
@@ -48,6 +48,6 @@ class PaperWorkAvailable implements Rule
      */
     public function message()
     {
-        return "Kertas kerja sudah tersedia.";
+        return "Kertas kerja KPI sudah tersedia !";
     }
 }

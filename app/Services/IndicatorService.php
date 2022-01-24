@@ -68,14 +68,14 @@ class IndicatorService {
             $indicator->label = 'super-master';
             $indicator->unit_id = null;
             $indicator->level_id = $this->levelRepository->findIdBySlug('super-master');
-            $indicator->order = $this->indicatorRepository->countOrderColumn('super-master');
+            $indicator->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear('super-master');
             $indicator->code = null;
             $indicator->parent_vertical_id = null;
             $indicator->parent_horizontal_id = null;
             $indicator->created_by = $indicatorNew->user_id;
 
             $this->indicatorRepository->save($indicator);
-            $this->indicatorRepository->updateCodeColumnById($id);
+            $this->indicatorRepository->updateCodeById($id);
         });
     }
 
@@ -90,22 +90,15 @@ class IndicatorService {
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
     public function update(IndicatorInsertOrUpdateRequest $indicatorNew, string|int $id) : void
     {
-        //logging
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-
         $indicator = new Indicator();
         $target = new Target();
         $realization = new Realization();
 
-        DB::transaction(function () use ($indicatorNew, $id, $indicator, $target, $realization, $output) {
+        DB::transaction(function () use ($indicatorNew, $id, $indicator, $target, $realization) {
 
             $indicatorOld = $this->indicatorRepository->findById($id);
 
             if ($indicatorOld->label === 'super-master') {
-                $output->writeln('--------------------------------');
-                $output->writeln('update -> super master');
-                $output->writeln('--------------------------------');
-
                 //convert (validity & weight) from array to JSON string
                 $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
 
@@ -142,12 +135,8 @@ class IndicatorService {
                 $indicator->parent_vertical_id = $indicatorOld->parent_vertical_id;
                 $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
-                $this->indicatorRepository->updateById($indicator, $id); //update indikator
+                $this->indicatorRepository->updateById($indicator, $id); //update KPI
             } else if ($indicatorOld->label === 'master') {
-                $output->writeln('--------------------------------');
-                $output->writeln('update -> master');
-                $output->writeln('--------------------------------');
-
                 /**
                  * section: master
                  */
@@ -189,10 +178,6 @@ class IndicatorService {
                 $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
                 if (count($indicatorOld->validity) > 0) { //masa berlaku lama tidak nol
-                    $output->writeln('--------------------------------');
-                    $output->writeln('master, masa berlaku lama tidak nol');
-                    $output->writeln('--------------------------------');
-
                     $monthsOld = array_keys($indicatorOld->validity);
                     $monthsNew = array_keys($indicatorNew->validity);
 
@@ -207,10 +192,6 @@ class IndicatorService {
                     }
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
-                        $output->writeln('--------------------------------');
-                        $output->writeln('master, terdapat selisih antara masa berlaku baru dengan lama');
-                        $output->writeln('--------------------------------');
-
                         foreach ($new as $v) {
                             $target->id = (string) Str::orderedUuid();
                             $target->indicator_id = $id;
@@ -243,25 +224,13 @@ class IndicatorService {
                     }
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
-                        $output->writeln('--------------------------------');
-                        $output->writeln('master, terdapat selisih antara masa berlaku lama dengan baru');
-                        $output->writeln('--------------------------------');
-
                         foreach ($old as $v) {
                             $this->targetRepository->deleteByMonthAndIndicatorId($v, $id); //delete target
                             $this->realizationRepository->deleteByMonthAndIndicatorId($v, $id); //delete realisasi
                         }
                     }
                 } else { //masa berlaku lama nol
-                    $output->writeln('--------------------------------');
-                    $output->writeln('master, masa berlaku lama nol');
-                    $output->writeln('--------------------------------');
-
                     if (count($indicatorNew->validity) > 0) {
-                        $output->writeln('--------------------------------');
-                        $output->writeln('master, masa berlaku baru tidak nol');
-                        $output->writeln('--------------------------------');
-
                         foreach ($indicatorNew->validity as $key => $value) {
                             $target->id = (string) Str::orderedUuid();
                             $target->indicator_id = $id;
@@ -284,18 +253,14 @@ class IndicatorService {
                     }
                 }
 
-                $this->indicatorRepository->updateById($indicator, $id); //update indikator
+                $this->indicatorRepository->updateById($indicator, $id); //update KPI
 
                 /**
                  * section: childs
                  */
 
-                //semua turunan indikator yang dipilih
+                //semua turunan KPI yang dipilih
                 $familiesIndicatorOld = $this->indicatorRepository->findAllByParentVerticalId($id);
-
-                $output->writeln('--------------------------------');
-                $output->writeln(sprintf('childs, jumlah keluarga indikator: %d', count($familiesIndicatorOld)));
-                $output->writeln('--------------------------------');
 
                 if (count($familiesIndicatorOld) > 0) {
                     foreach ($familiesIndicatorOld as $familyIndicatorOld) {
@@ -336,10 +301,6 @@ class IndicatorService {
                         $indicator->parent_horizontal_id = $familyIndicatorOld->parent_horizontal_id;
 
                         if (count($familyIndicatorOld->validity) > 0) { //masa berlaku lama tidak nol
-                            $output->writeln('--------------------------------');
-                            $output->writeln('childs, masa berlaku lama tidak nol');
-                            $output->writeln('--------------------------------');
-
                             $monthsOld = array_keys($familyIndicatorOld->validity);
                             $monthsNew = array_keys($indicatorNew->validity);
 
@@ -354,10 +315,6 @@ class IndicatorService {
                             }
 
                             if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
-                                $output->writeln('--------------------------------');
-                                $output->writeln('childs, terdapat selisih antara masa berlaku baru dengan lama');
-                                $output->writeln('--------------------------------');
-
                                 foreach ($new as $v) {
                                     $target->id = (string) Str::orderedUuid();
                                     $target->indicator_id = $familyIndicatorOld->id;
@@ -390,25 +347,13 @@ class IndicatorService {
                             }
 
                             if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
-                                $output->writeln('--------------------------------');
-                                $output->writeln('childs, terdapat selisih antara masa berlaku lama dengan baru');
-                                $output->writeln('--------------------------------');
-
                                 foreach ($old as $v) {
                                     $this->targetRepository->deleteByMonthAndIndicatorId($v, $familyIndicatorOld->id); //delete target
                                     $this->realizationRepository->deleteByMonthAndIndicatorId($v, $familyIndicatorOld->id); //delete realisasi
                                 }
                             }
                         } else { //masa berlaku lama nol
-                            $output->writeln('--------------------------------');
-                            $output->writeln('childs, masa berlaku lama nol');
-                            $output->writeln('--------------------------------');
-
                             if (count($indicatorNew->validity) > 0) {
-                                $output->writeln('--------------------------------');
-                                $output->writeln('childs, masa berlaku baru tidak nol');
-                                $output->writeln('--------------------------------');
-
                                 foreach ($indicatorNew->validity as $key => $value) {
                                     $target->id = (string) Str::orderedUuid();
                                     $target->indicator_id = $familyIndicatorOld->id;
@@ -431,14 +376,10 @@ class IndicatorService {
                             }
                         }
 
-                        $this->indicatorRepository->updateById($indicator, $familyIndicatorOld->id); //update indikator
+                        $this->indicatorRepository->updateById($indicator, $familyIndicatorOld->id); //update KPI
                     }
                 }
             } else if ($indicatorOld->label === 'child') {
-                $output->writeln('--------------------------------');
-                $output->writeln('update -> child');
-                $output->writeln('--------------------------------');
-
                 //convert (validity & weight) from array to JSON string
                 $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
 
@@ -476,10 +417,6 @@ class IndicatorService {
                 $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
                 if (count($indicatorOld->validity) > 0) { //masa berlaku lama tidak nol
-                    $output->writeln('--------------------------------');
-                    $output->writeln('masa berlaku lama tidak nol');
-                    $output->writeln('--------------------------------');
-
                     $monthsOld = array_keys($indicatorOld->validity);
                     $monthsNew = array_keys($indicatorNew->validity);
 
@@ -494,10 +431,6 @@ class IndicatorService {
                     }
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
-                        $output->writeln('--------------------------------');
-                        $output->writeln('terdapat selisih antara masa berlaku baru dengan lama');
-                        $output->writeln('--------------------------------');
-
                         foreach ($new as $v) {
                             $target->id = (string) Str::orderedUuid();
                             $target->indicator_id = $id;
@@ -530,25 +463,13 @@ class IndicatorService {
                     }
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
-                        $output->writeln('--------------------------------');
-                        $output->writeln('terdapat selisih antara masa berlaku lama dengan baru');
-                        $output->writeln('--------------------------------');
-
                         foreach ($old as $v) {
                             $this->targetRepository->deleteByMonthAndIndicatorId($v, $id); //delete target
                             $this->realizationRepository->deleteByMonthAndIndicatorId($v, $id); //delete realisasi
                         }
                     }
                 } else { //masa berlaku lama nol
-                    $output->writeln('--------------------------------');
-                    $output->writeln('masa berlaku lama nol');
-                    $output->writeln('--------------------------------');
-
                     if (count($indicatorNew->validity) > 0) {
-                        $output->writeln('--------------------------------');
-                        $output->writeln('masa berlaku baru tidak nol');
-                        $output->writeln('--------------------------------');
-
                         foreach ($indicatorNew->validity as $key => $value) {
                             $target->id = (string) Str::orderedUuid();
                             $target->indicator_id = $id;
@@ -571,7 +492,7 @@ class IndicatorService {
                     }
                 }
 
-                $this->indicatorRepository->updateById($indicator, $id); //update indikator
+                $this->indicatorRepository->updateById($indicator, $id); //update KPI
             }
         });
     }
@@ -580,7 +501,7 @@ class IndicatorService {
     public function destroy(string|int $id) : void
     {
         DB::transaction(function () use ($id) {
-            $this->indicatorRepository->deleteByWhere(['id' => $id]);
+            $this->indicatorRepository->deleteById($id);
         });
     }
 

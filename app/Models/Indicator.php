@@ -153,7 +153,7 @@ class Indicator extends Model
 
     public function childsHorizontal()
     {
-        return $this->hasMany(Indicator::class, 'parent_horizontal_id', 'id')->referenced();
+        return $this->hasMany(Indicator::class, 'parent_horizontal_id', 'id')->referenced()->orderBy('order', 'asc');
     }
 
     // Horizontal recursive, loads all children

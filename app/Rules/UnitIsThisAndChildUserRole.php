@@ -52,6 +52,6 @@ class UnitIsThisAndChildUserRole implements Rule
      */
     public function message()
     {
-        return "Anda tidak memiliki hak akses. (95bf1bc9f96f64a76162ca6826c6d1e3)";
+        return "(#4) : Anda tidak memiliki hak akses !";
     }
 }

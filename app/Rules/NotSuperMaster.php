@@ -5,8 +5,8 @@ namespace App\Rules;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-//Indikator tidak berlabel 'super-master'
-class IndicatorIsNotSuperMaster implements Rule
+//KPI tidak berlabel 'super-master'
+class NotSuperMaster implements Rule
 {
     private IndicatorRepository $indicatorRepository;
 
@@ -29,11 +29,7 @@ class IndicatorIsNotSuperMaster implements Rule
      */
     public function passes($attribute, $value)
     {
-        if ($this->indicatorRepository->findLabelColumnById($value) === 'super-master') {
-            return $this->indicatorRepository->countCodeColumnById($value) > 1 ? false : true;
-        } else {
-            return false;
-        }
+        return $this->indicatorRepository->findLabelById($value) === 'super-master' ? true : false;
     }
 
     /**
@@ -43,6 +39,6 @@ class IndicatorIsNotSuperMaster implements Rule
      */
     public function message()
     {
-        return "Indikator tidak bisa dihapus.";
+        return "KPI tidak bisa dihapus !";
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\ConstructRequest;
 use App\Repositories\UserRepository;
+use App\Rules\IsNotMasterUnit;
 use App\Rules\IsNotSuperMasterLevel;
 use App\Rules\LevelIsThisAndChildFromUserRole;
 use App\Rules\UnitIsThisAndChildUserRole;
@@ -12,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class TargetPaperWorkValidationService {
+class RealizationPaperWorkValidationService {
 
     private ?UserRepository $userRepository;
 
@@ -28,7 +29,7 @@ class TargetPaperWorkValidationService {
 
         $attributes = [
             'level' => ['required', 'string', new LevelIsThisAndChildFromUserRole($user), new IsNotSuperMasterLevel()],
-            'unit' => ['required', 'string', new UnitIsThisAndChildUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
+            'unit' => ['required', 'string', new UnitIsThisAndChildUserRole($user), new UnitMatchOnRequestLevel($request->query('level')), new IsNotMasterUnit()],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 

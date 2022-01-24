@@ -6,7 +6,7 @@ use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 
-//Terdapat indikator yang tidak cocok dengan kertas kerja 'super-master'
+//Terdapat KPI yang tidak cocok dengan kertas kerja 'super-master'
 class HaveIndicatorsNotMatchInSuperMaterPaperWork implements Rule
 {
     private IndicatorRepository $indicatorRepository;
@@ -33,10 +33,10 @@ class HaveIndicatorsNotMatchInSuperMaterPaperWork implements Rule
      */
     public function passes($attribute, $value)
     {
-        $indicatorsId = Arr::flatten($this->indicatorRepository->findAllIdReferencedBySuperMasterLabel());
+        $indicators = Arr::flatten($this->indicatorRepository->findAllIdAndReferencedBySuperMasterLabel());
 
-        foreach ($this->indicators as $k => $v) {
-            if (!in_array($v, $indicatorsId)) {return false;}
+        foreach ($this->indicators as $indicator) {
+            if (!in_array($indicator, $indicators)) {return false;}
         }
 
         return true;
@@ -49,6 +49,6 @@ class HaveIndicatorsNotMatchInSuperMaterPaperWork implements Rule
      */
     public function message()
     {
-        return 'Terdapat ID indikator yang tidak sesuai dengan kertas kerja indikator seharusnya.';
+        return 'Terdapat KPI yang tidak sesuai dengan kertas kerja KPI seharusnya !';
     }
 }

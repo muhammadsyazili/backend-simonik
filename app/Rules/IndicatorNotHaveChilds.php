@@ -2,11 +2,13 @@
 
 namespace App\Rules;
 
+use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-//Merupakan kertas kerja 'super-master'
-class IsSuperMasterPaperWork implements Rule
+class IndicatorNotHaveChilds implements Rule
 {
+    private IndicatorRepository $indicatorRepository;
+
     /**
      * Create a new rule instance.
      *
@@ -14,7 +16,7 @@ class IsSuperMasterPaperWork implements Rule
      */
     public function __construct()
     {
-        //
+        $this->indicatorRepository = new IndicatorRepository();
     }
 
     /**
@@ -26,7 +28,7 @@ class IsSuperMasterPaperWork implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $value === 'super-master' ? false : true;
+        return $this->indicatorRepository->countAllByCode($value) > 1 ? false : true;
     }
 
     /**
@@ -36,6 +38,6 @@ class IsSuperMasterPaperWork implements Rule
      */
     public function message()
     {
-        return "(#1) : Anda tidak memiliki hak akses !";
+        return "KPI tidak bisa dihapus !";
     }
 }

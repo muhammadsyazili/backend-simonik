@@ -63,7 +63,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator (Level: %s) (Unit: %s) (Tahun: %s) ditampilkan", $level, $unit, $year),
+            sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) ditampilkan !", strtoupper($level), strtoupper($unit), strtoupper($year)),
             [
                 'levels' => $response->levels,
                 'indicators' => $response->indicators,
@@ -99,7 +99,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja indikator ditampilkan",
+            "Kertas kerja KPI ditampilkan !",
             [
                 'indicators' => $response->indicators,
                 'levels' => $response->levels,
@@ -158,7 +158,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator (Level: %s) (Tahun: %s) berhasil dibuat.", $request->post('level'), $request->post('year')),
+            sprintf("Kertas kerja KPI (Level: %s) (Tahun: %s) berhasil dibuat !", strtoupper($request->post('level')), strtoupper($request->post('year'))),
             null,
             null,
         );
@@ -184,6 +184,20 @@ class PaperWorkIndicatorController extends ApiController
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService();
+
+        $validation = $indicatorPaperWorkValidationService->editValidation($level, $unit, $year);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
         $response = $indicatorPaperWorkService->edit($level, $unit, $year);
@@ -191,7 +205,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja indikator ditampilkan",
+            "Kertas kerja KPI ditampilkan !",
             [
                 'super_master_indicators' => $response->super_master_indicators,
                 'indicators' => $response->indicators,
@@ -246,7 +260,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah.", $level, $unit, $year),
+            sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );
@@ -276,7 +290,7 @@ class PaperWorkIndicatorController extends ApiController
         $constructRequest->targetRepository = $targetRepository;
         $constructRequest->realizationRepository = $realizationRepository;
 
-        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService();
 
         $validation = $indicatorPaperWorkValidationService->destroyValidation($level, $unit, $year);
 
@@ -297,7 +311,52 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja indikator (Level: %s) (Unit: %s) (Tahun: %s) berhasil dihapus.", $level, $unit, $year),
+            sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil dihapus !", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            null,
+            null,
+        );
+    }
+
+    /**
+     * Reorder the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reorder(Request $request)
+    {
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
+
+        $validation = $indicatorPaperWorkValidationService->reorderValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+
+        $indicatorPaperWorkService->reorder($request->post('indicators'), $request->post('level'), $request->post('unit'), $request->post('year'));
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            $request->post('level') === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil diurutkan ulang !", strtoupper($request->post('level'))) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil diurutkan ulang !", strtoupper($request->post('level')), strtoupper($request->post('unit')), strtoupper($request->post('year'))),
             null,
             null,
         );
