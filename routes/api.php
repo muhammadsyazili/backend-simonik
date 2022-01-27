@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]);
 
     Route::post('/indicators/paper-work', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'store'])
-    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]); //App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class
 
     Route::get('/indicators/paper-work/{level}/{unit}/{year}/edit', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'edit'])
     ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class]);
@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]);
 
     Route::put('/indicators/paper-work/reorder', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'reorder'])
-    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]); //App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class
     //End Route : paper work - indicator
 
     //Route : indicator
@@ -64,10 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
     ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
 
     Route::get('/indicators/reference/edit', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'edit'])
-    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromQuery::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]); //App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromQuery::class
 
     Route::put('/indicators/reference', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'update'])
-    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class]);
+    ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]); //App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromPost::class
     //End Route : reference - indicator
 
     //Route : paper work - target

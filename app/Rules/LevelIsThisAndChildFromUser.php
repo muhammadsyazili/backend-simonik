@@ -4,11 +4,11 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
-use App\Repositories\UnitRepository;
+use App\Repositories\LevelRepository;
 
-class UnitIsThisAndChildUserRole implements Rule
+class LevelIsThisAndChildFromUser implements Rule
 {
-    private UnitRepository $unitRepository;
+    private LevelRepository $levelRepository;
     private $user;
 
     /**
@@ -21,7 +21,7 @@ class UnitIsThisAndChildUserRole implements Rule
     {
         $this->user = $user;
 
-        $this->unitRepository = new UnitRepository();
+        $this->levelRepository = new LevelRepository();
     }
 
     /**
@@ -36,10 +36,9 @@ class UnitIsThisAndChildUserRole implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            $chils = $this->unitRepository->findAllSlugWithChildsById($this->user->unit->id);
-            return $value === 'master' || in_array($value, Arr::flatten($chils)) ? true : false;
+            return in_array($value, Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($this->user->unit->level->id))) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
-            return $value === $this->user->unit->slug ? true : false;
+            return $value === $this->user->unit->level->slug ? true : false;
         } else {
             return false;
         }
@@ -52,6 +51,6 @@ class UnitIsThisAndChildUserRole implements Rule
      */
     public function message()
     {
-        return "(#4) : Anda tidak memiliki hak akses !";
+        return "(#3) : Anda tidak memiliki hak akses !";
     }
 }

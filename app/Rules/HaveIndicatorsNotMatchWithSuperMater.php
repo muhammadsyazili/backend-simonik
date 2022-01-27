@@ -3,28 +3,25 @@
 namespace App\Rules;
 
 use App\Repositories\IndicatorRepository;
-use App\Repositories\LevelRepository;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Arr;
 
-class PaperWorkAvailable implements Rule
+//Terdapat KPI yang tidak cocok dengan kertas kerja 'super-master'
+class HaveIndicatorsNotMatchWithSuperMater implements Rule
 {
-    private LevelRepository $levelRepository;
     private IndicatorRepository $indicatorRepository;
-    private string $level;
-    private string|int $year;
+    private array $indicators;
 
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct(string $level, string|int $year)
+    public function __construct(array $indicators)
     {
-        $this->levelRepository = new LevelRepository();
         $this->indicatorRepository = new IndicatorRepository();
 
-        $this->level = $level;
-        $this->year = $year;
+        $this->indicators = $indicators;
     }
 
     /**
@@ -36,9 +33,13 @@ class PaperWorkAvailable implements Rule
      */
     public function passes($attribute, $value)
     {
-        $sumOfIndicator = $this->indicatorRepository->countAllByLevelIdAndYear($this->levelRepository->findIdBySlug($this->level), $this->year);
+        $indicators = Arr::flatten($this->indicatorRepository->findAllIdAndReferencedBySuperMasterLabel());
 
-        return $sumOfIndicator > 0 ? false : true;
+        foreach ($this->indicators as $indicator) {
+            if (!in_array($indicator, $indicators)) {return false;}
+        }
+
+        return true;
     }
 
     /**
@@ -48,6 +49,6 @@ class PaperWorkAvailable implements Rule
      */
     public function message()
     {
-        return "Kertas kerja KPI sudah tersedia !";
+        return 'Akses ilegal !';
     }
 }

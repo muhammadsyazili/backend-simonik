@@ -6,11 +6,11 @@ use App\DTO\ConstructRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
-use App\Rules\PaperWorkNotAvailable;
+use App\Rules\IndicatorPaperWorkAvailable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use App\Rules\UnitMatchOnRequestLevel;
+use App\Rules\UnitMatchWithLevel;
 
 class IndicatorReferenceValidationService {
     private ?IndicatorRepository $indicatorRepository;
@@ -45,7 +45,7 @@ class IndicatorReferenceValidationService {
 
         $indicators = $this->indicatorRepository->findAllIdBySuperMasterLabel(); //get indicators paper work
 
-        //memastikan semua ID KPI dari request ada pada daftar ID KPI kertas kerja 'SUPER MASTER'
+        //memastikan semua KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
@@ -57,7 +57,7 @@ class IndicatorReferenceValidationService {
 
         $indicators[count($indicators)] = ['id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
 
-        //memastikan semua ID preferensi dari request ada pada daftar ID KPI kertas kerja 'SUPER MASTER'
+        //memastikan semua preferensi KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('preferences') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
@@ -72,9 +72,12 @@ class IndicatorReferenceValidationService {
 
     public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
+        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan unit yang dikirim besesuaian dengan level
+
         $attributes = [
-            'level' => ['required', 'string', new PaperWorkNotAvailable($request->query('level'), $request->query('unit'), $request->query('tahun'))],
-            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnRequestLevel($request->query('level'))],
+            'level' => ['required', 'string', new IndicatorPaperWorkAvailable($request->query('level'), $request->query('unit'), $request->query('tahun'))],
+            'unit' => ['required_unless:level,super-master', 'string', 'in:master', new UnitMatchWithLevel($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -82,6 +85,7 @@ class IndicatorReferenceValidationService {
             'required' => ':attribute tidak boleh kosong.',
             'required_unless' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->query(), array_keys($attributes));
@@ -96,7 +100,7 @@ class IndicatorReferenceValidationService {
             'indicators.*' => ['required', 'uuid'],
             'preferences.*' => ['required'],
             'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', new UnitMatchOnRequestLevel($request->post('level'))],
+            'unit' => ['required_unless:level,super-master', 'string', 'in:master', new UnitMatchWithLevel($request->post('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -105,6 +109,7 @@ class IndicatorReferenceValidationService {
             'required_unless' => ':attribute tidak boleh kosong.',
             'uuid' => ':attribute harus UUID format.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -113,7 +118,7 @@ class IndicatorReferenceValidationService {
 
         $indicators = $request->post('level') === 'super-master' ? $this->indicatorRepository->findIdAndParentHorizontalIdByWhere('super-master', null, null, null) : $this->indicatorRepository->findIdAndParentHorizontalIdByWhere($request->post('unit') === 'master' ? 'master' : 'child', $this->levelRepository->findIdBySlug($request->post('level')), $request->post('unit') === 'master' ? null : $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan semua ID KPI dari request ada pada daftar ID KPI kertas kerja
+        //memastikan semua KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
@@ -125,7 +130,7 @@ class IndicatorReferenceValidationService {
 
         $indicators[count($indicators)] = ['id' => 'root', 'parent_horizontal_id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
 
-        //memastikan semua ID preferensi dari request ada pada daftar ID KPI kertas kerja
+        //memastikan semua preferensi KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('preferences') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {

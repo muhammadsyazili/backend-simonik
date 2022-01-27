@@ -40,7 +40,8 @@ class CurrentLevelNotSameWithUserLevelFromQuery
         if ($user->role->name === 'super-admin') {
             return $next($request);
         } else {
-            return $request->query('level') === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
+            //return $request->query('level') === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
+            return $request->level === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
         }
     }
 }

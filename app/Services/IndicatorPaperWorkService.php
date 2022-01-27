@@ -163,7 +163,7 @@ class IndicatorPaperWorkService {
                         $target->indicator_id = $idListMaster[$pathIndicator->id];
                         $target->month = $validityKey;
                         $target->value = 0;
-                        $target->locked = true;
+                        $target->locked = false;
                         $target->default = true;
 
                         $this->targetRepository->save($target);
@@ -216,7 +216,7 @@ class IndicatorPaperWorkService {
                             $target->indicator_id = $idListChild[$pathIndicator->id];
                             $target->month = $validityKey;
                             $target->value = 0;
-                            $target->locked = true;
+                            $target->locked = false;
                             $target->default = true;
 
                             $this->targetRepository->save($target);
@@ -225,7 +225,7 @@ class IndicatorPaperWorkService {
                             $realization->indicator_id = $idListChild[$pathIndicator->id];
                             $realization->month = $validityKey;
                             $realization->value = 0;
-                            $realization->locked = true;
+                            $realization->locked = false;
                             $realization->default = true;
 
                             $this->realizationRepository->save($realization);
@@ -261,13 +261,6 @@ class IndicatorPaperWorkService {
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::transaction(function () use ($indicatorsFromInput, $level, $unit, $year, $userId, $indicatorDomains, $targetDomains, $realizationDomains) {
-
-            //logging.
-            $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-
-            // $output->writeln('--------------------------------');
-            // $output->writeln(sprintf('indicators: %s', json_encode($indicatorsFromInput)));
-            // $output->writeln('--------------------------------');
 
             $levelId = $this->levelRepository->findIdBySlug($level);
             $unitId = $unit === 'master' ? null : $this->unitRepository->findIdBySlug($unit);
@@ -391,7 +384,7 @@ class IndicatorPaperWorkService {
                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
                                         $targetDomains->month = $validityKey;
                                         $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
+                                        $targetDomains->locked = false;
                                         $targetDomains->default = true;
 
                                         $this->targetRepository->save($targetDomains);
@@ -440,7 +433,7 @@ class IndicatorPaperWorkService {
                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
                                         $targetDomains->month = $validityKey;
                                         $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
+                                        $targetDomains->locked = false;
                                         $targetDomains->default = true;
 
                                         $this->targetRepository->save($targetDomains);
@@ -503,7 +496,7 @@ class IndicatorPaperWorkService {
                                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
                                                         $targetDomains->month = $validityKey;
                                                         $targetDomains->value = 0;
-                                                        $targetDomains->locked = true;
+                                                        $targetDomains->locked = false;
                                                         $targetDomains->default = true;
 
                                                         $this->targetRepository->save($targetDomains);
@@ -659,7 +652,7 @@ class IndicatorPaperWorkService {
                                             $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                             $targetDomains->month = $validitykey;
                                             $targetDomains->value = 0;
-                                            $targetDomains->locked = true;
+                                            $targetDomains->locked = false;
                                             $targetDomains->default = true;
 
                                             $this->targetRepository->save($targetDomains);
@@ -668,7 +661,7 @@ class IndicatorPaperWorkService {
                                             $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                             $realizationDomains->month = $validitykey;
                                             $realizationDomains->value = 0;
-                                            $realizationDomains->locked = true;
+                                            $realizationDomains->locked = false;
                                             $realizationDomains->default = true;
 
                                             $this->realizationRepository->save($realizationDomains);
@@ -717,7 +710,7 @@ class IndicatorPaperWorkService {
                                             $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                             $targetDomains->month = $validityKey;
                                             $targetDomains->value = 0;
-                                            $targetDomains->locked = true;
+                                            $targetDomains->locked = false;
                                             $targetDomains->default = true;
 
                                             $this->targetRepository->save($targetDomains);
@@ -726,7 +719,7 @@ class IndicatorPaperWorkService {
                                             $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                             $realizationDomains->month = $validityKey;
                                             $realizationDomains->value = 0;
-                                            $realizationDomains->locked = true;
+                                            $realizationDomains->locked = false;
                                             $realizationDomains->default = true;
 
                                             $this->realizationRepository->save($realizationDomains);
@@ -790,7 +783,7 @@ class IndicatorPaperWorkService {
                                                             $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                                             $targetDomains->month = $validityKey;
                                                             $targetDomains->value = 0;
-                                                            $targetDomains->locked = true;
+                                                            $targetDomains->locked = false;
                                                             $targetDomains->default = true;
 
                                                             $this->targetRepository->save($targetDomains);
@@ -799,7 +792,7 @@ class IndicatorPaperWorkService {
                                                             $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                                             $realizationDomains->month = $validityKey;
                                                             $realizationDomains->value = 0;
-                                                            $realizationDomains->locked = true;
+                                                            $realizationDomains->locked = false;
                                                             $realizationDomains->default = true;
 
                                                             $this->realizationRepository->save($realizationDomains);
@@ -960,7 +953,7 @@ class IndicatorPaperWorkService {
                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
                                         $targetDomains->month = $validitykey;
                                         $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
+                                        $targetDomains->locked = false;
                                         $targetDomains->default = true;
 
                                         $this->targetRepository->save($targetDomains);
@@ -1009,7 +1002,7 @@ class IndicatorPaperWorkService {
                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
                                         $targetDomains->month = $validityKey;
                                         $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
+                                        $targetDomains->locked = false;
                                         $targetDomains->default = true;
 
                                         $this->targetRepository->save($targetDomains);
@@ -1072,7 +1065,7 @@ class IndicatorPaperWorkService {
                                                         $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
                                                         $targetDomains->month = $validityKey;
                                                         $targetDomains->value = 0;
-                                                        $targetDomains->locked = true;
+                                                        $targetDomains->locked = false;
                                                         $targetDomains->default = true;
 
                                                         $this->targetRepository->save($targetDomains);
@@ -1203,7 +1196,7 @@ class IndicatorPaperWorkService {
                                         $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                         $targetDomains->month = $validitykey;
                                         $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
+                                        $targetDomains->locked = false;
                                         $targetDomains->default = true;
 
                                         $this->targetRepository->save($targetDomains);
@@ -1212,7 +1205,7 @@ class IndicatorPaperWorkService {
                                         $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                         $realizationDomains->month = $validitykey;
                                         $realizationDomains->value = 0;
-                                        $realizationDomains->locked = true;
+                                        $realizationDomains->locked = false;
                                         $realizationDomains->default = true;
 
                                         $this->realizationRepository->save($realizationDomains);
@@ -1261,7 +1254,7 @@ class IndicatorPaperWorkService {
                                         $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                         $targetDomains->month = $validityKey;
                                         $targetDomains->value = 0;
-                                        $targetDomains->locked = true;
+                                        $targetDomains->locked = false;
                                         $targetDomains->default = true;
 
                                         $this->targetRepository->save($targetDomains);
@@ -1270,7 +1263,7 @@ class IndicatorPaperWorkService {
                                         $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                         $realizationDomains->month = $validityKey;
                                         $realizationDomains->value = 0;
-                                        $realizationDomains->locked = true;
+                                        $realizationDomains->locked = false;
                                         $realizationDomains->default = true;
 
                                         $this->realizationRepository->save($realizationDomains);
@@ -1334,7 +1327,7 @@ class IndicatorPaperWorkService {
                                                         $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                                         $targetDomains->month = $validityKey;
                                                         $targetDomains->value = 0;
-                                                        $targetDomains->locked = true;
+                                                        $targetDomains->locked = false;
                                                         $targetDomains->default = true;
 
                                                         $this->targetRepository->save($targetDomains);
@@ -1343,7 +1336,7 @@ class IndicatorPaperWorkService {
                                                         $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
                                                         $realizationDomains->month = $validityKey;
                                                         $realizationDomains->value = 0;
-                                                        $realizationDomains->locked = true;
+                                                        $realizationDomains->locked = false;
                                                         $realizationDomains->default = true;
 
                                                         $this->realizationRepository->save($realizationDomains);

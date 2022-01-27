@@ -4,11 +4,11 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
-use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
 
-class LevelIsChildFromUserRole implements Rule
+class UnitIsThisAndChildUser implements Rule
 {
-    private LevelRepository $levelRepository;
+    private UnitRepository $unitRepository;
     private $user;
 
     /**
@@ -21,7 +21,7 @@ class LevelIsChildFromUserRole implements Rule
     {
         $this->user = $user;
 
-        $this->levelRepository = new LevelRepository();
+        $this->unitRepository = new UnitRepository();
     }
 
     /**
@@ -36,7 +36,9 @@ class LevelIsChildFromUserRole implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return in_array($value, Arr::flatten($this->levelRepository->findAllSlugWithChildsById($this->user->unit->level->id))) ? true : false;
+            return $value === 'master' || in_array($value, Arr::flatten($this->unitRepository->findAllSlugWithChildsById($this->user->unit->id))) ? true : false;
+        } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
+            return $value === $this->user->unit->slug ? true : false;
         } else {
             return false;
         }
@@ -49,6 +51,6 @@ class LevelIsChildFromUserRole implements Rule
      */
     public function message()
     {
-        return "(#2) : Anda tidak memiliki hak akses !";
+        return "(#4) : Anda tidak memiliki hak akses !";
     }
 }

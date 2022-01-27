@@ -121,7 +121,9 @@ class PaperWorkTargetController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        //
+        //logging
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output->writeln(sprintf('targets: %s', $request->post('targets')));
     }
 
     /**

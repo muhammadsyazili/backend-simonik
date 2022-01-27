@@ -8,7 +8,7 @@ use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 
 //Terdapat KPI yang sudah punya kertas kerja target & realisasi
-class IndicatorsHaveTargetAndRealization implements Rule
+class AllTargetAndAllRealizationIsDefault implements Rule
 {
     private IndicatorRepository $indicatorRepository;
     private LevelRepository $levelRepository;
@@ -44,12 +44,9 @@ class IndicatorsHaveTargetAndRealization implements Rule
     public function passes($attribute, $value)
     {
         $levelId = $this->levelRepository->findIdBySlug($this->level);
+        $indicators = $this->unit === 'master' ? $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, null, $this->year) : $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
 
-        $indicators = $this->unit === 'master' ?
-        $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, null, $this->year) :
-        $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
-
-        //cek apakah target or realization sudah ada yang di-edit
+        //cek apakah target or realisasi sudah ada yang di-edit
         $isDefault = true;
         foreach ($indicators as $indicator) {
             foreach ($indicator->targets as $target) {

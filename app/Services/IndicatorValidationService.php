@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Rules\IndicatorNotHaveChilds;
-use App\Rules\NotSuperMaster;
+use App\Rules\IndicatorIsSuperMaster;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -99,8 +99,11 @@ class IndicatorValidationService {
 
     public function destroyValidation(string|int $id) : \Illuminate\Contracts\Validation\Validator
     {
+        //memastikan KPI berlabel super-master
+        //memastikan KPI belum memiliki turunan
+        
         $attributes = [
-            'id' => ['required', 'uuid', new NotSuperMaster(), new IndicatorNotHaveChilds()],
+            'id' => ['required', 'uuid', new IndicatorIsSuperMaster(), new IndicatorNotHaveChilds()],
         ];
 
         $messages = [

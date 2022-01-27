@@ -7,13 +7,13 @@ use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-class PaperWorkNotAvailable implements Rule
+class IndicatorPaperWorkAvailable implements Rule
 {
     private LevelRepository $levelRepository;
     private UnitRepository $unitRepository;
     private IndicatorRepository $indicatorRepository;
     private string $level;
-    private ?string $unit;
+    private string|null $unit;
     private string|int|null $year;
 
     /**
@@ -21,7 +21,7 @@ class PaperWorkNotAvailable implements Rule
      *
      * @return void
      */
-    public function __construct(string $level, ?string $unit, string|int|null $year)
+    public function __construct(string $level, string|null $unit, string|int|null $year)
     {
         $this->levelRepository = new LevelRepository();
         $this->unitRepository = new UnitRepository();
@@ -45,10 +45,7 @@ class PaperWorkNotAvailable implements Rule
             return true;
         } else {
             $levelId = $this->levelRepository->findIdBySlug($this->level);
-
-            $sumOfIndicator = $this->unit === 'master' ?
-            $this->indicatorRepository->countAllByLevelIdAndUnitIdAndYear($levelId, null, $this->year) :
-            $this->indicatorRepository->countAllByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
+            $sumOfIndicator = $this->unit === 'master' ? $this->indicatorRepository->countAllByLevelIdAndUnitIdAndYear($levelId, null, $this->year) : $this->indicatorRepository->countAllByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
 
             return $sumOfIndicator > 0 ? true : false;
         }

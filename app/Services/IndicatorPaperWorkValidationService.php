@@ -7,15 +7,14 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\HaveIndicatorsNotMatchInSuperMaterPaperWork;
-use App\Rules\IndicatorsHaveTargetAndRealization;
-use App\Rules\IsSuperMasterPaperWork;
+use App\Rules\HaveIndicatorsNotMatchWithSuperMater;
+use App\Rules\AllTargetAndAllRealizationIsDefault;
 use App\Rules\LevelIsChildFromUserRole;
-use App\Rules\LevelIsThisAndChildFromUserRole;
-use App\Rules\PaperWorkAvailable;
-use App\Rules\PaperWorkNotAvailable;
-use App\Rules\UnitMatchOnRequestLevel;
-use App\Rules\UnitIsThisAndChildUserRole;
+use App\Rules\LevelIsThisAndChildFromUser;
+use App\Rules\IndicatorPaperWorkNotAvailable;
+use App\Rules\IndicatorPaperWorkAvailable;
+use App\Rules\UnitMatchWithLevel;
+use App\Rules\UnitIsThisAndChildUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -39,11 +38,14 @@ class IndicatorPaperWorkValidationService {
     //use repo UserRepository
     public function indexValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
+        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new LevelIsThisAndChildFromUserRole($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new UnitIsThisAndChildUserRole($user), new UnitMatchOnRequestLevel($request->query('level'))],
+            'level' => ['required', 'string', new LevelIsThisAndChildFromUser($user)],
+            'unit' => ['required_unless:level,super-master', 'string', new UnitIsThisAndChildUser($user)], //new UnitMatchWithLevel($request->query('level'))
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -61,17 +63,22 @@ class IndicatorPaperWorkValidationService {
     //use repo UserRepository
     public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
+        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //memastikan semua KPI yang dikirim mrupakan KPI yang bersumber dari super-master
+        //memastikan kertas kerja KPI yang akan dibuat belum tersedia di DB
+
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'indicators' => ['required', new HaveIndicatorsNotMatchInSuperMaterPaperWork($request->post('indicators'))],
-            'level' => ['required', 'string', new LevelIsChildFromUserRole($user), new PaperWorkAvailable($request->post('level'), $request->post('year'))],
+            'indicators' => ['required', new HaveIndicatorsNotMatchWithSuperMater($request->post('indicators'))],
+            'level' => ['required', 'string', 'not_in:super-master', new LevelIsChildFromUserRole($user), new IndicatorPaperWorkNotAvailable($request->post('level'), $request->post('year'))],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -81,15 +88,19 @@ class IndicatorPaperWorkValidationService {
 
     public function editValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
     {
+        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan unit yang dikirim besesuaian dengan level
+
         $attributes = [
-            'level' => ['required', 'string', new IsSuperMasterPaperWork(), new PaperWorkNotAvailable($level, $unit, $year)],
-            'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWorkAvailable($level, $unit, $year)],
+            'unit' => ['required', 'string', new UnitMatchWithLevel($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
@@ -100,15 +111,19 @@ class IndicatorPaperWorkValidationService {
     //use repo IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request, string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
     {
+        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan unit yang dikirim besesuaian dengan level
+
         $attributes = [
-            'level' => ['required', 'string', new IsSuperMasterPaperWork(), new PaperWorkNotAvailable($level, $unit, $year)],
-            'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWorkAvailable($level, $unit, $year)],
+            'unit' => ['required', 'string', new UnitMatchWithLevel($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
@@ -141,15 +156,20 @@ class IndicatorPaperWorkValidationService {
 
     public function destroyValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
     {
+        //memastikan semua value target & realisasi masih default
+        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan unit yang dikirim besesuaian dengan level
+
         $attributes = [
-            'level' => ['required', 'string', new IsSuperMasterPaperWork(), new IndicatorsHaveTargetAndRealization($level, $unit, $year), new PaperWorkNotAvailable($level, $unit, $year)],
-            'unit' => ['required', 'string', new UnitMatchOnRequestLevel($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new AllTargetAndAllRealizationIsDefault($level, $unit, $year), new IndicatorPaperWorkAvailable($level, $unit, $year)],
+            'unit' => ['required', 'string', new UnitMatchWithLevel($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
@@ -179,7 +199,6 @@ class IndicatorPaperWorkValidationService {
         if ($request->post('level') === 'super-master') {
             $indicators = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear());
         } else {
-
             $levelId = $this->levelRepository->findIdBySlug($request->post('level'));
             $year = $request->post('year');
             if ($request->post('unit') === 'master') {

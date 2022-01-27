@@ -4,11 +4,9 @@ namespace App\Services;
 
 use App\DTO\ConstructRequest;
 use App\Repositories\UserRepository;
-use App\Rules\IsNotMasterUnit;
-use App\Rules\IsNotSuperMasterLevel;
-use App\Rules\LevelIsThisAndChildFromUserRole;
-use App\Rules\UnitIsThisAndChildUserRole;
-use App\Rules\UnitMatchOnRequestLevel;
+use App\Rules\LevelIsThisAndChildFromUser;
+use App\Rules\UnitIsThisAndChildUser;
+use App\Rules\UnitMatchWithLevel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -25,17 +23,21 @@ class RealizationPaperWorkValidationService {
     //use repo UserRepository
     public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
+        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new LevelIsThisAndChildFromUserRole($user), new IsNotSuperMasterLevel()],
-            'unit' => ['required', 'string', new UnitIsThisAndChildUserRole($user), new UnitMatchOnRequestLevel($request->query('level')), new IsNotMasterUnit()],
+            'level' => ['required', 'string', 'not_in:super-master', new LevelIsThisAndChildFromUser($user)],
+            'unit' => ['required', 'string', 'not_in:master', new UnitIsThisAndChildUser($user)], //new UnitMatchWithLevel($request->query('level'))
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->query(), array_keys($attributes));
