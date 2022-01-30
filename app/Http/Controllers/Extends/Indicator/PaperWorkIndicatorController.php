@@ -53,12 +53,12 @@ class PaperWorkIndicatorController extends ApiController
 
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
-        $user_id = $request->header('X-User-Id');
+        $userId = $request->header('X-User-Id');
         $level = $request->query('level');
         $unit = $request->query('unit');
         $year = $request->query('tahun');
 
-        $response = $indicatorPaperWorkService->index($user_id, $level, $unit, $year);
+        $response = $indicatorPaperWorkService->index($userId, $level, $unit, $year);
 
         return $this->APIResponse(
             true,
@@ -92,9 +92,9 @@ class PaperWorkIndicatorController extends ApiController
 
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
-        $response = $indicatorPaperWorkService->create(
-            $request->header('X-User-Id')
-        );
+        $userId = $request->header('X-User-Id');
+
+        $response = $indicatorPaperWorkService->create($userId);
 
         return $this->APIResponse(
             true,
@@ -148,17 +148,17 @@ class PaperWorkIndicatorController extends ApiController
 
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
-        $indicatorPaperWorkService->store(
-            $request->post('indicators'),
-            $request->post('level'),
-            $request->post('year'),
-            $request->header('X-User-Id')
-        );
+        $indicators = $request->post('indicators');
+        $level = $request->post('level');
+        $year = $request->post('year');
+        $userId = $request->header('X-User-Id');
+
+        $indicatorPaperWorkService->store($indicators, $level, $year, $userId);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja KPI (Level: %s) (Tahun: %s) berhasil dibuat !", strtoupper($request->post('level')), strtoupper($request->post('year'))),
+            sprintf("Kertas kerja KPI (Level: %s) (Tahun: %s) berhasil dibuat !", strtoupper($level), strtoupper($year)),
             null,
             null,
         );
@@ -255,7 +255,10 @@ class PaperWorkIndicatorController extends ApiController
 
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
-        $indicatorPaperWorkService->update($request->post('indicators'), $level, $unit, $year, $request->header('X-User-Id'));
+        $indicators = $request->post('indicators');
+        $userId = $request->header('X-User-Id');
+
+        $indicatorPaperWorkService->update($indicators, $level, $unit, $year, $userId);
 
         return $this->APIResponse(
             true,
@@ -351,12 +354,17 @@ class PaperWorkIndicatorController extends ApiController
 
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
-        $indicatorPaperWorkService->reorder($request->post('indicators'), $request->post('level'), $request->post('unit'), $request->post('year'));
+        $indicators = $request->post('indicators');
+        $level = $request->post('level');
+        $unit = $request->post('unit');
+        $year = $request->post('year');
+
+        $indicatorPaperWorkService->reorder($indicators, $level, $unit, $year);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            $request->post('level') === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil diurutkan ulang !", strtoupper($request->post('level'))) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil diurutkan ulang !", strtoupper($request->post('level')), strtoupper($request->post('unit')), strtoupper($request->post('year'))),
+            $level === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil diurutkan ulang !", strtoupper($level)) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil diurutkan ulang !", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );

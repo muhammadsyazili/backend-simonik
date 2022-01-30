@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
+use App\Repositories\TargetRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use App\Services\TargetPaperWorkService;
@@ -116,14 +117,60 @@ class PaperWorkTargetController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         //logging
-        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        $output->writeln(sprintf('targets: %s', $request->post('targets')));
+        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $output->writeln(sprintf('targets: %s', json_encode($request->post('targets'))));
+
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $targetRepository = new TargetRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->targetRepository = $targetRepository;
+
+        $targetPaperWorkValidationService = new TargetPaperWorkValidationService($constructRequest);
+
+        $validation = $targetPaperWorkValidationService->updateValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $targetPaperWorkService = new TargetPaperWorkService($constructRequest);
+
+        $userId = $request->header('X-User-Id');
+        $indicators = array_keys($request->post('targets'));
+        $targets = $request->post('targets');
+        $level = $request->post('level');
+        $unit = $request->post('unit');
+        $year = $request->post('tahun');
+
+        $targetPaperWorkService->update($userId, $indicators, $targets, $level, $unit, $year);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            null,
+            null,
+        );
     }
 
     /**

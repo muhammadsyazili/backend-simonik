@@ -18,6 +18,11 @@ class TargetRepository {
         ]);
     }
 
+    public function updateValueAndDefaultByMonthAndIndicatorId(string $month, string|int $indicatorId, float $value)
+    {
+        ModelsTarget::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['default' => false, 'value' => $value]);
+    }
+
     public function deleteById(string|int $id) : void
     {
         ModelsTarget::where(['id' => $id])->forceDelete();

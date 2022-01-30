@@ -88,6 +88,7 @@ class IndicatorController extends ApiController
         $indicatorService = new IndicatorService($constructRequest);
 
         $indicator = $indicatorService->edit($id);
+        
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
