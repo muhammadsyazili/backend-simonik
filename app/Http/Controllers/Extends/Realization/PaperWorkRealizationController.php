@@ -8,6 +8,7 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
+use App\Repositories\RealizationRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use App\Services\RealizationPaperWorkService;
@@ -119,9 +120,54 @@ class PaperWorkRealizationController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        //
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
+
+        $realizationPaperWorkValidationService = new RealizationPaperWorkValidationService($constructRequest);
+
+        $validation = $realizationPaperWorkValidationService->updateValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
+
+        $userId = $request->header('X-User-Id');
+        $indicators = array_keys($request->post('realizations'));
+        $realizations = $request->post('realizations');
+        $level = $request->post('level');
+        $unit = $request->post('unit');
+        $year = $request->post('tahun');
+
+        $realizationPaperWorkService->update($userId, $indicators, $realizations, $level, $unit, $year);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            null,
+            null,
+        );
     }
 
     /**

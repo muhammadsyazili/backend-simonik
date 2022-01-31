@@ -15,7 +15,7 @@ class IndicatorValidationService {
             'indicator' => ['required', 'string', 'max:100'],
             'dummy' => ['required', 'boolean'],
             'reducing_factor' => ['nullable', 'required_if:dummy,0', 'boolean'],
-            'polarity' => ['nullable', 'required_if:dummy,0', 'in:aman,1,-1'],
+            'polarity' => ['nullable', 'required_if:dummy,0', 'in:1,-1'],
             'formula' => ['nullable', 'string'],
             'measure' => ['nullable', 'string'],
             'validity' => ['nullable'],
@@ -38,7 +38,7 @@ class IndicatorValidationService {
 
         if (!is_null($request->post('validity'))) {
             foreach ($request->post('validity') as $key => $value) {
-                $attributes["validity.$key"] = ['in:aman,1'];
+                $attributes["validity.$key"] = ['in:1,0'];
             }
         }
 
@@ -59,7 +59,7 @@ class IndicatorValidationService {
             'indicator' => ['required', 'string', 'max:100'],
             'dummy' => ['required', 'boolean'],
             'reducing_factor' => ['nullable', 'required_if:dummy,0', 'boolean'],
-            'polarity' => ['nullable', 'required_if:dummy,0', 'in:aman,1,-1'],
+            'polarity' => ['nullable', 'required_if:dummy,0', 'in:1,-1'],
             'formula' => ['nullable', 'string'],
             'measure' => ['nullable', 'string'],
             'validity' => ['nullable'],
@@ -82,7 +82,7 @@ class IndicatorValidationService {
 
         if (!is_null($request->post('validity'))) {
             foreach ($request->post('validity') as $key => $value) {
-                $attributes["validity.$key"] = ['in:aman,1'];
+                $attributes["validity.$key"] = ['in:1,0'];
             }
         }
 
@@ -101,7 +101,7 @@ class IndicatorValidationService {
     {
         //memastikan KPI berlabel super-master
         //memastikan KPI belum memiliki turunan
-        
+
         $attributes = [
             'id' => ['required', 'uuid', new IndicatorIsSuperMaster(), new IndicatorNotHaveChilds()],
         ];

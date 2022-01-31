@@ -18,6 +18,11 @@ class RealizationRepository {
         ]);
     }
 
+    public function updateValueAndDefaultByMonthAndIndicatorId(string $month, string|int $indicatorId, float $value)
+    {
+        ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['default' => false, 'value' => $value]);
+    }
+
     public function deleteById(string|int $id) : void
     {
         ModelsRealization::where(['id' => $id])->forceDelete();

@@ -72,7 +72,15 @@ class TargetPaperWorkValidationService {
             'required' => ':attribute tidak boleh kosong.',
             'date_format' => ':attribute harus berformat yyyy.',
             'not_in' => ':attribute yang dipilih tidak sah.',
+            'numeric' => ':attribute harus numerik.',
         ];
+
+        //memastikan target yang dikirim tipe data 'numeric'
+        foreach ($request->post('targets') as $targetK => $targetV) {
+            foreach ($targetV as $K => $V) {
+                $attributes["targets.$targetK.$K"] = ['numeric'];
+            }
+        }
 
         $input = Arr::only($request->post(), array_keys($attributes));
 
@@ -80,24 +88,6 @@ class TargetPaperWorkValidationService {
 
         $targets = $request->post('targets');
         $indicatorsId = array_keys($request->post('targets')); //list KPI dari target
-
-        //memastikan target yang dikirim tipe data 'numeric'
-        $validator->after(function ($validator) use ($targets) {
-            foreach ($targets as $target) {
-                $isError = false;
-                foreach ($target as $targetV) {
-                    if (!is_numeric($targetV)) {
-                        $validator->errors()->add('targets', "terdapat target bukan numerik !");
-                        $isError = true;
-                        break;
-                    }
-                }
-
-                if ($isError) {
-                    break;
-                }
-            }
-        });
 
         $levelId = $this->levelRepository->findIdBySlug($request->post('level'));
         $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun')));
