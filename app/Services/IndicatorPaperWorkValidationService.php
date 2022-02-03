@@ -9,7 +9,7 @@ use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use App\Rules\HaveIndicatorsNotMatchWithSuperMater;
 use App\Rules\AllTargetAndAllRealizationIsDefault;
-use App\Rules\LevelIsChildFromUserRole;
+use App\Rules\LevelIsChildFromUser;
 use App\Rules\LevelIsThisAndChildFromUser;
 use App\Rules\IndicatorPaperWorkNotAvailable;
 use App\Rules\IndicatorPaperWorkAvailable;
@@ -71,7 +71,7 @@ class IndicatorPaperWorkValidationService {
 
         $attributes = [
             'indicators' => ['required', new HaveIndicatorsNotMatchWithSuperMater($request->post('indicators'))],
-            'level' => ['required', 'string', 'not_in:super-master', new LevelIsChildFromUserRole($user), new IndicatorPaperWorkNotAvailable($request->post('level'), $request->post('year'))],
+            'level' => ['required', 'string', 'not_in:super-master', new LevelIsChildFromUser($user), new IndicatorPaperWorkNotAvailable($request->post('level'), $request->post('year'))],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 

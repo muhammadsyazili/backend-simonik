@@ -122,6 +122,10 @@ class PaperWorkRealizationController extends ApiController
      */
     public function update(Request $request)
     {
+        //logging
+        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $output->writeln(sprintf('realizations: %s', json_encode($request->post('realizations'))));
+
         $userRepository = new UserRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
@@ -164,7 +168,7 @@ class PaperWorkRealizationController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas kerja realisasi (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );
@@ -179,5 +183,40 @@ class PaperWorkRealizationController extends ApiController
     public function destroy($id)
     {
         //
+    }
+
+    public function changeLock(Request $request, $id, $month)
+    {
+        //logging
+        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
+
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
+
+        $realizationPaperWorkValidationService = new RealizationPaperWorkValidationService($constructRequest);
+
+        $validation = $realizationPaperWorkValidationService->changeLockValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
     }
 }

@@ -49,6 +49,6 @@ class LevelIsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rul
      */
     public function message()
     {
-        return "(#3.1) : Anda tidak memiliki hak akses !";
+        return "(#3.3) : Anda tidak memiliki hak akses !";
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Unit;
+use App\Models\UnitOnlyId;
 use App\Models\UnitOnlySlug;
 
 class UnitRepository {
@@ -25,9 +26,24 @@ class UnitRepository {
         return Unit::where(['level_id' => $levelId])->get();
     }
 
-    public function findAllSlugWithChildsById(string|int $id) : array
+    public function findAllSlugWithThisAndChildsById(string|int $id) : array
     {
         return UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->get()->toArray();
+    }
+
+    public function findAllSlugWithChildsById(string|int $id) : array
+    {
+        return UnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
+    }
+
+    public function findAllIdWithThisAndChildsById(string|int $id) : array
+    {
+        return UnitOnlyId::with('childsRecursive')->where(['id' => $id])->get()->toArray();
+    }
+
+    public function findAllIdWithChildsById(string|int $id) : array
+    {
+        return UnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
     }
 
     public function findIdWithLevelBySlug(string $slug)

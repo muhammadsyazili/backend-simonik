@@ -20,7 +20,7 @@ class RealizationRepository {
 
     public function updateValueAndDefaultByMonthAndIndicatorId(string $month, string|int $indicatorId, float $value)
     {
-        ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['default' => false, 'value' => $value]);
+        ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['locked' => true, 'default' => false, 'value' => $value]);
     }
 
     public function deleteById(string|int $id) : void
@@ -36,6 +36,11 @@ class RealizationRepository {
     public function deleteByIndicatorId(string|int $indicatorId) : void
     {
         ModelsRealization::where(['indicator_id' => $indicatorId])->forceDelete();
+    }
+
+    public function findByIndicatorIdAndMonth(string|int $indicatorId, string $month)
+    {
+        return ModelsRealization::firstWhere(['indicator_id' => $indicatorId, 'month' => $month]);
     }
 
     public function findAllByIndicatorId(string|int $indicatorId)

@@ -230,6 +230,7 @@ class PaperWorkIndicatorController extends ApiController
         $unitRepository = new UnitRepository();
         $targetRepository = new TargetRepository();
         $realizationRepository = new RealizationRepository();
+        $userRepository = new UserRepository();
 
         $constructRequest = new ConstructRequest();
 
@@ -238,6 +239,7 @@ class PaperWorkIndicatorController extends ApiController
         $constructRequest->unitRepository = $unitRepository;
         $constructRequest->targetRepository = $targetRepository;
         $constructRequest->realizationRepository = $realizationRepository;
+        $constructRequest->userRepository = $userRepository;
 
         $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 

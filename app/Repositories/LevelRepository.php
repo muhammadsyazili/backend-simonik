@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Level;
+use App\Models\LevelOnlyId;
 use App\Models\LevelOnlySlug;
 
 class LevelRepository {
@@ -24,6 +25,16 @@ class LevelRepository {
     public function findAllSlugWithChildsById(string|int $id) : array
     {
         return LevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
+    }
+
+    public function findAllIdWithThisAndChildsById(string|int $id) : array
+    {
+        return LevelOnlyId::with('childsRecursive')->where(['id' => $id])->get()->toArray();
+    }
+
+    public function findAllIdWithChildsById(string|int $id) : array
+    {
+        return LevelOnlyId::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
     }
 
     public function findAllWithChildsByRoot()

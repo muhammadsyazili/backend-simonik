@@ -34,7 +34,7 @@ class IndicatorService {
         $indicator = new Indicator();
 
         DB::transaction(function () use ($indicatorNew, $indicator) {
-            $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
+            $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
             if ($indicatorNew->dummy === '1') {
                 $indicator->dummy = true;
@@ -100,7 +100,7 @@ class IndicatorService {
 
             if ($indicatorOld->label === 'super-master') {
                 //convert (validity & weight) from array to JSON string
-                $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
+                $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                 if ($indicatorNew->dummy === '1') {
                     $indicator->dummy = true;
@@ -142,7 +142,7 @@ class IndicatorService {
                  */
 
                 //convert (validity & weight) from array to JSON string
-                $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
+                $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                 if ($indicatorNew->dummy === '1') {
                     $indicator->dummy = true;
@@ -265,7 +265,7 @@ class IndicatorService {
                 if (count($familiesIndicatorOld) > 0) {
                     foreach ($familiesIndicatorOld as $familyIndicatorOld) {
                         //convert (validity & weight) from array to JSON string
-                        $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
+                        $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                         if ($indicatorNew->dummy === '1') {
                             $indicator->dummy = true;
@@ -381,7 +381,7 @@ class IndicatorService {
                 }
             } else if ($indicatorOld->label === 'child') {
                 //convert (validity & weight) from array to JSON string
-                $toJson = $this->validityNweightToJSON($indicatorNew->validity, $indicatorNew->weight);
+                $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                 if ($indicatorNew->dummy === '1') {
                     $indicator->dummy = true;
@@ -505,7 +505,7 @@ class IndicatorService {
         });
     }
 
-    private function validityNweightToJSON(?array $validity, ?array $weight) : array
+    private function validity_and_weight__to__JSON(?array $validity, ?array $weight) : array
     {
         $jsonString = [];
         if (is_null($validity)) {

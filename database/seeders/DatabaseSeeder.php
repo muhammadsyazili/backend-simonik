@@ -159,7 +159,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $users = [
-            ['nip' => null, 'name' => 'Super Admin', 'username' => 'super.admin', 'email' => 'super.admin@email.com', 'unit_id' => null, 'role_id' => 1],
+            ['nip' => null, 'name' => 'Super Admin', 'username' => 'super-admin', 'email' => 'super-admin@email.com', 'unit_id' => null, 'role_id' => 1],
 
             ['nip' => null, 'name' => 'Admin UIW', 'username' => 'admin.uiw.s2jb', 'email' => 'admin.uiw.s2jb@email.com', 'unit_id' => '3fb49e43-537f-4df4-9a49-bbe9e9887283', 'role_id' => 2],
 

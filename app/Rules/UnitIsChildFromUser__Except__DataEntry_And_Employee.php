@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 use App\Repositories\UnitRepository;
 
-class UnitIsThisAndChildUser__Except__DataEntry_And_Employee implements Rule
+class UnitIsChildFromUser__Except__DataEntry_And_Employee implements Rule
 {
     private UnitRepository $unitRepository;
     private $user;

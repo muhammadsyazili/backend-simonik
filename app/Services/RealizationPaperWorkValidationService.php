@@ -3,10 +3,13 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\LevelIsThisAndChildFromUser;
+use App\Rules\LevelIsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\LevelIsThisAndChildFromUser__Except__Employee;
-use App\Rules\UnitIsThisAndChildUser;
+use App\Rules\UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\UnitIsThisAndChildUser__Except__Employee;
 use App\Rules\UnitMatchWithLevel;
 use Illuminate\Http\Request;
@@ -16,10 +19,18 @@ use Illuminate\Support\Facades\Validator;
 class RealizationPaperWorkValidationService {
 
     private ?UserRepository $userRepository;
+    private ?IndicatorRepository $indicatorRepository;
+    private ?LevelRepository $levelRepository;
+    private ?UnitRepository $unitRepository;
 
     public function __construct(ConstructRequest $constructRequest)
     {
-        $this->userRepository = $constructRequest->userRepository;
+        if (!is_null($constructRequest)) {
+            $this->userRepository = $constructRequest->userRepository;
+            $this->indicatorRepository = $constructRequest->indicatorRepository;
+            $this->levelRepository = $constructRequest->levelRepository;
+            $this->unitRepository = $constructRequest->unitRepository;
+        }
     }
 
     //use repo UserRepository
@@ -50,6 +61,9 @@ class RealizationPaperWorkValidationService {
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
+        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
@@ -105,7 +119,7 @@ class RealizationPaperWorkValidationService {
             }
         });
 
-        //pastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
+        //memastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
         $validator->after(function ($validator) use ($realizations) {
             foreach ($realizations as $realizationK => $realizationV) {
                 $indicator = $this->indicatorRepository->findById($realizationK);
@@ -123,6 +137,45 @@ class RealizationPaperWorkValidationService {
                 if ($isError) {
                     break;
                 }
+            }
+        });
+
+        return $validator;
+    }
+
+    //use repo UserRepository, IndicatorRepository, UnitRepository
+    public function changeLockValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    {
+        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+
+        $attributes = [
+            'id' => ['required', 'string', 'uuid', new LevelIsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee($user)],
+            'month' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+            'in' => ':attribute yang dipilih tidak sah.',
+        ];
+
+        $input = Arr::only($request->query(), array_keys($attributes));
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        $indicator = $this->indicatorRepository->findById($request->id);
+
+        //memastikan KPI yang dikirim berlabel 'child'
+        $validator->after(function ($validator) use ($indicator) {
+            if (in_array($indicator->label, ['super-master', 'master'])) {
+                $validator->errors()->add('id', "Akses ilegal !");
+            }
+        });
+
+        //memastikan unit dari KPI yang dikirim merupakan turunannya
+        $validator->after(function ($validator) use ($user, $indicator) {
+            if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->findAllIdWithThisAndChildsById($user->unit->id)))) {
+                $validator->errors()->add('id', "Akses ilegal !");
             }
         });
 

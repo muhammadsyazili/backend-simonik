@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 use App\Repositories\LevelRepository;
 
-class LevelIsChildFromUserRole implements Rule
+class LevelIsChildFromUser__Except__DataEntry_And_Employee implements Rule
 {
     private LevelRepository $levelRepository;
     private $user;
@@ -49,6 +49,6 @@ class LevelIsChildFromUserRole implements Rule
      */
     public function message()
     {
-        return "(#2) : Anda tidak memiliki hak akses !";
+        return "(#3.1) : Anda tidak memiliki hak akses !";
     }
 }
