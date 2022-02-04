@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Rules\IndicatorNotHaveChilds;
-use App\Rules\IndicatorIsSuperMaster;
+use App\Rules\Indicator__NotHave__Childs;
+use App\Rules\Indicator__IsSuperMaster;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -103,7 +103,7 @@ class IndicatorValidationService {
         //memastikan KPI belum memiliki turunan
 
         $attributes = [
-            'id' => ['required', 'uuid', new IndicatorIsSuperMaster(), new IndicatorNotHaveChilds()],
+            'id' => ['required', 'uuid', new Indicator__IsSuperMaster(), new Indicator__NotHave__Childs()],
         ];
 
         $messages = [

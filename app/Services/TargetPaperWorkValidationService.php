@@ -7,9 +7,9 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\LevelIsChildFromUser__Except__DataEntry_And_Employee;
-use App\Rules\UnitIsChildFromUser__Except__DataEntry_And_Employee;
-use App\Rules\UnitMatchWithLevel;
+use App\Rules\Level__IsChildFromUser__Except__DataEntry_And_Employee;
+use App\Rules\Unit__IsChildFromUser__Except__DataEntry_And_Employee;
+use App\Rules\Unit__MatchWith__Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -40,8 +40,8 @@ class TargetPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new LevelIsChildFromUser__Except__DataEntry_And_Employee($user)],
-            'unit' => ['required', 'string', new UnitIsChildFromUser__Except__DataEntry_And_Employee($user)], //new UnitMatchWithLevel($request->query('level'))
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
+            'unit' => ['required', 'string', new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)], //new Unit__MatchWith__Level($request->query('level'))
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -61,13 +61,13 @@ class TargetPaperWorkValidationService {
     {
         //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
-        
+
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
             'targets' => ['required'],
-            'level' => ['required', 'string', 'not_in:super-master', new LevelIsChildFromUser__Except__DataEntry_And_Employee($user)],
-            'unit' => ['required', 'string', new UnitIsChildFromUser__Except__DataEntry_And_Employee($user), new UnitMatchWithLevel($request->post('level'))],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
+            'unit' => ['required', 'string', new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user), new Unit__MatchWith__Level($request->post('level'))],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 

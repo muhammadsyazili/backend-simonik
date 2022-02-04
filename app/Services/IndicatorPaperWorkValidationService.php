@@ -7,14 +7,14 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\HaveIndicatorsNotMatchWithSuperMater;
-use App\Rules\AllTargetAndAllRealizationIsDefault;
-use App\Rules\LevelIsChildFromUser;
-use App\Rules\LevelIsThisAndChildFromUser;
-use App\Rules\IndicatorPaperWorkNotAvailable;
-use App\Rules\IndicatorPaperWorkAvailable;
-use App\Rules\UnitMatchWithLevel;
-use App\Rules\UnitIsThisAndChildUser;
+use App\Rules\Indicator__MatchWith__SuperMater_Indicator;
+use App\Rules\AllTarget_And_AllRealization__IsDefault;
+use App\Rules\Level__IsChildFromUser;
+use App\Rules\Level__IsThisAndChildFromUser;
+use App\Rules\IndicatorPaperWork__NotAvailable;
+use App\Rules\IndicatorPaperWork__Available;
+use App\Rules\Unit__MatchWith__Level;
+use App\Rules\Unit__IsThisAndChildUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -44,8 +44,8 @@ class IndicatorPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new LevelIsThisAndChildFromUser($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new UnitIsThisAndChildUser($user)], //new UnitMatchWithLevel($request->query('level'))
+            'level' => ['required', 'string', new Level__IsThisAndChildFromUser($user)],
+            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildUser($user)], //new Unit__MatchWith__Level($request->query('level'))
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -70,8 +70,8 @@ class IndicatorPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'indicators' => ['required', new HaveIndicatorsNotMatchWithSuperMater($request->post('indicators'))],
-            'level' => ['required', 'string', 'not_in:super-master', new LevelIsChildFromUser($user), new IndicatorPaperWorkNotAvailable($request->post('level'), $request->post('year'))],
+            'indicators' => ['required', new Indicator__MatchWith__SuperMater_Indicator($request->post('indicators'))],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser($user), new IndicatorPaperWork__NotAvailable($request->post('level'), $request->post('year'))],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -92,8 +92,8 @@ class IndicatorPaperWorkValidationService {
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWorkAvailable($level, $unit, $year)],
-            'unit' => ['required', 'string', new UnitMatchWithLevel($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year)],
+            'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -115,8 +115,8 @@ class IndicatorPaperWorkValidationService {
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWorkAvailable($level, $unit, $year)],
-            'unit' => ['required', 'string', new UnitMatchWithLevel($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year)],
+            'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -161,8 +161,8 @@ class IndicatorPaperWorkValidationService {
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new AllTargetAndAllRealizationIsDefault($level, $unit, $year), new IndicatorPaperWorkAvailable($level, $unit, $year)],
-            'unit' => ['required', 'string', new UnitMatchWithLevel($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new AllTarget_And_AllRealization__IsDefault($level, $unit, $year), new IndicatorPaperWork__Available($level, $unit, $year)],
+            'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 

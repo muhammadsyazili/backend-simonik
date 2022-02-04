@@ -6,7 +6,7 @@ use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
 //KPI tidak berlabel 'super-master'
-class IndicatorIsSuperMaster implements Rule
+class Indicator__IsSuperMaster implements Rule
 {
     private IndicatorRepository $indicatorRepository;
 

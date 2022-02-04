@@ -5,7 +5,7 @@ namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use App\Repositories\UnitRepository;
 
-class UnitMatchWithLevel implements Rule
+class Unit__MatchWith__Level implements Rule
 {
     private UnitRepository $unitRepository;
     private $level;

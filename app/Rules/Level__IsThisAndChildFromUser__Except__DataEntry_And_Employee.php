@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 use App\Repositories\LevelRepository;
 
-class LevelIsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rule
+class Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rule
 {
     private LevelRepository $levelRepository;
     private $user;

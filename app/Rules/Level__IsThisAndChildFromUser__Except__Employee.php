@@ -4,11 +4,11 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
-use App\Repositories\UnitRepository;
+use App\Repositories\LevelRepository;
 
-class UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rule
+class Level__IsThisAndChildFromUser__Except__Employee implements Rule
 {
-    private UnitRepository $unitRepository;
+    private LevelRepository $levelRepository;
     private $user;
 
     /**
@@ -21,7 +21,7 @@ class UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rule
     {
         $this->user = $user;
 
-        $this->unitRepository = new UnitRepository();
+        $this->levelRepository = new LevelRepository();
     }
 
     /**
@@ -36,7 +36,9 @@ class UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return $value === 'master' || in_array($value, Arr::flatten($this->unitRepository->findAllSlugWithThisAndChildsById($this->user->unit->id))) ? true : false;
+            return in_array($value, Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($this->user->unit->level->id))) ? true : false;
+        } else if ($this->user->role->name === 'data-entry') {
+            return $value === $this->user->unit->level->slug ? true : false;
         } else {
             return false;
         }
@@ -49,6 +51,6 @@ class UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee implements Rule
      */
     public function message()
     {
-        return "(#4.2) : Anda tidak memiliki hak akses !";
+        return "(#3.2) : Anda tidak memiliki hak akses !";
     }
 }

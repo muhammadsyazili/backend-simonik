@@ -6,11 +6,11 @@ use App\DTO\ConstructRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
-use App\Rules\IndicatorPaperWorkAvailable;
+use App\Rules\IndicatorPaperWork__Available;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use App\Rules\UnitMatchWithLevel;
+use App\Rules\Unit__MatchWith__Level;
 
 class IndicatorReferenceValidationService {
     private ?IndicatorRepository $indicatorRepository;
@@ -76,8 +76,8 @@ class IndicatorReferenceValidationService {
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
-            'level' => ['required', 'string', new IndicatorPaperWorkAvailable($request->query('level'), $request->query('unit'), $request->query('tahun'))],
-            'unit' => ['required_unless:level,super-master', 'string', 'in:master', new UnitMatchWithLevel($request->query('level'))],
+            'level' => ['required', 'string', new IndicatorPaperWork__Available($request->query('level'), $request->query('unit'), $request->query('tahun'))],
+            'unit' => ['required_unless:level,super-master', 'string', 'in:master', new Unit__MatchWith__Level($request->query('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -100,7 +100,7 @@ class IndicatorReferenceValidationService {
             'indicators.*' => ['required', 'uuid'],
             'preferences.*' => ['required'],
             'level' => ['required', 'string'],
-            'unit' => ['required_unless:level,super-master', 'string', 'in:master', new UnitMatchWithLevel($request->post('level'))],
+            'unit' => ['required_unless:level,super-master', 'string', 'in:master', new Unit__MatchWith__Level($request->post('level'))],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 

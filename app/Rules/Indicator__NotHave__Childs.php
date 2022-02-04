@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-class IndicatorNotHaveChilds implements Rule
+class Indicator__NotHave__Childs implements Rule
 {
     private IndicatorRepository $indicatorRepository;
 

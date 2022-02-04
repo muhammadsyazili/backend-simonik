@@ -7,11 +7,11 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\LevelIsThisAndChildFromUser__Except__DataEntry_And_Employee;
-use App\Rules\LevelIsThisAndChildFromUser__Except__Employee;
-use App\Rules\UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee;
-use App\Rules\UnitIsThisAndChildUser__Except__Employee;
-use App\Rules\UnitMatchWithLevel;
+use App\Rules\Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
+use App\Rules\Level__IsThisAndChildFromUser__Except__Employee;
+use App\Rules\Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
+use App\Rules\Unit__IsThisAndChildUser__Except__Employee;
+use App\Rules\Unit__MatchWith__Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -42,8 +42,8 @@ class RealizationPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new LevelIsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new UnitIsThisAndChildUser__Except__Employee($user)], //new UnitMatchWithLevel($request->query('level'))
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)], //new Unit__MatchWith__Level($request->query('level'))
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -68,8 +68,8 @@ class RealizationPaperWorkValidationService {
 
         $attributes = [
             'realizations' => ['required'],
-            'level' => ['required', 'string', 'not_in:super-master', new LevelIsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new UnitIsThisAndChildUser__Except__Employee($user), new UnitMatchWithLevel($request->post('level'))],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user), new Unit__MatchWith__Level($request->post('level'))],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -149,7 +149,7 @@ class RealizationPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'id' => ['required', 'string', 'uuid', new LevelIsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new UnitIsThisAndChildFromUser__Except__DataEntry_And_Employee($user)],
+            'id' => ['required', 'string', 'uuid', new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)],
             'month' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
@@ -172,7 +172,7 @@ class RealizationPaperWorkValidationService {
             }
         });
 
-        //memastikan unit dari KPI yang dikirim merupakan turunannya
+        //memastikan unit dari KPI yang dikirim merupakan turunan user saat ini
         $validator->after(function ($validator) use ($user, $indicator) {
             if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->findAllIdWithThisAndChildsById($user->unit->id)))) {
                 $validator->errors()->add('id', "Akses ilegal !");

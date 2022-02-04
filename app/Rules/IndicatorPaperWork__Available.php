@@ -7,7 +7,7 @@ use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-class IndicatorPaperWorkAvailable implements Rule
+class IndicatorPaperWork__Available implements Rule
 {
     private LevelRepository $levelRepository;
     private UnitRepository $unitRepository;

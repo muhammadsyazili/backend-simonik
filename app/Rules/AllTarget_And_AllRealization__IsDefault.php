@@ -8,7 +8,7 @@ use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 
 //Terdapat KPI yang sudah punya kertas kerja target & realisasi
-class AllTargetAndAllRealizationIsDefault implements Rule
+class AllTarget_And_AllRealization__IsDefault implements Rule
 {
     private IndicatorRepository $indicatorRepository;
     private LevelRepository $levelRepository;
@@ -76,6 +76,6 @@ class AllTargetAndAllRealizationIsDefault implements Rule
      */
     public function message()
     {
-        return 'Kertas kerja KPI tidak bisa dihapus !';
+        return 'Terdapat target/realisasi berstatus un-default !';
     }
 }
