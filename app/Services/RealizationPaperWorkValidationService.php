@@ -149,7 +149,7 @@ class RealizationPaperWorkValidationService {
         $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
 
         $attributes = [
-            'id' => ['required', 'string', 'uuid', new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)],
+            'id' => ['required', 'string', 'uuid'], //new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)
             'month' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
@@ -159,7 +159,7 @@ class RealizationPaperWorkValidationService {
             'in' => ':attribute yang dipilih tidak sah.',
         ];
 
-        $input = Arr::only($request->query(), array_keys($attributes));
+        $input = ['id' => $request->id, 'month' => $request->month];
 
         $validator = Validator::make($input, $attributes, $messages);
 
@@ -173,11 +173,13 @@ class RealizationPaperWorkValidationService {
         });
 
         //memastikan unit dari KPI yang dikirim merupakan turunan user saat ini
-        $validator->after(function ($validator) use ($user, $indicator) {
-            if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->findAllIdWithThisAndChildsById($user->unit->id)))) {
-                $validator->errors()->add('id', "Akses ilegal !");
-            }
-        });
+        if ($user->role->name !== 'super-admin') {
+            $validator->after(function ($validator) use ($user, $indicator) {
+                if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->findAllIdWithThisAndChildsById($user->unit->id)))) {
+                    $validator->errors()->add('id', "Akses ilegal2 !");
+                }
+            });
+        }
 
         return $validator;
     }

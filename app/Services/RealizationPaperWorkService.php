@@ -76,9 +76,18 @@ class RealizationPaperWorkService {
         });
     }
 
-    public function changeLock(string|int $userId, string|int $indicatorId, string $month)
+    //use repo RealizationRepository
+    public function changeLock(string|int $indicatorId, string $month) : void
     {
+        DB::transaction(function () use ($indicatorId, $month) {
+            $realization = $this->realizationRepository->findByIndicatorIdAndMonth($indicatorId, $month);
 
+            if ($realization->locked) {
+                $this->realizationRepository->updateLockedByMonthAndIndicatorId($month, $indicatorId, false);
+            } else {
+                $this->realizationRepository->updateLockedByMonthAndIndicatorId($month, $indicatorId, true);
+            }
+        });
     }
 
     private function monthName__to__monthNumber(string $monthName) : int

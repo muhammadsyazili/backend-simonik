@@ -192,7 +192,6 @@ class PaperWorkRealizationController extends ApiController
         // $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
 
         $userRepository = new UserRepository();
-        $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
         $indicatorRepository = new IndicatorRepository();
         $realizationRepository = new RealizationRepository();
@@ -200,7 +199,6 @@ class PaperWorkRealizationController extends ApiController
         $constructRequest = new ConstructRequest();
 
         $constructRequest->userRepository = $userRepository;
-        $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->realizationRepository = $realizationRepository;
@@ -218,5 +216,17 @@ class PaperWorkRealizationController extends ApiController
                 $validation->errors(),
             );
         }
+
+        $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
+
+        $realizationPaperWorkService->changeLock($id, $month);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Kertas kerja realisasi (KPI: %s) (Bulan: %s) berhasil diubah !", $id, $month),
+            null,
+            null,
+        );
     }
 }

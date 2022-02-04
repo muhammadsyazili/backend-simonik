@@ -23,6 +23,11 @@ class RealizationRepository {
         ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['locked' => true, 'default' => false, 'value' => $value]);
     }
 
+    public function updateLockedByMonthAndIndicatorId(string $month, string|int $indicatorId, bool $locked)
+    {
+        ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['locked' => $locked]);
+    }
+
     public function deleteById(string|int $id) : void
     {
         ModelsRealization::where(['id' => $id])->forceDelete();
