@@ -38,6 +38,11 @@ class TargetRepository {
         ModelsTarget::where(['indicator_id' => $indicatorId])->forceDelete();
     }
 
+    public function find__by__indicatorId_month(string|int $indicatorId, string $month)
+    {
+        return ModelsTarget::firstWhere(['indicator_id' => $indicatorId, 'month' => $month]);
+    }
+
     public function find__all__by__indicatorId(string|int $indicatorId)
     {
         return ModelsTarget::where(['indicator_id' => $indicatorId])->get();

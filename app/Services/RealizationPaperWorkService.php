@@ -63,11 +63,17 @@ class RealizationPaperWorkService {
             foreach ($indicators as $indicator) {
                 //section: paper work 'CHILD' updating ----------------------------------------------------------------------
                 foreach ($indicator->validity as $month => $value) {
+                    $realization = $this->realizationRepository->find__by__indicatorId_month($indicator->id, $month);
+
                     if (in_array($user->role->name, ['super-admin', 'admin'])) {
-                        $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                        if ($realization->value != $realizations[$indicator->id][$month]) {
+                            $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                        }
                     } else {
                         if ($this->monthName__to__monthNumber($month) === now()->month || !$this->realizationRepository->find__by__indicatorId_month($indicator->id, $month)->locked) {
-                            $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                            if ($realization->value != $realizations[$indicator->id][$month]) {
+                                $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                            }
                         }
                     }
                 }

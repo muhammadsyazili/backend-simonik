@@ -64,7 +64,11 @@ class TargetPaperWorkService {
             foreach ($indicators as $indicator) {
                 //section: paper work 'MASTER' updating ----------------------------------------------------------------------
                 foreach ($indicator->validity as $month => $value) {
-                    $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $targets[$indicator->id][$month]);
+                    $target = $this->targetRepository->find__by__indicatorId_month($indicator->id, $month);
+
+                    if ($target->value != $targets[$indicator->id][$month]) {
+                        $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $targets[$indicator->id][$month]);
+                    }
                 }
                 //end section: paper work 'MASTER' updating ----------------------------------------------------------------------
 
@@ -76,7 +80,11 @@ class TargetPaperWorkService {
                         foreach ($indicatorsChild as $indicatorChild) {
                             foreach ($indicatorChild->validity as $month => $value) {
                                 if (in_array($month, array_keys($targets[$indicator->id]))) {
-                                    $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
+                                    $target = $this->targetRepository->find__by__indicatorId_month($indicatorChild->id, $month);
+
+                                    if ($target->value != $targets[$indicator->id][$month]) {
+                                        $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
+                                    }
                                 }
                             }
                         }
@@ -89,7 +97,11 @@ class TargetPaperWorkService {
                             if (in_array($indicatorChild->unit_id, $unitsId)) {
                                 foreach ($indicatorChild->validity as $month => $value) {
                                     if (in_array($month, array_keys($targets[$indicator->id]))) {
-                                        $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
+                                        $target = $this->targetRepository->find__by__indicatorId_month($indicatorChild->id, $month);
+
+                                        if ($target->value != $targets[$indicator->id][$month]) {
+                                            $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
+                                        }
                                     }
                                 }
                             }
