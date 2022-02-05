@@ -36,11 +36,11 @@ class IsSuperAdminOrAdminHaveChild
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
         if ($user->role->name === 'super-admin') {
             return $next($request);
         } else if ($user->role->name === 'admin') {
-            $childs = Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($user->unit->level->id));
+            $childs = Arr::flatten($this->levelRepository->find__allSlug__with__this_childs__by__id($user->unit->level->id));
 
             return count($childs) > 1 ?
             $next($request) :

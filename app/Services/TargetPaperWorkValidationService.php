@@ -37,7 +37,7 @@ class TargetPaperWorkValidationService {
         //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
@@ -62,7 +62,7 @@ class TargetPaperWorkValidationService {
         //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'targets' => ['required'],
@@ -92,8 +92,8 @@ class TargetPaperWorkValidationService {
         $targets = $request->post('targets');
         $indicatorsId = array_keys($request->post('targets')); //list KPI dari target
 
-        $levelId = $this->levelRepository->findIdBySlug($request->post('level'));
-        $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun')));
+        $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
+        $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun')));
 
         //memastikan KPI yang dikirim terdaftar di DB
         $validator->after(function ($validator) use ($indicatorsId, $indicators) {
@@ -105,7 +105,7 @@ class TargetPaperWorkValidationService {
             }
         });
 
-        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYearAndIdList($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYearAndIdList($indicatorsId, $levelId, $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun'));
+        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan KPI yang dikirim tidak ada status dummy
         $validator->after(function ($validator) use ($indicators) {
@@ -120,7 +120,7 @@ class TargetPaperWorkValidationService {
         //pastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
         $validator->after(function ($validator) use ($targets) {
             foreach ($targets as $targetK => $targetV) {
-                $indicator = $this->indicatorRepository->findById($targetK);
+                $indicator = $this->indicatorRepository->find__by__id($targetK);
                 $validityMonths = array_keys($indicator->validity);
 
                 $isError = false;

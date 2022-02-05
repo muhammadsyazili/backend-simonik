@@ -36,7 +36,7 @@ class Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee implements Ru
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return $value === 'master' || in_array($value, Arr::flatten($this->unitRepository->findAllSlugWithThisAndChildsById($this->user->unit->id))) ? true : false;
+            return $value === 'master' || in_array($value, Arr::flatten($this->unitRepository->find__allSlug__with__this_childs__by__id($this->user->unit->id))) ? true : false;
         } else {
             return false;
         }

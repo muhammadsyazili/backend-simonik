@@ -42,9 +42,9 @@ class RealizationPaperWorkService {
 
         $response->levels = $levelService->levelsOfUser($userId, false);
 
-        $levelId = $this->levelRepository->findIdBySlug($level);
+        $levelId = $this->levelRepository->find__id__by__slug($level);
 
-        $response->indicators = $this->indicatorRepository->findAllWithChildsAndTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year);
+        $response->indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
         return $response;
     }
@@ -54,20 +54,20 @@ class RealizationPaperWorkService {
     {
         //jika user adalah 'super-admin' or 'admin' maka bisa entry realisasi semua bulan, else hanya bisa bulan saat ini or bulan yang un-locked
         DB::transaction(function () use ($userId, $indicators, $realizations, $level, $unit, $year) {
-            $user = $this->userRepository->findWithRoleUnitLevelById($userId);
+            $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
 
-            $levelId = $this->levelRepository->findIdBySlug($level);
+            $levelId = $this->levelRepository->find__id__by__slug($level);
 
-            $indicators = $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYearAndIdList($indicators, $levelId, $this->unitRepository->findIdBySlug($unit), $year);
+            $indicators = $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicators, $levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
             foreach ($indicators as $indicator) {
                 //section: paper work 'CHILD' updating ----------------------------------------------------------------------
                 foreach ($indicator->validity as $month => $value) {
                     if (in_array($user->role->name, ['super-admin', 'admin'])) {
-                        $this->realizationRepository->updateValueAndDefaultByMonthAndIndicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                        $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
                     } else {
-                        if ($this->monthName__to__monthNumber($month) === now()->month || !$this->realizationRepository->findByIndicatorIdAndMonth($indicator->id, $month)->locked) {
-                            $this->realizationRepository->updateValueAndDefaultByMonthAndIndicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                        if ($this->monthName__to__monthNumber($month) === now()->month || !$this->realizationRepository->find__by__indicatorId_month($indicator->id, $month)->locked) {
+                            $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
                         }
                     }
                 }
@@ -80,12 +80,12 @@ class RealizationPaperWorkService {
     public function changeLock(string|int $indicatorId, string $month) : void
     {
         DB::transaction(function () use ($indicatorId, $month) {
-            $realization = $this->realizationRepository->findByIndicatorIdAndMonth($indicatorId, $month);
+            $realization = $this->realizationRepository->find__by__indicatorId_month($indicatorId, $month);
 
             if ($realization->locked) {
-                $this->realizationRepository->updateLockedByMonthAndIndicatorId($month, $indicatorId, false);
+                $this->realizationRepository->update__locked__by__month_indicatorId($month, $indicatorId, false);
             } else {
-                $this->realizationRepository->updateLockedByMonthAndIndicatorId($month, $indicatorId, true);
+                $this->realizationRepository->update__locked__by__month_indicatorId($month, $indicatorId, true);
             }
         });
     }

@@ -32,7 +32,7 @@ class IsSuperAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = $this->userRepository->findWithRoleById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role__by__id($request->header('X-User-Id'));
 
         return $user->role->name === 'super-admin' ?
         $next($request) :

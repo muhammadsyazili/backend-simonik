@@ -67,22 +67,22 @@ class IndicatorService {
             $indicator->referenced = false;
             $indicator->label = 'super-master';
             $indicator->unit_id = null;
-            $indicator->level_id = $this->levelRepository->findIdBySlug('super-master');
-            $indicator->order = $this->indicatorRepository->countAllPlusOneByLevelIdAndUnitIdAndYear('super-master');
+            $indicator->level_id = $this->levelRepository->find__id__by__slug('super-master');
+            $indicator->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year('super-master');
             $indicator->code = null;
             $indicator->parent_vertical_id = null;
             $indicator->parent_horizontal_id = null;
             $indicator->created_by = $indicatorNew->user_id;
 
             $this->indicatorRepository->save($indicator);
-            $this->indicatorRepository->updateCodeById($id);
+            $this->indicatorRepository->update__code__by__id($id);
         });
     }
 
     //use repo IndicatorRepository
     public function edit(string|int $id)
     {
-        $indicator = $this->indicatorRepository->findWithLevelById($id);
+        $indicator = $this->indicatorRepository->find__with__level__by__id($id);
         $indicator->original_polarity = $indicator->getRawOriginal('polarity');
         return $indicator;
     }
@@ -96,7 +96,7 @@ class IndicatorService {
 
         DB::transaction(function () use ($indicatorNew, $id, $indicator, $target, $realization) {
 
-            $indicatorOld = $this->indicatorRepository->findById($id);
+            $indicatorOld = $this->indicatorRepository->find__by__id($id);
 
             if ($indicatorOld->label === 'super-master') {
                 //convert (validity & weight) from array to JSON string
@@ -135,7 +135,7 @@ class IndicatorService {
                 $indicator->parent_vertical_id = $indicatorOld->parent_vertical_id;
                 $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
-                $this->indicatorRepository->updateById($indicator, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicator, $id); //update KPI
             } else if ($indicatorOld->label === 'master') {
                 /**
                  * section: master
@@ -225,8 +225,8 @@ class IndicatorService {
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                         foreach ($old as $v) {
-                            $this->targetRepository->deleteByMonthAndIndicatorId($v, $id); //delete target
-                            $this->realizationRepository->deleteByMonthAndIndicatorId($v, $id); //delete realisasi
+                            $this->targetRepository->delete__by__month_indicatorId($v, $id); //delete target
+                            $this->realizationRepository->delete__by__month_indicatorId($v, $id); //delete realisasi
                         }
                     }
                 } else { //masa berlaku lama nol
@@ -253,7 +253,7 @@ class IndicatorService {
                     }
                 }
 
-                $this->indicatorRepository->updateById($indicator, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicator, $id); //update KPI
 
                 /**
                  * section: childs
@@ -348,8 +348,8 @@ class IndicatorService {
 
                             if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                                 foreach ($old as $v) {
-                                    $this->targetRepository->deleteByMonthAndIndicatorId($v, $familyIndicatorOld->id); //delete target
-                                    $this->realizationRepository->deleteByMonthAndIndicatorId($v, $familyIndicatorOld->id); //delete realisasi
+                                    $this->targetRepository->delete__by__month_indicatorId($v, $familyIndicatorOld->id); //delete target
+                                    $this->realizationRepository->delete__by__month_indicatorId($v, $familyIndicatorOld->id); //delete realisasi
                                 }
                             }
                         } else { //masa berlaku lama nol
@@ -376,7 +376,7 @@ class IndicatorService {
                             }
                         }
 
-                        $this->indicatorRepository->updateById($indicator, $familyIndicatorOld->id); //update KPI
+                        $this->indicatorRepository->update__by__id($indicator, $familyIndicatorOld->id); //update KPI
                     }
                 }
             } else if ($indicatorOld->label === 'child') {
@@ -464,8 +464,8 @@ class IndicatorService {
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                         foreach ($old as $v) {
-                            $this->targetRepository->deleteByMonthAndIndicatorId($v, $id); //delete target
-                            $this->realizationRepository->deleteByMonthAndIndicatorId($v, $id); //delete realisasi
+                            $this->targetRepository->delete__by__month_indicatorId($v, $id); //delete target
+                            $this->realizationRepository->delete__by__month_indicatorId($v, $id); //delete realisasi
                         }
                     }
                 } else { //masa berlaku lama nol
@@ -492,7 +492,7 @@ class IndicatorService {
                     }
                 }
 
-                $this->indicatorRepository->updateById($indicator, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicator, $id); //update KPI
             }
         });
     }
@@ -501,7 +501,7 @@ class IndicatorService {
     public function destroy(string|int $id) : void
     {
         DB::transaction(function () use ($id) {
-            $this->indicatorRepository->deleteById($id);
+            $this->indicatorRepository->delete__by__id($id);
         });
     }
 

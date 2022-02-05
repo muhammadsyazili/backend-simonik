@@ -37,7 +37,7 @@ class Unit__MatchWith__Level implements Rule
         } else if ($value === 'master') {
             return true;
         } else {
-            $unit = $this->unitRepository->findIdWithLevelBySlug($value);
+            $unit = $this->unitRepository->find__id__with__level__by__slug($value);
             return $unit->level->slug === $this->level ? true : false;
         }
     }

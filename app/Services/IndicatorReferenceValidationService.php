@@ -43,7 +43,7 @@ class IndicatorReferenceValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $indicators = $this->indicatorRepository->findAllIdBySuperMasterLabel(); //get indicators paper work
+        $indicators = $this->indicatorRepository->find__allId__by_SuperMasterLabel(); //get indicators paper work
 
         //memastikan semua KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {
@@ -116,7 +116,7 @@ class IndicatorReferenceValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $indicators = $request->post('level') === 'super-master' ? $this->indicatorRepository->findIdAndParentHorizontalIdByWhere('super-master', null, null, null) : $this->indicatorRepository->findIdAndParentHorizontalIdByWhere($request->post('unit') === 'master' ? 'master' : 'child', $this->levelRepository->findIdBySlug($request->post('level')), $request->post('unit') === 'master' ? null : $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun'));
+        $indicators = $request->post('level') === 'super-master' ? $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year($request->post('unit') === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($request->post('level')), $request->post('unit') === 'master' ? null : $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan semua KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
         $validator->after(function ($validator) use ($request, $indicators) {

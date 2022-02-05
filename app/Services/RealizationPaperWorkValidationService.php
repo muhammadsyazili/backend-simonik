@@ -39,7 +39,7 @@ class RealizationPaperWorkValidationService {
         //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
@@ -64,7 +64,7 @@ class RealizationPaperWorkValidationService {
         //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'realizations' => ['required'],
@@ -94,8 +94,8 @@ class RealizationPaperWorkValidationService {
         $realizations = $request->post('realizations');
         $indicatorsId = array_keys($request->post('realizations')); //list KPI dari realization
 
-        $levelId = $this->levelRepository->findIdBySlug($request->post('level'));
-        $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun')));
+        $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
+        $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun')));
 
         //memastikan KPI yang dikirim terdaftar di DB
         $validator->after(function ($validator) use ($indicatorsId, $indicators) {
@@ -107,7 +107,7 @@ class RealizationPaperWorkValidationService {
             }
         });
 
-        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYearAndIdList($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->findAllByLevelIdAndUnitIdAndYearAndIdList($indicatorsId, $levelId, $this->unitRepository->findIdBySlug($request->post('unit')), $request->post('tahun'));
+        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan KPI yang dikirim tidak ada status dummy
         $validator->after(function ($validator) use ($indicators) {
@@ -122,7 +122,7 @@ class RealizationPaperWorkValidationService {
         //memastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
         $validator->after(function ($validator) use ($realizations) {
             foreach ($realizations as $realizationK => $realizationV) {
-                $indicator = $this->indicatorRepository->findById($realizationK);
+                $indicator = $this->indicatorRepository->find__by__id($realizationK);
                 $validityMonths = array_keys($indicator->validity);
 
                 $isError = false;
@@ -146,7 +146,7 @@ class RealizationPaperWorkValidationService {
     //use repo UserRepository, IndicatorRepository, UnitRepository
     public function changeLockValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'id' => ['required', 'string', 'uuid'], //new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)
@@ -163,7 +163,7 @@ class RealizationPaperWorkValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $indicator = $this->indicatorRepository->findById($request->id);
+        $indicator = $this->indicatorRepository->find__by__id($request->id);
 
         //memastikan KPI yang dikirim berlabel 'child'
         $validator->after(function ($validator) use ($indicator) {
@@ -175,7 +175,7 @@ class RealizationPaperWorkValidationService {
         //memastikan unit dari KPI yang dikirim merupakan turunan user saat ini
         if ($user->role->name !== 'super-admin') {
             $validator->after(function ($validator) use ($user, $indicator) {
-                if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->findAllIdWithThisAndChildsById($user->unit->id)))) {
+                if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->find__allId__with__this_childs__by__id($user->unit->id)))) {
                     $validator->errors()->add('id', "Akses ilegal2 !");
                 }
             });

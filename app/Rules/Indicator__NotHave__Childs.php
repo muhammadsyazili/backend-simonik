@@ -28,7 +28,7 @@ class Indicator__NotHave__Childs implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $this->indicatorRepository->countAllByCode($value) > 1 ? false : true;
+        return $this->indicatorRepository->count__all__by__code($value) > 1 ? false : true;
     }
 
     /**

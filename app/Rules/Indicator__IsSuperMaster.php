@@ -29,7 +29,7 @@ class Indicator__IsSuperMaster implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $this->indicatorRepository->findLabelById($value) === 'super-master' ? true : false;
+        return $this->indicatorRepository->find__label__by__id($value) === 'super-master' ? true : false;
     }
 
     /**

@@ -7,12 +7,12 @@ use App\Models\UnitOnlyId;
 use App\Models\UnitOnlySlug;
 
 class UnitRepository {
-    public function findIdBySlug(string $slug) : string|int
+    public function find__id__by__slug(string $slug) : string|int
     {
         return Unit::firstWhere(['slug' => $slug])->id;
     }
 
-    public function findAllWithIndicatorByLevelIdAndYear(string|int $levelId, string|int $year)
+    public function find__all__with__indicator__by__levelId_year(string|int $levelId, string|int $year)
     {
         return Unit::with(['indicators' => function ($query) use ($year) {
             $query->where([
@@ -21,37 +21,37 @@ class UnitRepository {
         }])->where(['level_id' => $levelId])->get();
     }
 
-    public function findAllByLevelId(string|int $levelId)
+    public function find__all__by__levelId(string|int $levelId)
     {
         return Unit::where(['level_id' => $levelId])->get();
     }
 
-    public function findAllSlugWithThisAndChildsById(string|int $id) : array
+    public function find__allSlug__with__this_childs__by__id(string|int $id) : array
     {
         return UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->get()->toArray();
     }
 
-    public function findAllSlugWithChildsById(string|int $id) : array
+    public function find__allSlug__with__childs__by__id(string|int $id) : array
     {
         return UnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
     }
 
-    public function findAllIdWithThisAndChildsById(string|int $id) : array
+    public function find__allId__with__this_childs__by__id(string|int $id) : array
     {
         return UnitOnlyId::with('childsRecursive')->where(['id' => $id])->get()->toArray();
     }
 
-    public function findAllIdWithChildsById(string|int $id) : array
+    public function find__allId__with__childs__by__id(string|int $id) : array
     {
         return UnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
     }
 
-    public function findIdWithLevelBySlug(string $slug)
+    public function find__id__with__level__by__slug(string $slug)
     {
         return Unit::with('level')->firstWhere(['slug' => $slug]);
     }
 
-    public function findAllSlugNameByLevelId(string|int $levelId)
+    public function find__allSlug_allName__by__levelId(string|int $levelId)
     {
         return Unit::where(['level_id' => $levelId])->orderBy('name', 'asc')->get(['slug', 'name']);
     }

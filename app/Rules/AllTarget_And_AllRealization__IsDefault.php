@@ -43,8 +43,8 @@ class AllTarget_And_AllRealization__IsDefault implements Rule
      */
     public function passes($attribute, $value)
     {
-        $levelId = $this->levelRepository->findIdBySlug($this->level);
-        $indicators = $this->unit === 'master' ? $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, null, $this->year) : $this->indicatorRepository->findAllWithTargetsAndRealizationsByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
+        $levelId = $this->levelRepository->find__id__by__slug($this->level);
+        $indicators = $this->unit === 'master' ? $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, null, $this->year) : $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($this->unit), $this->year);
 
         //cek apakah target or realisasi sudah ada yang di-edit
         $isDefault = true;

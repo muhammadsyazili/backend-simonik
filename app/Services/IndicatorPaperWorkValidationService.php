@@ -41,7 +41,7 @@ class IndicatorPaperWorkValidationService {
         //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'level' => ['required', 'string', new Level__IsThisAndChildFromUser($user)],
@@ -67,7 +67,7 @@ class IndicatorPaperWorkValidationService {
         //memastikan semua KPI yang dikirim mrupakan KPI yang bersumber dari super-master
         //memastikan kertas kerja KPI yang akan dibuat belum tersedia di DB
 
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
             'indicators' => ['required', new Indicator__MatchWith__SuperMater_Indicator($request->post('indicators'))],
@@ -130,8 +130,8 @@ class IndicatorPaperWorkValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $levelId = $this->levelRepository->findIdBySlug($level);
-        $indicators = $unit === 'master' ? Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, null, $year)) : Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($unit), $year));
+        $levelId = $this->levelRepository->find__id__by__slug($level);
+        $indicators = $unit === 'master' ? Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year)) : Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year));
 
         $new = [];
         $i = 0;
@@ -142,7 +142,7 @@ class IndicatorPaperWorkValidationService {
             }
         }
 
-        $res = $this->indicatorRepository->countAllByIdListAndSuperMasterLabel($new);
+        $res = $this->indicatorRepository->count__all__by__idList_superMasterLabel($new);
 
         //memastikan jumlah KPI sama dengan di database
         $validator->after(function ($validator) use ($new, $res) {
@@ -197,14 +197,14 @@ class IndicatorPaperWorkValidationService {
 
         $indicators = [];
         if ($request->post('level') === 'super-master') {
-            $indicators = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear());
+            $indicators = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year());
         } else {
-            $levelId = $this->levelRepository->findIdBySlug($request->post('level'));
+            $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
             $year = $request->post('year');
             if ($request->post('unit') === 'master') {
-                $indicators = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, null, $year));
+                $indicators = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year));
             } else {
-                $indicators = Arr::flatten($this->indicatorRepository->findAllIdByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($request->post('unit')), $year));
+                $indicators = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $year));
             }
         }
 

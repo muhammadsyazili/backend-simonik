@@ -36,7 +36,7 @@ class IndicatorPaperWork__NotAvailable implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $this->indicatorRepository->countAllByLevelIdAndYear($this->levelRepository->findIdBySlug($this->level), $this->year) > 0 ? false : true;
+        return $this->indicatorRepository->count__all__by__levelId_year($this->levelRepository->find__id__by__slug($this->level), $this->year) > 0 ? false : true;
     }
 
     /**

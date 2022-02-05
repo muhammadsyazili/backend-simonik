@@ -36,7 +36,7 @@ class Level__IsChildFromUser implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return in_array($value, Arr::flatten($this->levelRepository->findAllSlugWithChildsById($this->user->unit->level->id))) ? true : false;
+            return in_array($value, Arr::flatten($this->levelRepository->find__allSlug__with__childs__by__id($this->user->unit->level->id))) ? true : false;
         } else {
             return false;
         }

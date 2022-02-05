@@ -20,6 +20,6 @@ class UnitService {
     //use repo UnitRepository, LevelRepository
     public function unitsOfLevel(string $level)
     {
-        return $this->unitRepository->findAllSlugNameByLevelId($this->levelRepository->findIdBySlug($level));
+        return $this->unitRepository->find__allSlug_allName__by__levelId($this->levelRepository->find__id__by__slug($level));
     }
 }

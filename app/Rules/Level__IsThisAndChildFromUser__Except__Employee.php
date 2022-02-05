@@ -36,7 +36,7 @@ class Level__IsThisAndChildFromUser__Except__Employee implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return in_array($value, Arr::flatten($this->levelRepository->findAllSlugWithThisAndChildsById($this->user->unit->level->id))) ? true : false;
+            return in_array($value, Arr::flatten($this->levelRepository->find__allSlug__with__this_childs__by__id($this->user->unit->level->id))) ? true : false;
         } else if ($this->user->role->name === 'data-entry') {
             return $value === $this->user->unit->level->slug ? true : false;
         } else {

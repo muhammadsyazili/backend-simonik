@@ -32,6 +32,6 @@ class IsSuperMaster
      */
     public function handle(Request $request, Closure $next)
     {
-        return $this->indicatorRepository->findLabelById($request->id) === 'super-master' ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+        return $this->indicatorRepository->find__label__by__id($request->id) === 'super-master' ? $next($request) : $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
     }
 }

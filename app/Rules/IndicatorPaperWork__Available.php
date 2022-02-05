@@ -44,8 +44,8 @@ class IndicatorPaperWork__Available implements Rule
         if ($value === 'super-master') {
             return true;
         } else {
-            $levelId = $this->levelRepository->findIdBySlug($this->level);
-            $sumOfIndicator = $this->unit === 'master' ? $this->indicatorRepository->countAllByLevelIdAndUnitIdAndYear($levelId, null, $this->year) : $this->indicatorRepository->countAllByLevelIdAndUnitIdAndYear($levelId, $this->unitRepository->findIdBySlug($this->unit), $this->year);
+            $levelId = $this->levelRepository->find__id__by__slug($this->level);
+            $sumOfIndicator = $this->unit === 'master' ? $this->indicatorRepository->count__all__by__levelId_unitId_year($levelId, null, $this->year) : $this->indicatorRepository->count__all__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($this->unit), $this->year);
 
             return $sumOfIndicator > 0 ? true : false;
         }

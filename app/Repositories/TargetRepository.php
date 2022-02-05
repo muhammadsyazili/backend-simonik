@@ -18,27 +18,27 @@ class TargetRepository {
         ]);
     }
 
-    public function updateValueAndDefaultByMonthAndIndicatorId(string $month, string|int $indicatorId, float $value)
+    public function update__value_default__by__month_indicatorId(string $month, string|int $indicatorId, float $value)
     {
         ModelsTarget::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['default' => false, 'value' => $value]);
     }
 
-    public function deleteById(string|int $id) : void
+    public function delete__by__id(string|int $id) : void
     {
         ModelsTarget::where(['id' => $id])->forceDelete();
     }
 
-    public function deleteByMonthAndIndicatorId(string $month, string|int $indicatorId) : void
+    public function delete__by__month_indicatorId(string $month, string|int $indicatorId) : void
     {
         ModelsTarget::where(['indicator_id' => $indicatorId, 'month' => $month])->forceDelete();
     }
 
-    public function deleteByIndicatorId(string|int $indicatorId) : void
+    public function delete__by__indicatorId(string|int $indicatorId) : void
     {
         ModelsTarget::where(['indicator_id' => $indicatorId])->forceDelete();
     }
 
-    public function findAllByIndicatorId(string|int $indicatorId)
+    public function find__all__by__indicatorId(string|int $indicatorId)
     {
         return ModelsTarget::where(['indicator_id' => $indicatorId])->get();
     }

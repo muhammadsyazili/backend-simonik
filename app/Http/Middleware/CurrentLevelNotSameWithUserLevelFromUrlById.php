@@ -35,12 +35,12 @@ class CurrentLevelNotSameWithUserLevelFromUrlById
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         if ($user->role->name === 'super-admin') {
             return $next($request);
         } else {
-            return $this->indicatorRepository->findWithLevelById($request->id)->level->slug === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
+            return $this->indicatorRepository->find__with__level__by__id($request->id)->level->slug === $user->unit->level->slug ? $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null) : $next($request);
         }
     }
 }

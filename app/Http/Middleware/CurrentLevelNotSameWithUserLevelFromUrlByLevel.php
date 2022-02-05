@@ -32,7 +32,7 @@ class CurrentLevelNotSameWithUserLevelFromUrlByLevel
      */
     public function handle(Request $request, Closure $next)
     {
-        $user = $this->userRepository->findWithRoleUnitLevelById($request->header('X-User-Id'));
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         if ($user->role->name === 'super-admin') {
             return $next($request);

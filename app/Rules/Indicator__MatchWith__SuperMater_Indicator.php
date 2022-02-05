@@ -33,7 +33,7 @@ class Indicator__MatchWith__SuperMater_Indicator implements Rule
      */
     public function passes($attribute, $value)
     {
-        $indicators = Arr::flatten($this->indicatorRepository->findAllIdAndReferencedBySuperMasterLabel());
+        $indicators = Arr::flatten($this->indicatorRepository->find__allId_referenced__by__superMasterLabel());
 
         foreach ($this->indicators as $indicator) {
             if (!in_array($indicator, $indicators)) {
