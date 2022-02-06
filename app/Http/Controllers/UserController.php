@@ -2,14 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\ConstructRequest;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use App\Repositories\LevelRepository;
-use App\Repositories\UserRepository;
-use App\Services\LevelService;
 
-class LevelController extends ApiController
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -74,35 +69,5 @@ class LevelController extends ApiController
     public function destroy($id)
     {
         //
-    }
-
-    /**
-     * Display a listing of levels by user the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function levelsOfUser(Request $request, $id)
-    {
-        $levelRepository = new LevelRepository();
-        $userRepository = new UserRepository();
-
-        $constructRequest = new ConstructRequest();
-
-        $constructRequest->userRepository = $userRepository;
-        $constructRequest->levelRepository = $levelRepository;
-
-        $levelService = new LevelService($constructRequest);
-
-        $levels = $levelService->levelsOfUser($id, $request->query('with-super-master') === 'true' ? true : false);
-
-        return $this->APIResponse(
-            true,
-            Response::HTTP_OK,
-            "Levels of '$id'",
-            $levels,
-            null,
-        );
     }
 }
