@@ -104,7 +104,7 @@ class PaperWorkRealizationController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja realisasi ditampilkan !",
+            "Kertas kerja realisasi - Edit",
             [
                 'levels' => $response->levels,
                 'indicators' => $response->indicators,
@@ -168,7 +168,7 @@ class PaperWorkRealizationController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja realisasi (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas kerja realisasi (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );
@@ -224,7 +224,7 @@ class PaperWorkRealizationController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja realisasi (KPI: %s) (Bulan: %s) berhasil diubah !", $id, $month),
+            sprintf("Kertas kerja realisasi (KPI: %s) (Bulan: %s) berhasil diubah", $id, $month),
             null,
             null,
         );

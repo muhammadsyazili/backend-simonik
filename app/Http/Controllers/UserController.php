@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\ConstructRequest;
+use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
+use App\Services\UserService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class UserController extends Controller
+class UserController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -13,7 +18,25 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $userRepository = new UserRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+
+        $userService = new UserService($constructRequest);
+
+        $users = $userService->index();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Users",
+            [
+                'users' => $users
+            ],
+            null,
+        );
     }
 
     /**
@@ -23,7 +46,25 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->unitRepository = $unitRepository;
+
+        $userService = new UserService($constructRequest);
+
+        $response = $userService->create();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "User - Create",
+            [
+                'units' => $response->units
+            ],
+            null,
+        );
     }
 
     /**

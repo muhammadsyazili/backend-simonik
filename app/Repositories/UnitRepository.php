@@ -18,32 +18,32 @@ class UnitRepository {
             $query->where([
                 'year' => $year,
             ]);
-        }])->where(['level_id' => $levelId])->get();
+        }])->where(['level_id' => $levelId])->orderBy('name', 'asc')->get();
     }
 
     public function find__all__by__levelId(string|int $levelId)
     {
-        return Unit::where(['level_id' => $levelId])->get();
+        return Unit::where(['level_id' => $levelId])->orderBy('name', 'asc')->get();
     }
 
     public function find__allSlug__with__this_childs__by__id(string|int $id) : array
     {
-        return UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->get()->toArray();
+        return UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
     }
 
     public function find__allSlug__with__childs__by__id(string|int $id) : array
     {
-        return UnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
+        return UnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
     }
 
     public function find__allId__with__this_childs__by__id(string|int $id) : array
     {
-        return UnitOnlyId::with('childsRecursive')->where(['id' => $id])->get()->toArray();
+        return UnitOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
     }
 
     public function find__allId__with__childs__by__id(string|int $id) : array
     {
-        return UnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->get()->toArray();
+        return UnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
     }
 
     public function find__id__with__level__by__slug(string $slug)
@@ -54,5 +54,15 @@ class UnitRepository {
     public function find__allSlug_allName__by__levelId(string|int $levelId)
     {
         return Unit::where(['level_id' => $levelId])->orderBy('name', 'asc')->get(['slug', 'name']);
+    }
+
+    public function find__all__with__level_parent()
+    {
+        return Unit::with(['level', 'parent'])->orderBy('name', 'asc')->get();
+    }
+
+    public function find__all()
+    {
+        return Unit::orderBy('name', 'asc')->get();
     }
 }

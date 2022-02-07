@@ -19,7 +19,25 @@ class UnitController extends ApiController
      */
     public function index()
     {
+        $unitRepository = new UnitRepository();
 
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->unitRepository = $unitRepository;
+
+        $unitService = new UnitService($constructRequest);
+
+        $units = $unitService->index();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Units",
+            [
+                'units' => $units
+            ],
+            null,
+        );
     }
 
     /**

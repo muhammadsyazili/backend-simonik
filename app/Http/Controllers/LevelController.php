@@ -18,7 +18,25 @@ class LevelController extends ApiController
      */
     public function index()
     {
-        //
+        $levelRepository = new LevelRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $levels = $levelService->index();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Levels",
+            [
+                'levels' => $levels
+            ],
+            null,
+        );
     }
 
     /**

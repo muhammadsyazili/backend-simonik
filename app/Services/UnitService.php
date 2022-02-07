@@ -17,6 +17,11 @@ class UnitService {
         $this->levelRepository = $constructRequest->levelRepository;
     }
 
+    public function index()
+    {
+        return $this->unitRepository->find__all__with__level_parent();
+    }
+
     //use repo UnitRepository, LevelRepository
     public function unitsOfLevel(string $level)
     {

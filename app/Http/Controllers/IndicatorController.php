@@ -92,7 +92,7 @@ class IndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "KPI ditampilkan",
+            "KPI - Edit",
             $indicator,
             null,
         );

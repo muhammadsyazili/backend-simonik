@@ -17,6 +17,12 @@ class LevelService {
         $this->userRepository = $constructRequest->userRepository;
     }
 
+    //use repo LevelRepository
+    public function index()
+    {
+        return $this->levelRepository->find__all__with__parent();
+    }
+
     //use repo LevelRepository, UserRepository
     public function levelsOfUser(string|int $id, bool $withSuperMaster)
     {

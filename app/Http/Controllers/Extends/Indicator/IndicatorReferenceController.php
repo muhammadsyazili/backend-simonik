@@ -34,7 +34,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja KPI referensi ditampilkan !",
+            "Kertas kerja KPI referensi - Create",
             [
                 'indicators' => $create->indicators,
                 'preferences' => $create->preferences,
@@ -81,7 +81,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja KPI (Level: SUPER-MASTER) berhasil direferensikan !",
+            "Kertas kerja KPI (Level: SUPER-MASTER) berhasil direferensikan",
             null,
             null,
         );
@@ -130,7 +130,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja KPI referensi ditampilkan !",
+            "Kertas kerja KPI referensi - Edit",
             [
                 'indicators' => $indicators,
                 'preferences' => $indicators,

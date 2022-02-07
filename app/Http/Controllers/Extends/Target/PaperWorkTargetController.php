@@ -104,7 +104,7 @@ class PaperWorkTargetController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja target ditampilkan !",
+            "Kertas kerja target - Edit",
             [
                 'levels' => $response->levels,
                 'indicators' => $response->indicators,
@@ -167,7 +167,7 @@ class PaperWorkTargetController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah !", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );

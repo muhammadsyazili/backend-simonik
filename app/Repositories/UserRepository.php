@@ -14,4 +14,9 @@ class UserRepository {
     {
         return User::with(['role'])->findOrFail($id);
     }
+
+    public function find__all__with__role_unit_level()
+    {
+        return User::with(['role', 'unit.level'])->orderBy('role_id', 'asc')->orderBy('name', 'asc')->get();
+    }
 }

@@ -82,6 +82,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'actived' => 'boolean',
     ];
 
     public function creatingIndicator()
