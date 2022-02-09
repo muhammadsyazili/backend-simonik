@@ -3,7 +3,7 @@
 namespace App\DTO;
 
 class IndicatorInsertOrUpdateRequest {
-    public string|int|null $id = null;
+    public ?string $id = null;
     public ?array $validity = null;
     public ?array $weight = null;
     public string $dummy;

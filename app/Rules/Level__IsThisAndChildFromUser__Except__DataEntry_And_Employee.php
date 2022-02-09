@@ -36,7 +36,7 @@ class Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee implements R
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return in_array($value, Arr::flatten($this->levelRepository->find__allSlug__with__this_childs__by__id($this->user->unit->level->id))) ? true : false;
+            return in_array($value, $this->levelRepository->find__allSlug__with__this_childs__by__id($this->user->unit->level->id)) ? true : false;
         } else {
             return false;
         }
@@ -49,6 +49,6 @@ class Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee implements R
      */
     public function message()
     {
-        return "(#3.3) : Anda tidak memiliki hak akses !";
+        return "(#2.2) : Anda tidak memiliki hak akses !";
     }
 }

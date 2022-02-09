@@ -36,7 +36,7 @@ class Level__IsThisAndChildFromUser implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return in_array($value, Arr::flatten($this->levelRepository->find__allSlug__with__this_childs__by__id($this->user->unit->level->id))) ? true : false;
+            return in_array($value, $this->levelRepository->find__allSlug__with__this_childs__by__id($this->user->unit->level->id)) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
             return $value === $this->user->unit->level->slug ? true : false;
         } else {
@@ -51,6 +51,6 @@ class Level__IsThisAndChildFromUser implements Rule
      */
     public function message()
     {
-        return "(#3) : Anda tidak memiliki hak akses !";
+        return "(#2) : Anda tidak memiliki hak akses !";
     }
 }

@@ -7,9 +7,7 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Rules\Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Level__IsThisAndChildFromUser__Except__Employee;
-use App\Rules\Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Unit__IsThisAndChildUser__Except__Employee;
 use App\Rules\Unit__MatchWith__Level;
 use Illuminate\Http\Request;
@@ -95,13 +93,13 @@ class RealizationPaperWorkValidationService {
         $indicatorsId = array_keys($request->post('realizations')); //list KPI dari realization
 
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
-        $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun')));
+        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan KPI yang dikirim terdaftar di DB
         $validator->after(function ($validator) use ($indicatorsId, $indicators) {
             foreach ($indicatorsId as $value) {
                 if (!in_array($value, $indicators)) {
-                    $validator->errors()->add('realizations', "Akses ilegal !");
+                    $validator->errors()->add('realizations', "(#4.1) : Akses ilegal !");
                     break;
                 }
             }
@@ -113,7 +111,7 @@ class RealizationPaperWorkValidationService {
         $validator->after(function ($validator) use ($indicators) {
             foreach ($indicators as $indicator) {
                 if ($indicator->dummy) {
-                    $validator->errors()->add('realizations', "Akses ilegal !");
+                    $validator->errors()->add('realizations', "(#4.2) : Akses ilegal !");
                     break;
                 }
             }
@@ -128,7 +126,7 @@ class RealizationPaperWorkValidationService {
                 $isError = false;
                 foreach ($validityMonths as $validityMonth) {
                     if (!in_array($validityMonth, array_keys($realizationV))) {
-                        $validator->errors()->add('realizations', "Akses ilegal !");
+                        $validator->errors()->add('realizations', "(#4.3) : Akses ilegal !");
                         $isError = true;
                         break;
                     }
@@ -168,14 +166,14 @@ class RealizationPaperWorkValidationService {
         //memastikan KPI yang dikirim berlabel 'child'
         $validator->after(function ($validator) use ($indicator) {
             if (in_array($indicator->label, ['super-master', 'master'])) {
-                $validator->errors()->add('id', "Akses ilegal !");
+                $validator->errors()->add('id', "(#4.4) : Akses ilegal !");
             }
         });
 
         //memastikan unit dari KPI yang dikirim merupakan turunan user saat ini
         if ($user->role->name !== 'super-admin') {
             $validator->after(function ($validator) use ($user, $indicator) {
-                if (!in_array($indicator->unit_id, Arr::flatten($this->unitRepository->find__allId__with__this_childs__by__id($user->unit->id)))) {
+                if (!in_array($indicator->unit_id, $this->unitRepository->find__allId__with__this_childs__by__id($user->unit->id))) {
                     $validator->errors()->add('id', "Akses ilegal2 !");
                 }
             });

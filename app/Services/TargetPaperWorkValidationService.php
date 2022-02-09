@@ -93,13 +93,13 @@ class TargetPaperWorkValidationService {
         $indicatorsId = array_keys($request->post('targets')); //list KPI dari target
 
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
-        $indicators = $request->post('unit') === 'master' ? Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun'))) : Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun')));
+        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan KPI yang dikirim terdaftar di DB
         $validator->after(function ($validator) use ($indicatorsId, $indicators) {
             foreach ($indicatorsId as $value) {
                 if (!in_array($value, $indicators)) {
-                    $validator->errors()->add('targets', "Akses ilegal !");
+                    $validator->errors()->add('targets', "(#5.1) : Akses ilegal !");
                     break;
                 }
             }
@@ -111,7 +111,7 @@ class TargetPaperWorkValidationService {
         $validator->after(function ($validator) use ($indicators) {
             foreach ($indicators as $indicator) {
                 if ($indicator->dummy) {
-                    $validator->errors()->add('targets', "Akses ilegal !");
+                    $validator->errors()->add('targets', "(#5.2) : Akses ilegal !");
                     break;
                 }
             }
@@ -126,7 +126,7 @@ class TargetPaperWorkValidationService {
                 $isError = false;
                 foreach ($validityMonths as $validityMonth) {
                     if (!in_array($validityMonth, array_keys($targetV))) {
-                        $validator->errors()->add('targets', "Akses ilegal !");
+                        $validator->errors()->add('targets', "(#5.3) : Akses ilegal !");
                         $isError = true;
                         break;
                     }

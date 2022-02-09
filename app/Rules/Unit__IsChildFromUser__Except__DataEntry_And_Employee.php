@@ -36,7 +36,7 @@ class Unit__IsChildFromUser__Except__DataEntry_And_Employee implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return $value === 'master' || in_array($value, Arr::flatten($this->unitRepository->find__allSlug__with__childs__by__id($this->user->unit->id))) ? true : false;
+            return $value === 'master' || in_array($value, $this->unitRepository->find__allSlug__with__childs__by__id($this->user->unit->id)) ? true : false;
         } else {
             return false;
         }
@@ -49,6 +49,6 @@ class Unit__IsChildFromUser__Except__DataEntry_And_Employee implements Rule
      */
     public function message()
     {
-        return "(#4.1) : Anda tidak memiliki hak akses !";
+        return "(#3.1) : Anda tidak memiliki hak akses !";
     }
 }

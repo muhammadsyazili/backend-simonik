@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Domains\Indicator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use App\Models\Indicator as ModelsIndicator;
 use App\Models\IndicatorOnlyId as ModelsIndicatorOnlyId;
@@ -224,7 +225,8 @@ class IndicatorRepository {
 
     public function find__all__with__parents__by__id(string|int $id) : array
     {
-        return ModelsIndicatorOnlyId::with('parentHorizontalRecursive')->where(['id' => $id])->orderBy('order', 'asc')->get()->toArray();
+        $result = ModelsIndicatorOnlyId::with('parentHorizontalRecursive')->where(['id' => $id])->orderBy('order', 'asc')->get()->toArray();
+        return Arr::flatten($result);
     }
 
     public function find__all__by__idList(array $idList)
@@ -253,21 +255,26 @@ class IndicatorRepository {
 
     public function find__allId__by__levelId_unitId_year(string|int|null $levelId = null, string|int|null $unitId = null, string|int|null $year = null) : array
     {
+        $result = null;
         if (is_null($levelId)) {
-            return ModelsIndicatorOnlyId::referenced()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get()->toArray();
+            $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get()->toArray();
         } else {
             if (is_null($unitId)) {
-                return ModelsIndicatorOnlyId::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
+                $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
             } else {
-                return ModelsIndicatorOnlyId::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
+                $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
             }
         }
+
+        return Arr::flatten($result);
     }
 
     public function find__allCode__by__levelId_unitId_year(string|int $levelId, string|int|null $unitId = null, string|int $year) : array
     {
-        return is_null($unitId) ?
+        $result = is_null($unitId) ?
         ModelsIndicatorOnlyCode::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray() :
         ModelsIndicatorOnlyCode::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
+
+        return Arr::flatten($result);
     }
 }

@@ -40,7 +40,7 @@ class IsSuperAdminOrAdminHaveChild
         if ($user->role->name === 'super-admin') {
             return $next($request);
         } else if ($user->role->name === 'admin') {
-            $childs = Arr::flatten($this->levelRepository->find__allSlug__with__this_childs__by__id($user->unit->level->id));
+            $childs = $this->levelRepository->find__allSlug__with__this_childs__by__id($user->unit->level->id);
 
             return count($childs) > 1 ?
             $next($request) :

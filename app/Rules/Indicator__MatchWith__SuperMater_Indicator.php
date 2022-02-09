@@ -51,6 +51,6 @@ class Indicator__MatchWith__SuperMater_Indicator implements Rule
      */
     public function message()
     {
-        return 'Akses ilegal !';
+        return '(#1) : Akses ilegal !';
     }
 }

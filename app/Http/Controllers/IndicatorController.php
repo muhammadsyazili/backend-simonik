@@ -23,7 +23,6 @@ class IndicatorController extends ApiController
      */
     public function store(Request $request)
     {
-
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
 
@@ -60,13 +59,13 @@ class IndicatorController extends ApiController
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $insert = $indicatorService->store($indicatorInsertOrUpdateRequest);
+        $indicatorService->store($indicatorInsertOrUpdateRequest);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "KPI berhasil ditambahkan",
-            $insert,
+            null,
             null,
         );
     }

@@ -49,7 +49,7 @@ class IndicatorReferenceValidationService {
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
-                    $validator->errors()->add('indicators', "Akses ilegal !");
+                    $validator->errors()->add('indicators', "(#3.1) : Akses ilegal !");
                     break;
                 }
             }
@@ -61,7 +61,7 @@ class IndicatorReferenceValidationService {
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('preferences') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
-                    $validator->errors()->add('preferences', "Akses ilegal !");
+                    $validator->errors()->add('preferences', "(#3.2) : Akses ilegal !");
                     break;
                 }
             }
@@ -122,7 +122,7 @@ class IndicatorReferenceValidationService {
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
-                    $validator->errors()->add('indicators', "Akses ilegal !");
+                    $validator->errors()->add('indicators', "(#3.3) : Akses ilegal !");
                     break;
                 }
             }
@@ -134,7 +134,7 @@ class IndicatorReferenceValidationService {
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('preferences') as $value) {
                 if (!in_array($value, Arr::flatten($indicators))) {
-                    $validator->errors()->add('preferences', "Akses ilegal !");
+                    $validator->errors()->add('preferences', "(#3.4) : Akses ilegal !");
                     break;
                 }
             }

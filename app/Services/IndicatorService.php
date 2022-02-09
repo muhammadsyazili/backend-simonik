@@ -29,52 +29,52 @@ class IndicatorService {
     }
 
     //use repo IndicatorRepository, LevelRepository
-    public function store(IndicatorInsertOrUpdateRequest $indicatorNew) : void
+    public function store(IndicatorInsertOrUpdateRequest $indicator) : void
     {
-        $indicator = new Indicator();
+        DB::transaction(function () use ($indicator) {
+            $indicatorDomain = new Indicator();
 
-        DB::transaction(function () use ($indicatorNew, $indicator) {
-            $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
+            $toJson = $this->validity_and_weight__to__JSON($indicator->validity, $indicator->weight);
 
-            if ($indicatorNew->dummy === '1') {
-                $indicator->dummy = true;
-                $indicator->reducing_factor = null;
-                $indicator->polarity = null;
-                $indicator->validity = null;
-                $indicator->weight = null;
+            if ($indicator->dummy === '1') {
+                $indicatorDomain->dummy = true;
+                $indicatorDomain->reducing_factor = null;
+                $indicatorDomain->polarity = null;
+                $indicatorDomain->validity = null;
+                $indicatorDomain->weight = null;
             } else {
-                if ($indicatorNew->reducing_factor === '1') {
-                    $indicator->reducing_factor = true;
-                    $indicator->polarity = null;
+                if ($indicator->reducing_factor === '1') {
+                    $indicatorDomain->reducing_factor = true;
+                    $indicatorDomain->polarity = null;
                 } else {
-                    $indicator->reducing_factor = false;
-                    $indicator->polarity = $indicatorNew->polarity;
+                    $indicatorDomain->reducing_factor = false;
+                    $indicatorDomain->polarity = $indicator->polarity;
                 }
 
-                $indicator->dummy = false;
-                $indicator->validity = $toJson['validity'];
-                $indicator->weight =  $toJson['weight'];
+                $indicatorDomain->dummy = false;
+                $indicatorDomain->validity = $toJson['validity'];
+                $indicatorDomain->weight =  $toJson['weight'];
             }
 
             $id = (string) Str::orderedUuid();
 
-            $indicator->id = $id;
-            $indicator->indicator = $indicatorNew->indicator;
-            $indicator->formula = $indicatorNew->formula;
-            $indicator->measure = $indicatorNew->measure;
-            $indicator->year = null;
-            $indicator->reviewed = true;
-            $indicator->referenced = false;
-            $indicator->label = 'super-master';
-            $indicator->unit_id = null;
-            $indicator->level_id = $this->levelRepository->find__id__by__slug('super-master');
-            $indicator->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year('super-master');
-            $indicator->code = null;
-            $indicator->parent_vertical_id = null;
-            $indicator->parent_horizontal_id = null;
-            $indicator->created_by = $indicatorNew->user_id;
+            $indicatorDomain->id = $id;
+            $indicatorDomain->indicator = $indicator->indicator;
+            $indicatorDomain->formula = $indicator->formula;
+            $indicatorDomain->measure = $indicator->measure;
+            $indicatorDomain->year = null;
+            $indicatorDomain->reviewed = true;
+            $indicatorDomain->referenced = false;
+            $indicatorDomain->label = 'super-master';
+            $indicatorDomain->unit_id = null;
+            $indicatorDomain->level_id = $this->levelRepository->find__id__by__slug('super-master');
+            $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year('super-master');
+            $indicatorDomain->code = null;
+            $indicatorDomain->parent_vertical_id = null;
+            $indicatorDomain->parent_horizontal_id = null;
+            $indicatorDomain->created_by = $indicator->user_id;
 
-            $this->indicatorRepository->save($indicator);
+            $this->indicatorRepository->save($indicatorDomain);
             $this->indicatorRepository->update__code__by__id($id);
         });
     }
@@ -90,11 +90,10 @@ class IndicatorService {
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
     public function update(IndicatorInsertOrUpdateRequest $indicatorNew, string|int $id) : void
     {
-        $indicator = new Indicator();
-        $target = new Target();
-        $realization = new Realization();
-
-        DB::transaction(function () use ($indicatorNew, $id, $indicator, $target, $realization) {
+        DB::transaction(function () use ($indicatorNew, $id) {
+            $indicatorDomain = new Indicator();
+            $targetDomain = new Target();
+            $realizationDomain = new Realization();
 
             $indicatorOld = $this->indicatorRepository->find__by__id($id);
 
@@ -103,39 +102,39 @@ class IndicatorService {
                 $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                 if ($indicatorNew->dummy === '1') {
-                    $indicator->dummy = true;
-                    $indicator->reducing_factor = null;
-                    $indicator->polarity = null;
-                    $indicator->validity = null;
-                    $indicator->weight = null;
+                    $indicatorDomain->dummy = true;
+                    $indicatorDomain->reducing_factor = null;
+                    $indicatorDomain->polarity = null;
+                    $indicatorDomain->validity = null;
+                    $indicatorDomain->weight = null;
                 } else {
                     if ($indicatorNew->reducing_factor === '1') {
-                        $indicator->reducing_factor = true;
-                        $indicator->polarity = null;
+                        $indicatorDomain->reducing_factor = true;
+                        $indicatorDomain->polarity = null;
                     } else {
-                        $indicator->reducing_factor = false;
-                        $indicator->polarity = $indicatorNew->polarity;
+                        $indicatorDomain->reducing_factor = false;
+                        $indicatorDomain->polarity = $indicatorNew->polarity;
                     }
 
-                    $indicator->dummy = false;
-                    $indicator->validity = $toJson['validity'];
-                    $indicator->weight =  $toJson['weight'];
+                    $indicatorDomain->dummy = false;
+                    $indicatorDomain->validity = $toJson['validity'];
+                    $indicatorDomain->weight =  $toJson['weight'];
                 }
 
-                $indicator->indicator = $indicatorNew->indicator;
-                $indicator->formula = $indicatorNew->formula;
-                $indicator->measure = $indicatorNew->measure;
-                $indicator->year = $indicatorOld->year;
-                $indicator->reviewed = $indicatorOld->reviewed;
-                $indicator->referenced = $indicatorOld->referenced;
-                $indicator->label = $indicatorOld->label;
-                $indicator->unit_id = $indicatorOld->unit_id;
-                $indicator->level_id = $indicatorOld->level_id;
-                $indicator->order = $indicatorOld->order;
-                $indicator->parent_vertical_id = $indicatorOld->parent_vertical_id;
-                $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
+                $indicatorDomain->indicator = $indicatorNew->indicator;
+                $indicatorDomain->formula = $indicatorNew->formula;
+                $indicatorDomain->measure = $indicatorNew->measure;
+                $indicatorDomain->year = $indicatorOld->year;
+                $indicatorDomain->reviewed = $indicatorOld->reviewed;
+                $indicatorDomain->referenced = $indicatorOld->referenced;
+                $indicatorDomain->label = $indicatorOld->label;
+                $indicatorDomain->unit_id = $indicatorOld->unit_id;
+                $indicatorDomain->level_id = $indicatorOld->level_id;
+                $indicatorDomain->order = $indicatorOld->order;
+                $indicatorDomain->parent_vertical_id = $indicatorOld->parent_vertical_id;
+                $indicatorDomain->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
-                $this->indicatorRepository->update__by__id($indicator, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain, $id); //update KPI
             } else if ($indicatorOld->label === 'master') {
                 /**
                  * section: master
@@ -145,37 +144,37 @@ class IndicatorService {
                 $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                 if ($indicatorNew->dummy === '1') {
-                    $indicator->dummy = true;
-                    $indicator->reducing_factor = null;
-                    $indicator->polarity = null;
-                    $indicator->validity = null;
-                    $indicator->weight = null;
+                    $indicatorDomain->dummy = true;
+                    $indicatorDomain->reducing_factor = null;
+                    $indicatorDomain->polarity = null;
+                    $indicatorDomain->validity = null;
+                    $indicatorDomain->weight = null;
                 } else {
                     if ($indicatorNew->reducing_factor === '1') {
-                        $indicator->reducing_factor = true;
-                        $indicator->polarity = null;
+                        $indicatorDomain->reducing_factor = true;
+                        $indicatorDomain->polarity = null;
                     } else {
-                        $indicator->reducing_factor = false;
-                        $indicator->polarity = $indicatorNew->polarity;
+                        $indicatorDomain->reducing_factor = false;
+                        $indicatorDomain->polarity = $indicatorNew->polarity;
                     }
 
-                    $indicator->dummy = false;
-                    $indicator->validity = $toJson['validity'];
-                    $indicator->weight =  $toJson['weight'];
+                    $indicatorDomain->dummy = false;
+                    $indicatorDomain->validity = $toJson['validity'];
+                    $indicatorDomain->weight =  $toJson['weight'];
                 }
 
-                $indicator->indicator = $indicatorNew->indicator;
-                $indicator->formula = $indicatorNew->formula;
-                $indicator->measure = $indicatorNew->measure;
-                $indicator->year = $indicatorOld->year;
-                $indicator->reviewed = $indicatorOld->reviewed;
-                $indicator->referenced = $indicatorOld->referenced;
-                $indicator->label = $indicatorOld->label;
-                $indicator->unit_id = $indicatorOld->unit_id;
-                $indicator->level_id = $indicatorOld->level_id;
-                $indicator->order = $indicatorOld->order;
-                $indicator->parent_vertical_id = $indicatorOld->parent_vertical_id;
-                $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
+                $indicatorDomain->indicator = $indicatorNew->indicator;
+                $indicatorDomain->formula = $indicatorNew->formula;
+                $indicatorDomain->measure = $indicatorNew->measure;
+                $indicatorDomain->year = $indicatorOld->year;
+                $indicatorDomain->reviewed = $indicatorOld->reviewed;
+                $indicatorDomain->referenced = $indicatorOld->referenced;
+                $indicatorDomain->label = $indicatorOld->label;
+                $indicatorDomain->unit_id = $indicatorOld->unit_id;
+                $indicatorDomain->level_id = $indicatorOld->level_id;
+                $indicatorDomain->order = $indicatorOld->order;
+                $indicatorDomain->parent_vertical_id = $indicatorOld->parent_vertical_id;
+                $indicatorDomain->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
                 if (count($indicatorOld->validity) > 0) { //masa berlaku lama tidak nol
                     $monthsOld = array_keys($indicatorOld->validity);
@@ -193,23 +192,23 @@ class IndicatorService {
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
-                            $target->id = (string) Str::orderedUuid();
-                            $target->indicator_id = $id;
-                            $target->month = $v;
-                            $target->value = 0;
-                            $target->locked = true;
-                            $target->default = true;
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $id;
+                            $targetDomain->month = $v;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = true;
+                            $targetDomain->default = true;
 
-                            $this->targetRepository->save($target); //save target
+                            $this->targetRepository->save($targetDomain); //save target
 
-                            $realization->id = (string) Str::orderedUuid();
-                            $realization->indicator_id = $id;
-                            $realization->month = $v;
-                            $realization->value = 0;
-                            $realization->locked = true;
-                            $realization->default = true;
+                            $realizationDomain->id = (string) Str::orderedUuid();
+                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->month = $v;
+                            $realizationDomain->value = 0;
+                            $realizationDomain->locked = true;
+                            $realizationDomain->default = true;
 
-                            $this->realizationRepository->save($realization); //save realisasi
+                            $this->realizationRepository->save($realizationDomain); //save realisasi
                         }
                     }
 
@@ -232,28 +231,28 @@ class IndicatorService {
                 } else { //masa berlaku lama nol
                     if (count($indicatorNew->validity) > 0) {
                         foreach ($indicatorNew->validity as $key => $value) {
-                            $target->id = (string) Str::orderedUuid();
-                            $target->indicator_id = $id;
-                            $target->month = $key;
-                            $target->value = 0;
-                            $target->locked = true;
-                            $target->default = true;
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $id;
+                            $targetDomain->month = $key;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = true;
+                            $targetDomain->default = true;
 
-                            $this->targetRepository->save($target); //save target
+                            $this->targetRepository->save($targetDomain); //save target
 
-                            $realization->id = (string) Str::orderedUuid();
-                            $realization->indicator_id = $id;
-                            $realization->month = $key;
-                            $realization->value = 0;
-                            $realization->locked = true;
-                            $realization->default = true;
+                            $realizationDomain->id = (string) Str::orderedUuid();
+                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->month = $key;
+                            $realizationDomain->value = 0;
+                            $realizationDomain->locked = true;
+                            $realizationDomain->default = true;
 
-                            $this->realizationRepository->save($realization); //save realisasi
+                            $this->realizationRepository->save($realizationDomain); //save realisasi
                         }
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicator, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain, $id); //update KPI
 
                 /**
                  * section: childs
@@ -268,37 +267,37 @@ class IndicatorService {
                         $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                         if ($indicatorNew->dummy === '1') {
-                            $indicator->dummy = true;
-                            $indicator->reducing_factor = null;
-                            $indicator->polarity = null;
-                            $indicator->validity = null;
-                            $indicator->weight = null;
+                            $indicatorDomain->dummy = true;
+                            $indicatorDomain->reducing_factor = null;
+                            $indicatorDomain->polarity = null;
+                            $indicatorDomain->validity = null;
+                            $indicatorDomain->weight = null;
                         } else {
                             if ($indicatorNew->reducing_factor === '1') {
-                                $indicator->reducing_factor = true;
-                                $indicator->polarity = null;
+                                $indicatorDomain->reducing_factor = true;
+                                $indicatorDomain->polarity = null;
                             } else {
-                                $indicator->reducing_factor = false;
-                                $indicator->polarity = $indicatorNew->polarity;
+                                $indicatorDomain->reducing_factor = false;
+                                $indicatorDomain->polarity = $indicatorNew->polarity;
                             }
 
-                            $indicator->dummy = false;
-                            $indicator->validity = $toJson['validity'];
-                            $indicator->weight =  $toJson['weight'];
+                            $indicatorDomain->dummy = false;
+                            $indicatorDomain->validity = $toJson['validity'];
+                            $indicatorDomain->weight =  $toJson['weight'];
                         }
 
-                        $indicator->indicator = $indicatorNew->indicator;
-                        $indicator->formula = $indicatorNew->formula;
-                        $indicator->measure = $indicatorNew->measure;
-                        $indicator->year = $familyIndicatorOld->year;
-                        $indicator->reviewed = $familyIndicatorOld->reviewed;
-                        $indicator->referenced = $familyIndicatorOld->referenced;
-                        $indicator->label = $familyIndicatorOld->label;
-                        $indicator->unit_id = $familyIndicatorOld->unit_id;
-                        $indicator->level_id = $familyIndicatorOld->level_id;
-                        $indicator->order = $familyIndicatorOld->order;
-                        $indicator->parent_vertical_id = $familyIndicatorOld->parent_vertical_id;
-                        $indicator->parent_horizontal_id = $familyIndicatorOld->parent_horizontal_id;
+                        $indicatorDomain->indicator = $indicatorNew->indicator;
+                        $indicatorDomain->formula = $indicatorNew->formula;
+                        $indicatorDomain->measure = $indicatorNew->measure;
+                        $indicatorDomain->year = $familyIndicatorOld->year;
+                        $indicatorDomain->reviewed = $familyIndicatorOld->reviewed;
+                        $indicatorDomain->referenced = $familyIndicatorOld->referenced;
+                        $indicatorDomain->label = $familyIndicatorOld->label;
+                        $indicatorDomain->unit_id = $familyIndicatorOld->unit_id;
+                        $indicatorDomain->level_id = $familyIndicatorOld->level_id;
+                        $indicatorDomain->order = $familyIndicatorOld->order;
+                        $indicatorDomain->parent_vertical_id = $familyIndicatorOld->parent_vertical_id;
+                        $indicatorDomain->parent_horizontal_id = $familyIndicatorOld->parent_horizontal_id;
 
                         if (count($familyIndicatorOld->validity) > 0) { //masa berlaku lama tidak nol
                             $monthsOld = array_keys($familyIndicatorOld->validity);
@@ -316,23 +315,23 @@ class IndicatorService {
 
                             if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                                 foreach ($new as $v) {
-                                    $target->id = (string) Str::orderedUuid();
-                                    $target->indicator_id = $familyIndicatorOld->id;
-                                    $target->month = $v;
-                                    $target->value = 0;
-                                    $target->locked = true;
-                                    $target->default = true;
+                                    $targetDomain->id = (string) Str::orderedUuid();
+                                    $targetDomain->indicator_id = $familyIndicatorOld->id;
+                                    $targetDomain->month = $v;
+                                    $targetDomain->value = 0;
+                                    $targetDomain->locked = true;
+                                    $targetDomain->default = true;
 
-                                    $this->targetRepository->save($target); //save target
+                                    $this->targetRepository->save($targetDomain); //save target
 
-                                    $realization->id = (string) Str::orderedUuid();
-                                    $realization->indicator_id = $familyIndicatorOld->id;
-                                    $realization->month = $v;
-                                    $realization->value = 0;
-                                    $realization->locked = true;
-                                    $realization->default = true;
+                                    $realizationDomain->id = (string) Str::orderedUuid();
+                                    $realizationDomain->indicator_id = $familyIndicatorOld->id;
+                                    $realizationDomain->month = $v;
+                                    $realizationDomain->value = 0;
+                                    $realizationDomain->locked = true;
+                                    $realizationDomain->default = true;
 
-                                    $this->realizationRepository->save($realization); //save realisasi
+                                    $this->realizationRepository->save($realizationDomain); //save realisasi
                                 }
                             }
 
@@ -355,28 +354,28 @@ class IndicatorService {
                         } else { //masa berlaku lama nol
                             if (count($indicatorNew->validity) > 0) {
                                 foreach ($indicatorNew->validity as $key => $value) {
-                                    $target->id = (string) Str::orderedUuid();
-                                    $target->indicator_id = $familyIndicatorOld->id;
-                                    $target->month = $key;
-                                    $target->value = 0;
-                                    $target->locked = true;
-                                    $target->default = true;
+                                    $targetDomain->id = (string) Str::orderedUuid();
+                                    $targetDomain->indicator_id = $familyIndicatorOld->id;
+                                    $targetDomain->month = $key;
+                                    $targetDomain->value = 0;
+                                    $targetDomain->locked = true;
+                                    $targetDomain->default = true;
 
-                                    $this->targetRepository->save($target); //save target
+                                    $this->targetRepository->save($targetDomain); //save target
 
-                                    $realization->id = (string) Str::orderedUuid();
-                                    $realization->indicator_id = $familyIndicatorOld->id;
-                                    $realization->month = $key;
-                                    $realization->value = 0;
-                                    $realization->locked = true;
-                                    $realization->default = true;
+                                    $realizationDomain->id = (string) Str::orderedUuid();
+                                    $realizationDomain->indicator_id = $familyIndicatorOld->id;
+                                    $realizationDomain->month = $key;
+                                    $realizationDomain->value = 0;
+                                    $realizationDomain->locked = true;
+                                    $realizationDomain->default = true;
 
-                                    $this->realizationRepository->save($realization); //save realisasi
+                                    $this->realizationRepository->save($realizationDomain); //save realisasi
                                 }
                             }
                         }
 
-                        $this->indicatorRepository->update__by__id($indicator, $familyIndicatorOld->id); //update KPI
+                        $this->indicatorRepository->update__by__id($indicatorDomain, $familyIndicatorOld->id); //update KPI
                     }
                 }
             } else if ($indicatorOld->label === 'child') {
@@ -384,37 +383,37 @@ class IndicatorService {
                 $toJson = $this->validity_and_weight__to__JSON($indicatorNew->validity, $indicatorNew->weight);
 
                 if ($indicatorNew->dummy === '1') {
-                    $indicator->dummy = true;
-                    $indicator->reducing_factor = null;
-                    $indicator->polarity = null;
-                    $indicator->validity = null;
-                    $indicator->weight = null;
+                    $indicatorDomain->dummy = true;
+                    $indicatorDomain->reducing_factor = null;
+                    $indicatorDomain->polarity = null;
+                    $indicatorDomain->validity = null;
+                    $indicatorDomain->weight = null;
                 } else {
                     if ($indicatorNew->reducing_factor === '1') {
-                        $indicator->reducing_factor = true;
-                        $indicator->polarity = null;
+                        $indicatorDomain->reducing_factor = true;
+                        $indicatorDomain->polarity = null;
                     } else {
-                        $indicator->reducing_factor = false;
-                        $indicator->polarity = $indicatorNew->polarity;
+                        $indicatorDomain->reducing_factor = false;
+                        $indicatorDomain->polarity = $indicatorNew->polarity;
                     }
 
-                    $indicator->dummy = false;
-                    $indicator->validity = $toJson['validity'];
-                    $indicator->weight =  $toJson['weight'];
+                    $indicatorDomain->dummy = false;
+                    $indicatorDomain->validity = $toJson['validity'];
+                    $indicatorDomain->weight =  $toJson['weight'];
                 }
 
-                $indicator->indicator = $indicatorNew->indicator;
-                $indicator->formula = $indicatorNew->formula;
-                $indicator->measure = $indicatorNew->measure;
-                $indicator->year = $indicatorOld->year;
-                $indicator->reviewed = $indicatorOld->reviewed;
-                $indicator->referenced = $indicatorOld->referenced;
-                $indicator->label = $indicatorOld->label;
-                $indicator->unit_id = $indicatorOld->unit_id;
-                $indicator->level_id = $indicatorOld->level_id;
-                $indicator->order = $indicatorOld->order;
-                $indicator->parent_vertical_id = $indicatorOld->parent_vertical_id;
-                $indicator->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
+                $indicatorDomain->indicator = $indicatorNew->indicator;
+                $indicatorDomain->formula = $indicatorNew->formula;
+                $indicatorDomain->measure = $indicatorNew->measure;
+                $indicatorDomain->year = $indicatorOld->year;
+                $indicatorDomain->reviewed = $indicatorOld->reviewed;
+                $indicatorDomain->referenced = $indicatorOld->referenced;
+                $indicatorDomain->label = $indicatorOld->label;
+                $indicatorDomain->unit_id = $indicatorOld->unit_id;
+                $indicatorDomain->level_id = $indicatorOld->level_id;
+                $indicatorDomain->order = $indicatorOld->order;
+                $indicatorDomain->parent_vertical_id = $indicatorOld->parent_vertical_id;
+                $indicatorDomain->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
                 if (count($indicatorOld->validity) > 0) { //masa berlaku lama tidak nol
                     $monthsOld = array_keys($indicatorOld->validity);
@@ -432,23 +431,23 @@ class IndicatorService {
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
-                            $target->id = (string) Str::orderedUuid();
-                            $target->indicator_id = $id;
-                            $target->month = $v;
-                            $target->value = 0;
-                            $target->locked = true;
-                            $target->default = true;
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $id;
+                            $targetDomain->month = $v;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = true;
+                            $targetDomain->default = true;
 
-                            $this->targetRepository->save($target); //save target
+                            $this->targetRepository->save($targetDomain); //save target
 
-                            $realization->id = (string) Str::orderedUuid();
-                            $realization->indicator_id = $id;
-                            $realization->month = $v;
-                            $realization->value = 0;
-                            $realization->locked = true;
-                            $realization->default = true;
+                            $realizationDomain->id = (string) Str::orderedUuid();
+                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->month = $v;
+                            $realizationDomain->value = 0;
+                            $realizationDomain->locked = true;
+                            $realizationDomain->default = true;
 
-                            $this->realizationRepository->save($realization); //save realisasi
+                            $this->realizationRepository->save($realizationDomain); //save realisasi
                         }
                     }
 
@@ -471,28 +470,28 @@ class IndicatorService {
                 } else { //masa berlaku lama nol
                     if (count($indicatorNew->validity) > 0) {
                         foreach ($indicatorNew->validity as $key => $value) {
-                            $target->id = (string) Str::orderedUuid();
-                            $target->indicator_id = $id;
-                            $target->month = $key;
-                            $target->value = 0;
-                            $target->locked = true;
-                            $target->default = true;
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $id;
+                            $targetDomain->month = $key;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = true;
+                            $targetDomain->default = true;
 
-                            $this->targetRepository->save($target); //save target
+                            $this->targetRepository->save($targetDomain); //save target
 
-                            $realization->id = (string) Str::orderedUuid();
-                            $realization->indicator_id = $id;
-                            $realization->month = $key;
-                            $realization->value = 0;
-                            $realization->locked = true;
-                            $realization->default = true;
+                            $realizationDomain->id = (string) Str::orderedUuid();
+                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->month = $key;
+                            $realizationDomain->value = 0;
+                            $realizationDomain->locked = true;
+                            $realizationDomain->default = true;
 
-                            $this->realizationRepository->save($realization); //save realisasi
+                            $this->realizationRepository->save($realizationDomain); //save realisasi
                         }
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicator, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain, $id); //update KPI
             }
         });
     }

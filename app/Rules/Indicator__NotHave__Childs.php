@@ -38,6 +38,6 @@ class Indicator__NotHave__Childs implements Rule
      */
     public function message()
     {
-        return "KPI tidak bisa dihapus !";
+        return "(#2) : KPI tidak bisa dihapus !";
     }
 }

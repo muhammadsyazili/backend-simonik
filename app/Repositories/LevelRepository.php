@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Illuminate\Support\Arr;
 use App\Models\Level;
 use App\Models\LevelOnlyId;
 use App\Models\LevelOnlySlug;
@@ -14,27 +15,32 @@ class LevelRepository {
 
     public function find__allSlug__with__childs__by__root() : array
     {
-        return LevelOnlySlug::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get()->toArray();
+        $result = LevelOnlySlug::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get()->toArray();
+        return Arr::flatten($result);
     }
 
     public function find__allSlug__with__this_childs__by__id(string|int $id) : array
     {
-        return LevelOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = LevelOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        return Arr::flatten($result);
     }
 
     public function find__allSlug__with__childs__by__id(string|int $id) : array
     {
-        return LevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = LevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        return Arr::flatten($result);
     }
 
     public function find__allId__with__this_childs__by__id(string|int $id) : array
     {
-        return LevelOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = LevelOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        return Arr::flatten($result);
     }
 
     public function find__allId__with__childs__by__id(string|int $id) : array
     {
-        return LevelOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = LevelOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        return Arr::flatten($result);
     }
 
     public function find__all__with__childs__by__root()

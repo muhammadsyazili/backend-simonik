@@ -55,7 +55,7 @@ class IndicatorPaperWorkService {
         }
 
         // 'permissions paper work indicator (create, edit, delete)' handler
-        $numberOfChildLevel = $isSuperAdmin ? count(Arr::flatten($this->levelRepository->find__allSlug__with__childs__by__root())) : count(Arr::flatten($this->levelRepository->find__allSlug__with__this_childs__by__id($user->unit->level->id)));
+        $numberOfChildLevel = $isSuperAdmin ? count($this->levelRepository->find__allSlug__with__childs__by__root()) : count($this->levelRepository->find__allSlug__with__this_childs__by__id($user->unit->level->id));
 
         $constructRequest = new ConstructRequest();
 
@@ -108,20 +108,20 @@ class IndicatorPaperWorkService {
     public function store(array $indicators, string $level, string $year, string|int $userId) : void
     {
         DB::transaction(function () use ($indicators, $level, $year, $userId) {
+            $indicatorDomain = new Indicator();
+            $targetDomain = new Target();
+            $realizationDomain = new Realization();
+
             $levelId = $this->levelRepository->find__id__by__slug($level);
 
             //membuat nasab KPI
             $pathsOfSelectedIndicator = [];
             foreach ($indicators as $value) {
-                $pathsOfSelectedIndicator = array_merge($pathsOfSelectedIndicator, Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($value)));
+                $pathsOfSelectedIndicator = array_merge($pathsOfSelectedIndicator, $this->indicatorRepository->find__all__with__parents__by__id($value));
             }
 
             //nasab KPI
             $pathsIndicator = $this->indicatorRepository->find__all__by__idList(array_unique($pathsOfSelectedIndicator));
-
-            $indicator = new Indicator();
-            $target = new Target();
-            $realization = new Realization();
 
             //section: paper work 'MASTER' creating ----------------------------------------------------------------------
 
@@ -133,40 +133,40 @@ class IndicatorPaperWorkService {
 
             $i = 0;
             foreach ($pathsIndicator as $pathIndicator) {
-                $indicator->id = $idListMaster[$pathIndicator->id];
-                $indicator->indicator = $pathIndicator->indicator;
-                $indicator->formula = $pathIndicator->formula;
-                $indicator->measure = $pathIndicator->measure;
-                $indicator->weight = $pathIndicator->getRawOriginal('weight');
-                $indicator->polarity = $pathIndicator->getRawOriginal('polarity');
-                $indicator->year = $year;
-                $indicator->reducing_factor = $pathIndicator->reducing_factor;
-                $indicator->validity = $pathIndicator->getRawOriginal('validity');
-                $indicator->reviewed = $pathIndicator->reviewed;
-                $indicator->referenced = $pathIndicator->referenced;
-                $indicator->dummy = $pathIndicator->dummy;
-                $indicator->label = 'master';
-                $indicator->unit_id = null;
-                $indicator->level_id = $levelId;
-                $indicator->order = $i+1;
-                $indicator->code = $pathIndicator->code;
-                $indicator->parent_vertical_id = $pathIndicator->id;
-                $indicator->parent_horizontal_id = is_null($pathIndicator->parent_horizontal_id) ? null : $idListMaster[$pathIndicator->parent_horizontal_id];
-                $indicator->created_by = $userId;
+                $indicatorDomain->id = $idListMaster[$pathIndicator->id];
+                $indicatorDomain->indicator = $pathIndicator->indicator;
+                $indicatorDomain->formula = $pathIndicator->formula;
+                $indicatorDomain->measure = $pathIndicator->measure;
+                $indicatorDomain->weight = $pathIndicator->getRawOriginal('weight');
+                $indicatorDomain->polarity = $pathIndicator->getRawOriginal('polarity');
+                $indicatorDomain->year = $year;
+                $indicatorDomain->reducing_factor = $pathIndicator->reducing_factor;
+                $indicatorDomain->validity = $pathIndicator->getRawOriginal('validity');
+                $indicatorDomain->reviewed = $pathIndicator->reviewed;
+                $indicatorDomain->referenced = $pathIndicator->referenced;
+                $indicatorDomain->dummy = $pathIndicator->dummy;
+                $indicatorDomain->label = 'master';
+                $indicatorDomain->unit_id = null;
+                $indicatorDomain->level_id = $levelId;
+                $indicatorDomain->order = $i+1;
+                $indicatorDomain->code = $pathIndicator->code;
+                $indicatorDomain->parent_vertical_id = $pathIndicator->id;
+                $indicatorDomain->parent_horizontal_id = is_null($pathIndicator->parent_horizontal_id) ? null : $idListMaster[$pathIndicator->parent_horizontal_id];
+                $indicatorDomain->created_by = $userId;
 
-                $this->indicatorRepository->save($indicator);
+                $this->indicatorRepository->save($indicatorDomain);
 
                 //target 'MASTER' creating
                 if (!is_null($pathIndicator->validity)) {
                     foreach ($pathIndicator->validity as $validityKey => $validityValue) {
-                        $target->id = (string) Str::orderedUuid();
-                        $target->indicator_id = $idListMaster[$pathIndicator->id];
-                        $target->month = $validityKey;
-                        $target->value = 0;
-                        $target->locked = false;
-                        $target->default = true;
+                        $targetDomain->id = (string) Str::orderedUuid();
+                        $targetDomain->indicator_id = $idListMaster[$pathIndicator->id];
+                        $targetDomain->month = $validityKey;
+                        $targetDomain->value = 0;
+                        $targetDomain->locked = false;
+                        $targetDomain->default = true;
 
-                        $this->targetRepository->save($target);
+                        $this->targetRepository->save($targetDomain);
                     }
                 }
                 $i++;
@@ -186,49 +186,49 @@ class IndicatorPaperWorkService {
 
                 $i = 0;
                 foreach ($pathsIndicator as $pathIndicator) {
-                    $indicator->id = $idListChild[$pathIndicator->id];
-                    $indicator->indicator = $pathIndicator->indicator;
-                    $indicator->formula = $pathIndicator->formula;
-                    $indicator->measure = $pathIndicator->measure;
-                    $indicator->weight = $pathIndicator->getRawOriginal('weight');
-                    $indicator->polarity = $pathIndicator->getRawOriginal('polarity');
-                    $indicator->year = $year;
-                    $indicator->reducing_factor = $pathIndicator->reducing_factor;
-                    $indicator->validity = $pathIndicator->getRawOriginal('validity');
-                    $indicator->reviewed = $pathIndicator->reviewed;
-                    $indicator->referenced = $pathIndicator->referenced;
-                    $indicator->dummy = $pathIndicator->dummy;
-                    $indicator->label = 'child';
-                    $indicator->unit_id = $unit->id;
-                    $indicator->level_id = $levelId;
-                    $indicator->order = $i+1;
-                    $indicator->code = $pathIndicator->code;
-                    $indicator->parent_vertical_id = $pathIndicator->id;
-                    $indicator->parent_horizontal_id = is_null($pathIndicator->parent_horizontal_id) ? null : $idListChild[$pathIndicator->parent_horizontal_id];
-                    $indicator->created_by = $userId;
+                    $indicatorDomain->id = $idListChild[$pathIndicator->id];
+                    $indicatorDomain->indicator = $pathIndicator->indicator;
+                    $indicatorDomain->formula = $pathIndicator->formula;
+                    $indicatorDomain->measure = $pathIndicator->measure;
+                    $indicatorDomain->weight = $pathIndicator->getRawOriginal('weight');
+                    $indicatorDomain->polarity = $pathIndicator->getRawOriginal('polarity');
+                    $indicatorDomain->year = $year;
+                    $indicatorDomain->reducing_factor = $pathIndicator->reducing_factor;
+                    $indicatorDomain->validity = $pathIndicator->getRawOriginal('validity');
+                    $indicatorDomain->reviewed = $pathIndicator->reviewed;
+                    $indicatorDomain->referenced = $pathIndicator->referenced;
+                    $indicatorDomain->dummy = $pathIndicator->dummy;
+                    $indicatorDomain->label = 'child';
+                    $indicatorDomain->unit_id = $unit->id;
+                    $indicatorDomain->level_id = $levelId;
+                    $indicatorDomain->order = $i+1;
+                    $indicatorDomain->code = $pathIndicator->code;
+                    $indicatorDomain->parent_vertical_id = $pathIndicator->id;
+                    $indicatorDomain->parent_horizontal_id = is_null($pathIndicator->parent_horizontal_id) ? null : $idListChild[$pathIndicator->parent_horizontal_id];
+                    $indicatorDomain->created_by = $userId;
 
-                    $this->indicatorRepository->save($indicator);
+                    $this->indicatorRepository->save($indicatorDomain);
 
                     //target & realisasi 'CHILD' creating
                     if (!is_null($pathIndicator->validity)) {
                         foreach ($pathIndicator->validity as $validityKey => $validityValue) {
-                            $target->id = (string) Str::orderedUuid();
-                            $target->indicator_id = $idListChild[$pathIndicator->id];
-                            $target->month = $validityKey;
-                            $target->value = 0;
-                            $target->locked = false;
-                            $target->default = true;
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $idListChild[$pathIndicator->id];
+                            $targetDomain->month = $validityKey;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = false;
+                            $targetDomain->default = true;
 
-                            $this->targetRepository->save($target);
+                            $this->targetRepository->save($targetDomain);
 
-                            $realization->id = (string) Str::orderedUuid();
-                            $realization->indicator_id = $idListChild[$pathIndicator->id];
-                            $realization->month = $validityKey;
-                            $realization->value = 0;
-                            $realization->locked = true;
-                            $realization->default = true;
+                            $realizationDomain->id = (string) Str::orderedUuid();
+                            $realizationDomain->indicator_id = $idListChild[$pathIndicator->id];
+                            $realizationDomain->month = $validityKey;
+                            $realizationDomain->value = 0;
+                            $realizationDomain->locked = true;
+                            $realizationDomain->default = true;
 
-                            $this->realizationRepository->save($realization);
+                            $this->realizationRepository->save($realizationDomain);
                         }
                     }
                     $i++;
@@ -255,12 +255,12 @@ class IndicatorPaperWorkService {
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository, RealizationRepository, UserRepository
     public function update(array $indicatorsFromInput, string $level, string $unit, string $year, string|int $userId) : void
     {
-        $indicatorDomains = new Indicator();
-        $targetDomains = new Target();
-        $realizationDomains = new Realization();
-
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        DB::transaction(function () use ($indicatorsFromInput, $level, $unit, $year, $userId, $indicatorDomains, $targetDomains, $realizationDomains) {
+        DB::transaction(function () use ($indicatorsFromInput, $level, $unit, $year, $userId) {
+            $indicatorDomain = new Indicator();
+            $targetDomain = new Target();
+            $realizationDomain = new Realization();
+
             $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
 
             $levelId = $this->levelRepository->find__id__by__slug($level);
@@ -270,10 +270,10 @@ class IndicatorPaperWorkService {
                 //section: 'MASTER' updating ----------------------------------------------------------------------
 
                 //daftar 'id' dari KPI-KPI 'master'
-                $oldIndicatorsMasterOnlyId = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year));
+                $oldIndicatorsMasterOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year);
 
                 //daftar 'code' dari KPI-KPI 'master'
-                $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year));
+                $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
                 $newIndicatorsMaster = [];
                 $i = 0;
@@ -309,7 +309,7 @@ class IndicatorPaperWorkService {
                     //nasab KPI baru yang belum terdaftar di 'master'.
                     $pathsNewIndicators = [];
                     foreach ($newIndicatorsNotExisInMaster as $newIndicatorNotExisInMaster) {
-                        $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInMaster)));
+                        $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInMaster));
                     }
 
                     //gabungan daftar KPI master & KPI baru yang belum terdaftar di 'master'.
@@ -340,7 +340,7 @@ class IndicatorPaperWorkService {
                     foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
                         if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //KPI belum terdaftar di 'master'
 
-                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator));
+                            $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
                             $havePathsIndicatorNotRegistedInMaster = [];
                             $j = 0;
@@ -355,40 +355,40 @@ class IndicatorPaperWorkService {
 
                                 $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
 
-                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'master';
-                                $indicatorDomains->unit_id = null;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
-                                $indicatorDomains->created_by = $userId;
+                                $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomain->year = $year;
+                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomain->label = 'master';
+                                $indicatorDomain->unit_id = null;
+                                $indicatorDomain->level_id = $levelId;
+                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
+                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                $indicatorDomain->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomain->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                $indicatorDomain->created_by = $userId;
 
-                                $this->indicatorRepository->save($indicatorDomains);
+                                $this->indicatorRepository->save($indicatorDomain);
 
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityvalue) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $validityKey;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = false;
-                                        $targetDomains->default = true;
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomain->month = $validityKey;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = false;
+                                        $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomains);
+                                        $this->targetRepository->save($targetDomain);
                                     }
                                 }
                             } else {
@@ -404,40 +404,40 @@ class IndicatorPaperWorkService {
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
                             if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
-                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'master';
-                                $indicatorDomains->unit_id = null;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = null;
-                                $indicatorDomains->created_by = $userId;
+                                $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomain->year = $year;
+                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomain->label = 'master';
+                                $indicatorDomain->unit_id = null;
+                                $indicatorDomain->level_id = $levelId;
+                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
+                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                $indicatorDomain->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomain->parent_horizontal_id = null;
+                                $indicatorDomain->created_by = $userId;
 
-                                $this->indicatorRepository->save($indicatorDomains);
+                                $this->indicatorRepository->save($indicatorDomain);
 
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $validityKey;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = false;
-                                        $targetDomains->default = true;
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomain->month = $validityKey;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = false;
+                                        $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomains);
+                                        $this->targetRepository->save($targetDomain);
                                     }
                                 }
 
@@ -452,12 +452,12 @@ class IndicatorPaperWorkService {
                                 }
                                 $indicatorsIdSuspended = $temp;
                             } else {
-                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]));
+                                $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]);
 
                                 foreach ($pathsNewIndicator as $pathNewIndicator) {
                                     if (!is_null($pathNewIndicator)) {
 
-                                        $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year));
+                                        $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
 
@@ -467,40 +467,40 @@ class IndicatorPaperWorkService {
                                             $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
 
                                             if (($sum > 0) && !in_array($indicatorSuperMaster->id, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
-                                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                                $indicatorDomains->year = $year;
-                                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                                $indicatorDomains->label = 'master';
-                                                $indicatorDomains->unit_id = null;
-                                                $indicatorDomains->level_id = $levelId;
-                                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
-                                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                                $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
-                                                $indicatorDomains->created_by = $userId;
+                                                $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
+                                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                $indicatorDomain->year = $year;
+                                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                                $indicatorDomain->label = 'master';
+                                                $indicatorDomain->unit_id = null;
+                                                $indicatorDomain->level_id = $levelId;
+                                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
+                                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                                $indicatorDomain->parent_vertical_id = $indicatorSuperMaster->id;
+                                                $indicatorDomain->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                                $indicatorDomain->created_by = $userId;
 
-                                                $this->indicatorRepository->save($indicatorDomains);
+                                                $this->indicatorRepository->save($indicatorDomain);
 
                                                 //target 'MASTER' creating
                                                 if (!is_null($indicatorSuperMaster->validity)) {
                                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                        $targetDomains->id = (string) Str::orderedUuid();
-                                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                                        $targetDomains->month = $validityKey;
-                                                        $targetDomains->value = 0;
-                                                        $targetDomains->locked = false;
-                                                        $targetDomains->default = true;
+                                                        $targetDomain->id = (string) Str::orderedUuid();
+                                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                                        $targetDomain->month = $validityKey;
+                                                        $targetDomain->value = 0;
+                                                        $targetDomain->locked = false;
+                                                        $targetDomain->default = true;
 
-                                                        $this->targetRepository->save($targetDomains);
+                                                        $this->targetRepository->save($targetDomain);
                                                     }
                                                 }
 
@@ -528,7 +528,7 @@ class IndicatorPaperWorkService {
                 $units = $this->unitRepository->find__all__by__levelId($levelId);
 
                 //daftar 'code' dari KPI-KPI 'child'
-                $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year));
+                $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
                 //daftar 'id' dari KPI-KPI 'master' yang di un-checked
                 $oldIndicatorsMasterUnchecked = $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($oldIndicatorsMaster, $levelId, null, $year);
@@ -537,10 +537,10 @@ class IndicatorPaperWorkService {
                 if ($user->role->name === 'super-admin') {
                     foreach ($units as $unit) {
                         //daftar 'id' dari KPI-KPI 'child'
-                        $oldIndicatorsChildOnlyId = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unit->id, $year));
+                        $oldIndicatorsChildOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unit->id, $year);
 
                         //daftar 'code' dari KPI-KPI 'child'
-                        $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year));
+                        $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
                         $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
                         $i = 0;
@@ -579,7 +579,7 @@ class IndicatorPaperWorkService {
                             //nasab KPI baru yang belum terdaftar di 'child'.
                             $pathsNewIndicators = [];
                             foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
-                                $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild)));
+                                $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild));
                             }
 
                             //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
@@ -610,7 +610,7 @@ class IndicatorPaperWorkService {
                             foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
                                 if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
 
-                                    $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator));
+                                    $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
                                     $havePathsIndicatorNotRegistedInChild = [];
                                     $j = 0;
@@ -625,49 +625,49 @@ class IndicatorPaperWorkService {
 
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
 
-                                        $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                        $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                        $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                        $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                        $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                        $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                        $indicatorDomains->year = $year;
-                                        $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                        $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                        $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                        $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                        $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                        $indicatorDomains->label = 'child';
-                                        $indicatorDomains->unit_id = $unit->id;
-                                        $indicatorDomains->level_id = $levelId;
-                                        $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
-                                        $indicatorDomains->code = $indicatorSuperMaster->code;
-                                        $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                        $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
-                                        $indicatorDomains->created_by = $userId;
+                                        $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                        $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                        $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                        $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                        $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                        $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                        $indicatorDomain->year = $year;
+                                        $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                        $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                        $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                        $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                        $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                        $indicatorDomain->label = 'child';
+                                        $indicatorDomain->unit_id = $unit->id;
+                                        $indicatorDomain->level_id = $levelId;
+                                        $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
+                                        $indicatorDomain->code = $indicatorSuperMaster->code;
+                                        $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                        $indicatorDomain->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
+                                        $indicatorDomain->created_by = $userId;
 
-                                        $this->indicatorRepository->save($indicatorDomains);
+                                        $this->indicatorRepository->save($indicatorDomain);
 
                                         //target & realisasi 'CHILD' creating
                                         if (!is_null($indicatorSuperMaster->validity)) {
                                             foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
-                                                $targetDomains->id = (string) Str::orderedUuid();
-                                                $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $targetDomains->month = $validitykey;
-                                                $targetDomains->value = 0;
-                                                $targetDomains->locked = false;
-                                                $targetDomains->default = true;
+                                                $targetDomain->id = (string) Str::orderedUuid();
+                                                $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                $targetDomain->month = $validitykey;
+                                                $targetDomain->value = 0;
+                                                $targetDomain->locked = false;
+                                                $targetDomain->default = true;
 
-                                                $this->targetRepository->save($targetDomains);
+                                                $this->targetRepository->save($targetDomain);
 
-                                                $realizationDomains->id = (string) Str::orderedUuid();
-                                                $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $realizationDomains->month = $validitykey;
-                                                $realizationDomains->value = 0;
-                                                $realizationDomains->locked = true;
-                                                $realizationDomains->default = true;
+                                                $realizationDomain->id = (string) Str::orderedUuid();
+                                                $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                $realizationDomain->month = $validitykey;
+                                                $realizationDomain->value = 0;
+                                                $realizationDomain->locked = true;
+                                                $realizationDomain->default = true;
 
-                                                $this->realizationRepository->save($realizationDomains);
+                                                $this->realizationRepository->save($realizationDomain);
                                             }
                                         }
                                     } else {
@@ -683,49 +683,49 @@ class IndicatorPaperWorkService {
                                     $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
                                     if ($indicatorSuperMaster->parent_horizontal_id === null) {
-                                        $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                        $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                        $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                        $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                        $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                        $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                        $indicatorDomains->year = $year;
-                                        $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                        $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                        $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                        $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                        $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                        $indicatorDomains->label = 'child';
-                                        $indicatorDomains->unit_id = $unit->id;
-                                        $indicatorDomains->level_id = $levelId;
-                                        $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
-                                        $indicatorDomains->code = $indicatorSuperMaster->code;
-                                        $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                        $indicatorDomains->parent_horizontal_id = null;
-                                        $indicatorDomains->created_by = $userId;
+                                        $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                        $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                        $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                        $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                        $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                        $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                        $indicatorDomain->year = $year;
+                                        $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                        $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                        $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                        $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                        $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                        $indicatorDomain->label = 'child';
+                                        $indicatorDomain->unit_id = $unit->id;
+                                        $indicatorDomain->level_id = $levelId;
+                                        $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
+                                        $indicatorDomain->code = $indicatorSuperMaster->code;
+                                        $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                        $indicatorDomain->parent_horizontal_id = null;
+                                        $indicatorDomain->created_by = $userId;
 
-                                        $this->indicatorRepository->save($indicatorDomains);
+                                        $this->indicatorRepository->save($indicatorDomain);
 
                                         //target & realisasi 'CHILD' creating
                                         if (!is_null($indicatorSuperMaster->validity)) {
                                             foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                $targetDomains->id = (string) Str::orderedUuid();
-                                                $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $targetDomains->month = $validityKey;
-                                                $targetDomains->value = 0;
-                                                $targetDomains->locked = false;
-                                                $targetDomains->default = true;
+                                                $targetDomain->id = (string) Str::orderedUuid();
+                                                $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                $targetDomain->month = $validityKey;
+                                                $targetDomain->value = 0;
+                                                $targetDomain->locked = false;
+                                                $targetDomain->default = true;
 
-                                                $this->targetRepository->save($targetDomains);
+                                                $this->targetRepository->save($targetDomain);
 
-                                                $realizationDomains->id = (string) Str::orderedUuid();
-                                                $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $realizationDomains->month = $validityKey;
-                                                $realizationDomains->value = 0;
-                                                $realizationDomains->locked = true;
-                                                $realizationDomains->default = true;
+                                                $realizationDomain->id = (string) Str::orderedUuid();
+                                                $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                $realizationDomain->month = $validityKey;
+                                                $realizationDomain->value = 0;
+                                                $realizationDomain->locked = true;
+                                                $realizationDomain->default = true;
 
-                                                $this->realizationRepository->save($realizationDomains);
+                                                $this->realizationRepository->save($realizationDomain);
                                             }
                                         }
 
@@ -741,12 +741,12 @@ class IndicatorPaperWorkService {
                                         $indicatorsIdSuspended = $temp;
                                     } else {
 
-                                        $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]));
+                                        $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]);
 
                                         foreach ($pathsNewIndicator as $pathNewIndicator) {
                                             if (!is_null($pathNewIndicator)) {
 
-                                                $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year));
+                                                $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
                                                 $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
 
@@ -756,49 +756,49 @@ class IndicatorPaperWorkService {
                                                     $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
 
                                                     if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
-                                                        $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                                        $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                                        $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                                        $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                                        $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                                        $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                                        $indicatorDomains->year = $year;
-                                                        $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                                        $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                                        $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                                        $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                                        $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                                        $indicatorDomains->label = 'child';
-                                                        $indicatorDomains->unit_id = $unit->id;
-                                                        $indicatorDomains->level_id = $levelId;
-                                                        $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
-                                                        $indicatorDomains->code = $indicatorSuperMaster->code;
-                                                        $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                                        $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
-                                                        $indicatorDomains->created_by = $userId;
+                                                        $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                                        $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                        $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                                        $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                                        $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                        $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                        $indicatorDomain->year = $year;
+                                                        $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                        $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                        $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                                        $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                                        $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                                        $indicatorDomain->label = 'child';
+                                                        $indicatorDomain->unit_id = $unit->id;
+                                                        $indicatorDomain->level_id = $levelId;
+                                                        $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
+                                                        $indicatorDomain->code = $indicatorSuperMaster->code;
+                                                        $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                                        $indicatorDomain->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
+                                                        $indicatorDomain->created_by = $userId;
 
-                                                        $this->indicatorRepository->save($indicatorDomains);
+                                                        $this->indicatorRepository->save($indicatorDomain);
 
                                                         //target & realisasi 'CHILD' creating
                                                         if (!is_null($indicatorSuperMaster->validity)) {
                                                             foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                                $targetDomains->id = (string) Str::orderedUuid();
-                                                                $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                                $targetDomains->month = $validityKey;
-                                                                $targetDomains->value = 0;
-                                                                $targetDomains->locked = false;
-                                                                $targetDomains->default = true;
+                                                                $targetDomain->id = (string) Str::orderedUuid();
+                                                                $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                                $targetDomain->month = $validityKey;
+                                                                $targetDomain->value = 0;
+                                                                $targetDomain->locked = false;
+                                                                $targetDomain->default = true;
 
-                                                                $this->targetRepository->save($targetDomains);
+                                                                $this->targetRepository->save($targetDomain);
 
-                                                                $realizationDomains->id = (string) Str::orderedUuid();
-                                                                $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                                $realizationDomains->month = $validityKey;
-                                                                $realizationDomains->value = 0;
-                                                                $realizationDomains->locked = true;
-                                                                $realizationDomains->default = true;
+                                                                $realizationDomain->id = (string) Str::orderedUuid();
+                                                                $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                                $realizationDomain->month = $validityKey;
+                                                                $realizationDomain->value = 0;
+                                                                $realizationDomain->locked = true;
+                                                                $realizationDomain->default = true;
 
-                                                                $this->realizationRepository->save($realizationDomains);
+                                                                $this->realizationRepository->save($realizationDomain);
                                                             }
                                                         }
 
@@ -840,15 +840,15 @@ class IndicatorPaperWorkService {
                         }
                     }
                 } else {
-                    $unitsId = Arr::flatten($this->unitRepository->find__allId__with__childs__by__id($user->unit->id)); //mengambil daftar 'id' unit-unit turunan berdasarkan user
+                    $unitsId = $this->unitRepository->find__allId__with__childs__by__id($user->unit->id); //mengambil daftar 'id' unit-unit turunan berdasarkan user
 
                     foreach ($units as $unit) {
                         if (in_array($unit->id, $unitsId)) {
                             //daftar 'id' dari KPI-KPI 'child'
-                            $oldIndicatorsChildOnlyId = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unit->id, $year));
+                            $oldIndicatorsChildOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unit->id, $year);
 
                             //daftar 'code' dari KPI-KPI 'child'
-                            $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year));
+                            $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
                             $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
                             $i = 0;
@@ -887,7 +887,7 @@ class IndicatorPaperWorkService {
                                 //nasab KPI baru yang belum terdaftar di 'child'.
                                 $pathsNewIndicators = [];
                                 foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
-                                    $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild)));
+                                    $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild));
                                 }
 
                                 //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
@@ -918,7 +918,7 @@ class IndicatorPaperWorkService {
                                 foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
                                     if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
 
-                                        $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator));
+                                        $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
                                         $havePathsIndicatorNotRegistedInChild = [];
                                         $j = 0;
@@ -933,49 +933,49 @@ class IndicatorPaperWorkService {
 
                                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
 
-                                            $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                            $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                            $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                            $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                            $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                            $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                            $indicatorDomains->year = $year;
-                                            $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                            $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                            $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                            $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                            $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                            $indicatorDomains->label = 'child';
-                                            $indicatorDomains->unit_id = $unit->id;
-                                            $indicatorDomains->level_id = $levelId;
-                                            $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
-                                            $indicatorDomains->code = $indicatorSuperMaster->code;
-                                            $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                            $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
-                                            $indicatorDomains->created_by = $userId;
+                                            $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                            $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                            $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                            $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                            $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                            $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                            $indicatorDomain->year = $year;
+                                            $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                            $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                            $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                            $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                            $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                            $indicatorDomain->label = 'child';
+                                            $indicatorDomain->unit_id = $unit->id;
+                                            $indicatorDomain->level_id = $levelId;
+                                            $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
+                                            $indicatorDomain->code = $indicatorSuperMaster->code;
+                                            $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                            $indicatorDomain->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
+                                            $indicatorDomain->created_by = $userId;
 
-                                            $this->indicatorRepository->save($indicatorDomains);
+                                            $this->indicatorRepository->save($indicatorDomain);
 
                                             //target & realisasi 'CHILD' creating
                                             if (!is_null($indicatorSuperMaster->validity)) {
                                                 foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
-                                                    $targetDomains->id = (string) Str::orderedUuid();
-                                                    $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $targetDomains->month = $validitykey;
-                                                    $targetDomains->value = 0;
-                                                    $targetDomains->locked = false;
-                                                    $targetDomains->default = true;
+                                                    $targetDomain->id = (string) Str::orderedUuid();
+                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                    $targetDomain->month = $validitykey;
+                                                    $targetDomain->value = 0;
+                                                    $targetDomain->locked = false;
+                                                    $targetDomain->default = true;
 
-                                                    $this->targetRepository->save($targetDomains);
+                                                    $this->targetRepository->save($targetDomain);
 
-                                                    $realizationDomains->id = (string) Str::orderedUuid();
-                                                    $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $realizationDomains->month = $validitykey;
-                                                    $realizationDomains->value = 0;
-                                                    $realizationDomains->locked = true;
-                                                    $realizationDomains->default = true;
+                                                    $realizationDomain->id = (string) Str::orderedUuid();
+                                                    $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                    $realizationDomain->month = $validitykey;
+                                                    $realizationDomain->value = 0;
+                                                    $realizationDomain->locked = true;
+                                                    $realizationDomain->default = true;
 
-                                                    $this->realizationRepository->save($realizationDomains);
+                                                    $this->realizationRepository->save($realizationDomain);
                                                 }
                                             }
                                         } else {
@@ -991,49 +991,49 @@ class IndicatorPaperWorkService {
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
                                         if ($indicatorSuperMaster->parent_horizontal_id === null) {
-                                            $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                            $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                            $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                            $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                            $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                            $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                            $indicatorDomains->year = $year;
-                                            $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                            $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                            $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                            $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                            $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                            $indicatorDomains->label = 'child';
-                                            $indicatorDomains->unit_id = $unit->id;
-                                            $indicatorDomains->level_id = $levelId;
-                                            $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
-                                            $indicatorDomains->code = $indicatorSuperMaster->code;
-                                            $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                            $indicatorDomains->parent_horizontal_id = null;
-                                            $indicatorDomains->created_by = $userId;
+                                            $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                            $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                            $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                            $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                            $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                            $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                            $indicatorDomain->year = $year;
+                                            $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                            $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                            $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                            $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                            $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                            $indicatorDomain->label = 'child';
+                                            $indicatorDomain->unit_id = $unit->id;
+                                            $indicatorDomain->level_id = $levelId;
+                                            $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
+                                            $indicatorDomain->code = $indicatorSuperMaster->code;
+                                            $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                            $indicatorDomain->parent_horizontal_id = null;
+                                            $indicatorDomain->created_by = $userId;
 
-                                            $this->indicatorRepository->save($indicatorDomains);
+                                            $this->indicatorRepository->save($indicatorDomain);
 
                                             //target & realisasi 'CHILD' creating
                                             if (!is_null($indicatorSuperMaster->validity)) {
                                                 foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                    $targetDomains->id = (string) Str::orderedUuid();
-                                                    $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $targetDomains->month = $validityKey;
-                                                    $targetDomains->value = 0;
-                                                    $targetDomains->locked = false;
-                                                    $targetDomains->default = true;
+                                                    $targetDomain->id = (string) Str::orderedUuid();
+                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                    $targetDomain->month = $validityKey;
+                                                    $targetDomain->value = 0;
+                                                    $targetDomain->locked = false;
+                                                    $targetDomain->default = true;
 
-                                                    $this->targetRepository->save($targetDomains);
+                                                    $this->targetRepository->save($targetDomain);
 
-                                                    $realizationDomains->id = (string) Str::orderedUuid();
-                                                    $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $realizationDomains->month = $validityKey;
-                                                    $realizationDomains->value = 0;
-                                                    $realizationDomains->locked = true;
-                                                    $realizationDomains->default = true;
+                                                    $realizationDomain->id = (string) Str::orderedUuid();
+                                                    $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                    $realizationDomain->month = $validityKey;
+                                                    $realizationDomain->value = 0;
+                                                    $realizationDomain->locked = true;
+                                                    $realizationDomain->default = true;
 
-                                                    $this->realizationRepository->save($realizationDomains);
+                                                    $this->realizationRepository->save($realizationDomain);
                                                 }
                                             }
 
@@ -1049,12 +1049,12 @@ class IndicatorPaperWorkService {
                                             $indicatorsIdSuspended = $temp;
                                         } else {
 
-                                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]));
+                                            $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]);
 
                                             foreach ($pathsNewIndicator as $pathNewIndicator) {
                                                 if (!is_null($pathNewIndicator)) {
 
-                                                    $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year));
+                                                    $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
                                                     $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
 
@@ -1064,49 +1064,49 @@ class IndicatorPaperWorkService {
                                                         $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
 
                                                         if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
-                                                            $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                                            $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                                            $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                                            $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                                            $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                                            $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                                            $indicatorDomains->year = $year;
-                                                            $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                                            $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                                            $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                                            $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                                            $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                                            $indicatorDomains->label = 'child';
-                                                            $indicatorDomains->unit_id = $unit->id;
-                                                            $indicatorDomains->level_id = $levelId;
-                                                            $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
-                                                            $indicatorDomains->code = $indicatorSuperMaster->code;
-                                                            $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                                            $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
-                                                            $indicatorDomains->created_by = $userId;
+                                                            $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                                            $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                            $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                                            $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                                            $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                            $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                            $indicatorDomain->year = $year;
+                                                            $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                            $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                            $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                                            $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                                            $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                                            $indicatorDomain->label = 'child';
+                                                            $indicatorDomain->unit_id = $unit->id;
+                                                            $indicatorDomain->level_id = $levelId;
+                                                            $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unit->id, $year);
+                                                            $indicatorDomain->code = $indicatorSuperMaster->code;
+                                                            $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                                            $indicatorDomain->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unit->id, $year);
+                                                            $indicatorDomain->created_by = $userId;
 
-                                                            $this->indicatorRepository->save($indicatorDomains);
+                                                            $this->indicatorRepository->save($indicatorDomain);
 
                                                             //target & realisasi 'CHILD' creating
                                                             if (!is_null($indicatorSuperMaster->validity)) {
                                                                 foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                                    $targetDomains->id = (string) Str::orderedUuid();
-                                                                    $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                                    $targetDomains->month = $validityKey;
-                                                                    $targetDomains->value = 0;
-                                                                    $targetDomains->locked = false;
-                                                                    $targetDomains->default = true;
+                                                                    $targetDomain->id = (string) Str::orderedUuid();
+                                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                                    $targetDomain->month = $validityKey;
+                                                                    $targetDomain->value = 0;
+                                                                    $targetDomain->locked = false;
+                                                                    $targetDomain->default = true;
 
-                                                                    $this->targetRepository->save($targetDomains);
+                                                                    $this->targetRepository->save($targetDomain);
 
-                                                                    $realizationDomains->id = (string) Str::orderedUuid();
-                                                                    $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                                    $realizationDomains->month = $validityKey;
-                                                                    $realizationDomains->value = 0;
-                                                                    $realizationDomains->locked = true;
-                                                                    $realizationDomains->default = true;
+                                                                    $realizationDomain->id = (string) Str::orderedUuid();
+                                                                    $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                                    $realizationDomain->month = $validityKey;
+                                                                    $realizationDomain->value = 0;
+                                                                    $realizationDomain->locked = true;
+                                                                    $realizationDomain->default = true;
 
-                                                                    $this->realizationRepository->save($realizationDomains);
+                                                                    $this->realizationRepository->save($realizationDomain);
                                                                 }
                                                             }
 
@@ -1161,7 +1161,7 @@ class IndicatorPaperWorkService {
                 //end section: 'MASTER' updating ----------------------------------------------------------------------
             } else {
                 //daftar 'id' dari KPI-KPI 'child'
-                $oldIndicatorsChildOnlyId = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unitId, $year));
+                $oldIndicatorsChildOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unitId, $year);
 
                 $newIndicatorsChild = [];
                 $i = 0;
@@ -1175,7 +1175,7 @@ class IndicatorPaperWorkService {
                 //section: 'MASTER' updating ----------------------------------------------------------------------
 
                 //daftar 'code' dari KPI-KPI 'master'
-                $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year));
+                $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
                 $newIndicatorsNotExisInMaster = []; //daftar KPI baru yang belum terdaftar di 'master'
                 $i = 0;
@@ -1191,7 +1191,7 @@ class IndicatorPaperWorkService {
                     //nasab KPI baru yang belum terdaftar di 'master'.
                     $pathsNewIndicators = [];
                     foreach ($newIndicatorsNotExisInMaster as $newIndicatorNotExisInMaster) {
-                        $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInMaster)));
+                        $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInMaster));
                     }
 
                     //gabungan daftar KPI master & KPI baru yang belum terdaftar di 'master'.
@@ -1222,7 +1222,7 @@ class IndicatorPaperWorkService {
                     foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
                         if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //KPI belum terdaftar di 'master'
 
-                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator));
+                            $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
                             $havePathsIndicatorNotRegistedInMaster = [];
                             $j = 0;
@@ -1237,40 +1237,40 @@ class IndicatorPaperWorkService {
 
                                 $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
 
-                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'master';
-                                $indicatorDomains->unit_id = null;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
-                                $indicatorDomains->created_by = $userId;
+                                $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomain->year = $year;
+                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomain->label = 'master';
+                                $indicatorDomain->unit_id = null;
+                                $indicatorDomain->level_id = $levelId;
+                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
+                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                $indicatorDomain->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomain->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                $indicatorDomain->created_by = $userId;
 
-                                $this->indicatorRepository->save($indicatorDomains);
+                                $this->indicatorRepository->save($indicatorDomain);
 
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validitykey => $validityvalue) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $validitykey;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = false;
-                                        $targetDomains->default = true;
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomain->month = $validitykey;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = false;
+                                        $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomains);
+                                        $this->targetRepository->save($targetDomain);
                                     }
                                 }
                             } else {
@@ -1286,40 +1286,40 @@ class IndicatorPaperWorkService {
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
                             if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
-                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'master';
-                                $indicatorDomains->unit_id = null;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                $indicatorDomains->parent_horizontal_id = null;
-                                $indicatorDomains->created_by = $userId;
+                                $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
+                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomain->year = $year;
+                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomain->label = 'master';
+                                $indicatorDomain->unit_id = null;
+                                $indicatorDomain->level_id = $levelId;
+                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
+                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                $indicatorDomain->parent_vertical_id = $indicatorSuperMaster->id;
+                                $indicatorDomain->parent_horizontal_id = null;
+                                $indicatorDomain->created_by = $userId;
 
-                                $this->indicatorRepository->save($indicatorDomains);
+                                $this->indicatorRepository->save($indicatorDomain);
 
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $validityKey;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = false;
-                                        $targetDomains->default = true;
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                        $targetDomain->month = $validityKey;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = false;
+                                        $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomains);
+                                        $this->targetRepository->save($targetDomain);
                                     }
                                 }
 
@@ -1334,12 +1334,12 @@ class IndicatorPaperWorkService {
                                 }
                                 $indicatorsIdSuspended = $temp;
                             } else {
-                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]));
+                                $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]);
 
                                 foreach ($pathsNewIndicator as $pathNewIndicator) {
                                     if (!is_null($pathNewIndicator)) {
 
-                                        $oldIndicatorsMasterOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year));
+                                        $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
 
@@ -1349,40 +1349,40 @@ class IndicatorPaperWorkService {
                                             $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
 
                                             if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
-                                                $indicatorDomains->id = $idListMaster[$indicatorSuperMaster->id];
-                                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                                $indicatorDomains->year = $year;
-                                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                                $indicatorDomains->label = 'master';
-                                                $indicatorDomains->unit_id = null;
-                                                $indicatorDomains->level_id = $levelId;
-                                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
-                                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                                $indicatorDomains->parent_vertical_id = $indicatorSuperMaster->id;
-                                                $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
-                                                $indicatorDomains->created_by = $userId;
+                                                $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
+                                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                $indicatorDomain->year = $year;
+                                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                                $indicatorDomain->label = 'master';
+                                                $indicatorDomain->unit_id = null;
+                                                $indicatorDomain->level_id = $levelId;
+                                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, null, $year);
+                                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                                $indicatorDomain->parent_vertical_id = $indicatorSuperMaster->id;
+                                                $indicatorDomain->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
+                                                $indicatorDomain->created_by = $userId;
 
-                                                $this->indicatorRepository->save($indicatorDomains);
+                                                $this->indicatorRepository->save($indicatorDomain);
 
                                                 //target 'MASTER' creating
                                                 if (!is_null($indicatorSuperMaster->validity)) {
                                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                        $targetDomains->id = (string) Str::orderedUuid();
-                                                        $targetDomains->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                                        $targetDomains->month = $validityKey;
-                                                        $targetDomains->value = 0;
-                                                        $targetDomains->locked = false;
-                                                        $targetDomains->default = true;
+                                                        $targetDomain->id = (string) Str::orderedUuid();
+                                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                                        $targetDomain->month = $validityKey;
+                                                        $targetDomain->value = 0;
+                                                        $targetDomain->locked = false;
+                                                        $targetDomain->default = true;
 
-                                                        $this->targetRepository->save($targetDomains);
+                                                        $this->targetRepository->save($targetDomain);
                                                     }
                                                 }
 
@@ -1409,7 +1409,7 @@ class IndicatorPaperWorkService {
                 //section: 'CHILD' updating ----------------------------------------------------------------------
 
                 //daftar 'code' dari KPI-KPI 'child'
-                $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unitId, $year));
+                $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unitId, $year);
 
                 $oldIndicatorsChild = [];
                 $i = 0;
@@ -1434,7 +1434,7 @@ class IndicatorPaperWorkService {
                     //nasab KPI baru yang belum terdaftar di 'child'.
                     $pathsNewIndicators = [];
                     foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
-                        $pathsNewIndicators = array_merge($pathsNewIndicators, Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild)));
+                        $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild));
                     }
 
                     //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
@@ -1465,7 +1465,7 @@ class IndicatorPaperWorkService {
                     foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
                         if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
 
-                            $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator));
+                            $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
                             $havePathsIndicatorNotRegistedInChild = [];
                             $j = 0;
@@ -1480,49 +1480,49 @@ class IndicatorPaperWorkService {
 
                                 $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
 
-                                $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'child';
-                                $indicatorDomains->unit_id = $unitId;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unitId, $year);
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                $indicatorDomains->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
-                                $indicatorDomains->created_by = $userId;
+                                $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomain->year = $year;
+                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomain->label = 'child';
+                                $indicatorDomain->unit_id = $unitId;
+                                $indicatorDomain->level_id = $levelId;
+                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unitId, $year);
+                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                $indicatorDomain->parent_horizontal_id = is_null($indicatorSuperMaster->parent_horizontal_id) ? null : $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
+                                $indicatorDomain->created_by = $userId;
 
-                                $this->indicatorRepository->save($indicatorDomains);
+                                $this->indicatorRepository->save($indicatorDomain);
 
                                 //target & realisasi 'CHILD' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $validitykey;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = false;
-                                        $targetDomains->default = true;
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $targetDomain->month = $validitykey;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = false;
+                                        $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomains);
+                                        $this->targetRepository->save($targetDomain);
 
-                                        $realizationDomains->id = (string) Str::orderedUuid();
-                                        $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                        $realizationDomains->month = $validitykey;
-                                        $realizationDomains->value = 0;
-                                        $realizationDomains->locked = true;
-                                        $realizationDomains->default = true;
+                                        $realizationDomain->id = (string) Str::orderedUuid();
+                                        $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $realizationDomain->month = $validitykey;
+                                        $realizationDomain->value = 0;
+                                        $realizationDomain->locked = true;
+                                        $realizationDomain->default = true;
 
-                                        $this->realizationRepository->save($realizationDomains);
+                                        $this->realizationRepository->save($realizationDomain);
                                     }
                                 }
                             } else {
@@ -1538,49 +1538,49 @@ class IndicatorPaperWorkService {
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
                             if ($indicatorSuperMaster->parent_horizontal_id === null) {
-                                $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                $indicatorDomains->year = $year;
-                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                $indicatorDomains->label = 'child';
-                                $indicatorDomains->unit_id = $unitId;
-                                $indicatorDomains->level_id = $levelId;
-                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unitId, $year);
-                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                $indicatorDomains->parent_horizontal_id = null;
-                                $indicatorDomains->created_by = $userId;
+                                $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                $indicatorDomain->year = $year;
+                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                $indicatorDomain->label = 'child';
+                                $indicatorDomain->unit_id = $unitId;
+                                $indicatorDomain->level_id = $levelId;
+                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unitId, $year);
+                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                $indicatorDomain->parent_horizontal_id = null;
+                                $indicatorDomain->created_by = $userId;
 
-                                $this->indicatorRepository->save($indicatorDomains);
+                                $this->indicatorRepository->save($indicatorDomain);
 
                                 //target & realisasi 'CHILD' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                        $targetDomains->id = (string) Str::orderedUuid();
-                                        $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                        $targetDomains->month = $validityKey;
-                                        $targetDomains->value = 0;
-                                        $targetDomains->locked = false;
-                                        $targetDomains->default = true;
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $targetDomain->month = $validityKey;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = false;
+                                        $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomains);
+                                        $this->targetRepository->save($targetDomain);
 
-                                        $realizationDomains->id = (string) Str::orderedUuid();
-                                        $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                        $realizationDomains->month = $validityKey;
-                                        $realizationDomains->value = 0;
-                                        $realizationDomains->locked = true;
-                                        $realizationDomains->default = true;
+                                        $realizationDomain->id = (string) Str::orderedUuid();
+                                        $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                        $realizationDomain->month = $validityKey;
+                                        $realizationDomain->value = 0;
+                                        $realizationDomain->locked = true;
+                                        $realizationDomain->default = true;
 
-                                        $this->realizationRepository->save($realizationDomains);
+                                        $this->realizationRepository->save($realizationDomain);
                                     }
                                 }
 
@@ -1596,12 +1596,12 @@ class IndicatorPaperWorkService {
                                 $indicatorsIdSuspended = $temp;
                             } else {
 
-                                $pathsNewIndicator = Arr::flatten($this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]));
+                                $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($indicatorsIdSuspended[$i]);
 
                                 foreach ($pathsNewIndicator as $pathNewIndicator) {
                                     if (!is_null($pathNewIndicator)) {
 
-                                        $oldIndicatorsChildOnlyCode = Arr::flatten($this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unitId, $year));
+                                        $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unitId, $year);
 
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
 
@@ -1611,49 +1611,49 @@ class IndicatorPaperWorkService {
                                             $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
 
                                             if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
-                                                $indicatorDomains->id = $idListChild[$indicatorSuperMaster->id];
-                                                $indicatorDomains->indicator = $indicatorSuperMaster->indicator;
-                                                $indicatorDomains->formula = $indicatorSuperMaster->formula;
-                                                $indicatorDomains->measure = $indicatorSuperMaster->measure;
-                                                $indicatorDomains->weight = $indicatorSuperMaster->getRawOriginal('weight');
-                                                $indicatorDomains->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
-                                                $indicatorDomains->year = $year;
-                                                $indicatorDomains->reducing_factor = $indicatorSuperMaster->reducing_factor;
-                                                $indicatorDomains->validity = $indicatorSuperMaster->getRawOriginal('validity');
-                                                $indicatorDomains->reviewed = $indicatorSuperMaster->reviewed;
-                                                $indicatorDomains->referenced = $indicatorSuperMaster->referenced;
-                                                $indicatorDomains->dummy = $indicatorSuperMaster->dummy;
-                                                $indicatorDomains->label = 'child';
-                                                $indicatorDomains->unit_id = $unitId;
-                                                $indicatorDomains->level_id = $levelId;
-                                                $indicatorDomains->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unitId, $year);
-                                                $indicatorDomains->code = $indicatorSuperMaster->code;
-                                                $indicatorDomains->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
-                                                $indicatorDomains->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
-                                                $indicatorDomains->created_by = $userId;
+                                                $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
+                                                $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomain->formula = $indicatorSuperMaster->formula;
+                                                $indicatorDomain->measure = $indicatorSuperMaster->measure;
+                                                $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
+                                                $indicatorDomain->polarity = $indicatorSuperMaster->getRawOriginal('polarity');
+                                                $indicatorDomain->year = $year;
+                                                $indicatorDomain->reducing_factor = $indicatorSuperMaster->reducing_factor;
+                                                $indicatorDomain->validity = $indicatorSuperMaster->getRawOriginal('validity');
+                                                $indicatorDomain->reviewed = $indicatorSuperMaster->reviewed;
+                                                $indicatorDomain->referenced = $indicatorSuperMaster->referenced;
+                                                $indicatorDomain->dummy = $indicatorSuperMaster->dummy;
+                                                $indicatorDomain->label = 'child';
+                                                $indicatorDomain->unit_id = $unitId;
+                                                $indicatorDomain->level_id = $levelId;
+                                                $indicatorDomain->order = $this->indicatorRepository->count__allPlusOne__by__levelId_unitId_year($levelId, $unitId, $year);
+                                                $indicatorDomain->code = $indicatorSuperMaster->code;
+                                                $indicatorDomain->parent_vertical_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->id, $levelId, null, $year);
+                                                $indicatorDomain->parent_horizontal_id = $this->indicatorRepository->find__id__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, $unitId, $year);
+                                                $indicatorDomain->created_by = $userId;
 
-                                                $this->indicatorRepository->save($indicatorDomains);
+                                                $this->indicatorRepository->save($indicatorDomain);
 
                                                 //target & realisasi 'CHILD' creating
                                                 if (!is_null($indicatorSuperMaster->validity)) {
                                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                        $targetDomains->id = (string) Str::orderedUuid();
-                                                        $targetDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                        $targetDomains->month = $validityKey;
-                                                        $targetDomains->value = 0;
-                                                        $targetDomains->locked = false;
-                                                        $targetDomains->default = true;
+                                                        $targetDomain->id = (string) Str::orderedUuid();
+                                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                        $targetDomain->month = $validityKey;
+                                                        $targetDomain->value = 0;
+                                                        $targetDomain->locked = false;
+                                                        $targetDomain->default = true;
 
-                                                        $this->targetRepository->save($targetDomains);
+                                                        $this->targetRepository->save($targetDomain);
 
-                                                        $realizationDomains->id = (string) Str::orderedUuid();
-                                                        $realizationDomains->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                        $realizationDomains->month = $validityKey;
-                                                        $realizationDomains->value = 0;
-                                                        $realizationDomains->locked = true;
-                                                        $realizationDomains->default = true;
+                                                        $realizationDomain->id = (string) Str::orderedUuid();
+                                                        $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                        $realizationDomain->month = $validityKey;
+                                                        $realizationDomain->value = 0;
+                                                        $realizationDomain->locked = true;
+                                                        $realizationDomain->default = true;
 
-                                                        $this->realizationRepository->save($realizationDomains);
+                                                        $this->realizationRepository->save($realizationDomain);
                                                     }
                                                 }
 

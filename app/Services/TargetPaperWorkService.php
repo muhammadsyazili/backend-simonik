@@ -10,7 +10,6 @@ use App\Repositories\TargetRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Arr;
 
 class TargetPaperWorkService {
 
@@ -90,7 +89,7 @@ class TargetPaperWorkService {
                         }
                         //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
                     } else {
-                        $unitsId = Arr::flatten($this->unitRepository->find__allId__with__childs__by__id($user->unit->id)); //mengambil daftar 'id' unit-unit turunan berdasarkan user
+                        $unitsId = $this->unitRepository->find__allId__with__childs__by__id($user->unit->id); //mengambil daftar 'id' unit-unit turunan berdasarkan user
 
                         //section: paper work 'CHILD' updating ----------------------------------------------------------------------
                         foreach ($indicatorsChild as $indicatorChild) {

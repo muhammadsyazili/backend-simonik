@@ -36,7 +36,7 @@ class Unit__IsThisAndChildUser implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return $value === 'master' || in_array($value, Arr::flatten($this->unitRepository->find__allSlug__with__this_childs__by__id($this->user->unit->id))) ? true : false;
+            return $value === 'master' || in_array($value, $this->unitRepository->find__allSlug__with__this_childs__by__id($this->user->unit->id)) ? true : false;
         } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
             return $value === $this->user->unit->slug ? true : false;
         } else {

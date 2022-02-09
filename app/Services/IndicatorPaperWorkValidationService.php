@@ -131,7 +131,7 @@ class IndicatorPaperWorkValidationService {
         $validator = Validator::make($input, $attributes, $messages);
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
-        $indicators = $unit === 'master' ? Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year)) : Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year));
+        $indicators = $unit === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
         $new = [];
         $i = 0;
@@ -147,7 +147,7 @@ class IndicatorPaperWorkValidationService {
         //memastikan jumlah KPI sama dengan di database
         $validator->after(function ($validator) use ($new, $res) {
             if (count($new) !== $res) {
-                $validator->errors()->add('indicators', "Akses ilegal !");
+                $validator->errors()->add('indicators', "(#2.1) : Akses ilegal !");
             }
         });
 
@@ -197,21 +197,21 @@ class IndicatorPaperWorkValidationService {
 
         $indicators = [];
         if ($request->post('level') === 'super-master') {
-            $indicators = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year());
+            $indicators = $this->indicatorRepository->find__allId__by__levelId_unitId_year();
         } else {
             $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
             $year = $request->post('year');
             if ($request->post('unit') === 'master') {
-                $indicators = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year));
+                $indicators = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year);
             } else {
-                $indicators = Arr::flatten($this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $year));
+                $indicators = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $year);
             }
         }
 
         //memastikan jumlah KPI sama dengan di database
         $validator->after(function ($validator) use ($request, $indicators) {
             if (count($request->post('indicators')) !== count($indicators)) {
-                $validator->errors()->add('indicators', "Akses ilegal !");
+                $validator->errors()->add('indicators', "(#2.2) : Akses ilegal !");
             }
         });
 
@@ -219,7 +219,7 @@ class IndicatorPaperWorkValidationService {
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $indicator) {
                 if (!in_array($indicator, $indicators)) {
-                    $validator->errors()->add('indicators', "Akses ilegal !");
+                    $validator->errors()->add('indicators', "(#2.3) : Akses ilegal !");
                     break;
                 }
             }
