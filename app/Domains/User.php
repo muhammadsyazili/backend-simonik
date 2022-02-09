@@ -8,8 +8,8 @@ class User {
     public string $name;
     public string $username;
     public string $email;
-    public bool $actived;
-    public string $password;
+    public ?bool $actived;
+    public ?string $password;
     public ?string $unit_id;
-    public int $role_id;
+    public ?int $role_id;
 }

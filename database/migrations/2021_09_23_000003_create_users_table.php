@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('nip')->nullable()->default(null);
             $table->string('name');
             $table->string('username')->unique();
-            $table->string('email')->unique();
+            $table->string('email');
             $table->timestamp('email_verified_at')->nullable();
             $table->boolean('actived')->default(0);
             $table->string('password');

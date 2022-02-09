@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Domains\User;
 use App\DTO\ConstructRequest;
-use App\DTO\UserCreateResponse;
+use App\DTO\UserCreateOrEditResponse;
 use App\DTO\UserInsertOrUpdateRequest;
 use App\Repositories\RoleRepository;
 use App\Repositories\UnitRepository;
@@ -32,9 +32,9 @@ class UserService {
     }
 
     //use repo UnitRepository
-    public function create() : UserCreateResponse
+    public function create() : UserCreateOrEditResponse
     {
-        $response = new UserCreateResponse();
+        $response = new UserCreateOrEditResponse();
 
         $response->units = $this->unitRepository->find__all();
 
@@ -58,6 +58,41 @@ class UserService {
             $userDomain->role_id = $this->roleRepository->find__id__by__name('employee');
 
             $this->userRepository->save($userDomain);
+        });
+    }
+
+    //use repo UnitRepository, UserRepository
+    public function edit(string|int $id) : UserCreateOrEditResponse
+    {
+        $response = new UserCreateOrEditResponse();
+
+        $response->user = $this->userRepository->find__by__id($id);
+        $response->units = $this->unitRepository->find__all();
+
+        return $response;
+    }
+
+    //use repo UserRepository
+    public function update(UserInsertOrUpdateRequest $user) : void
+    {
+        DB::transaction(function () use ($user) {
+            $userDomain = new User();
+
+            $userDomain->nip = $user->nip;
+            $userDomain->name = $user->name;
+            $userDomain->username = $user->username;
+            $userDomain->email = $user->email;
+            $userDomain->unit_id = $this->unitRepository->find__id__by__slug($user->unit);
+
+            $this->userRepository->update__by__id($userDomain, $user->id);
+        });
+    }
+
+    //use repo UserRepository
+    public function destroy(string|int $id) : void
+    {
+        DB::transaction(function () use ($id) {
+            $this->userRepository->delete__by__id($id);
         });
     }
 }
