@@ -2,9 +2,14 @@
 
 namespace App\Services;
 
+use App\Domains\Level;
 use App\DTO\ConstructRequest;
+use App\DTO\LevelCreateOrEditResponse;
+use App\DTO\LevelInsertOrUpdateRequest;
 use App\Repositories\LevelRepository;
 use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class LevelService {
 
@@ -21,6 +26,30 @@ class LevelService {
     public function index()
     {
         return $this->levelRepository->find__all__with__parent();
+    }
+
+    //use repo LevelRepository
+    public function create() : LevelCreateOrEditResponse
+    {
+        $response = new LevelCreateOrEditResponse();
+
+        $response->levels = $this->levelRepository->find__all();
+
+        return $response;
+    }
+
+    //use repo LevelRepository
+    public function store(LevelInsertOrUpdateRequest $level) : void
+    {
+        DB::transaction(function () use ($level) {
+            $levelDomain = new Level();
+
+            $levelDomain->name = strtoupper($level->name);
+            $levelDomain->slug = Str::slug(strtolower($level->name));
+            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($level->parent_level);
+
+            $this->levelRepository->save($levelDomain);
+        });
     }
 
     //use repo LevelRepository, UserRepository

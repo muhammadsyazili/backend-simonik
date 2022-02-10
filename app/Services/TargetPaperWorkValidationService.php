@@ -34,8 +34,8 @@ class TargetPaperWorkValidationService {
     //use repo UserRepository
     public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
-        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -59,8 +59,8 @@ class TargetPaperWorkValidationService {
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
-        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
+use App\DTO\LevelInsertOrUpdateRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\LevelRepository;
 use App\Repositories\UserRepository;
 use App\Services\LevelService;
+use App\Services\LevelValidationService;
 
 class LevelController extends ApiController
 {
@@ -46,7 +48,25 @@ class LevelController extends ApiController
      */
     public function create()
     {
-        //
+        $levelRepository = new LevelRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $response = $levelService->create();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level - Create",
+            [
+                'levels' => $response->levels
+            ],
+            null,
+        );
     }
 
     /**
@@ -57,7 +77,42 @@ class LevelController extends ApiController
      */
     public function store(Request $request)
     {
-        //
+        $levelRepository = new LevelRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+
+        $levelValidationService = new LevelValidationService($constructRequest);
+
+        $validation = $levelValidationService->storeValidation($request);
+
+        if($validation->fails()){
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $levelInsertOrUpdateRequest = new LevelInsertOrUpdateRequest();
+
+        $levelInsertOrUpdateRequest->name = $request->post('name');
+        $levelInsertOrUpdateRequest->parent_level = $request->post('parent_level');
+
+        $levelService = new LevelService($constructRequest);
+
+        $levelService->store($levelInsertOrUpdateRequest);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level berhasil ditambahkan",
+            null,
+            null,
+        );
     }
 
     /**

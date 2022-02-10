@@ -54,25 +54,27 @@ class UserValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $username = $request->post('username');
+        $username = strtolower($request->post('username'));
         $unit = $request->post('unit');
 
-        //username tidak mengandung keyword
+        //memastikan username tidak mengandung keyword
         $validator->after(function ($validator) use ($username) {
-            if (Str::containsAll(strtolower($username), ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+            if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
                 $validator->errors()->add('username', "username sudah tersedia.");
             }
         });
 
-        //username belum terdaftar di DB
-        $result = $this->userRepository->count__all__by__username($username);
-        $validator->after(function ($validator) use ($result) {
-            if ($result > 0) {
-                $validator->errors()->add('username', "username sudah tersedia.");
+        //memastikan username belum terdaftar di DB
+        $users = $this->userRepository->find__all();
+        $validator->after(function ($validator) use ($users, $username) {
+            foreach ($users as $user) {
+                if (strtolower($user->username) === $username) {
+                    $validator->errors()->add('username', "username sudah tersedia.");
+                }
             }
         });
 
-        //unit terdapat di DB
+        //memastikan unit terdapat di DB
         $result = $this->unitRepository->count__all__by__slug($unit);
         $validator->after(function ($validator) use ($result) {
             if ($result === 0) {
@@ -110,37 +112,39 @@ class UserValidationService {
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $username = $request->post('username');
+        $username = strtolower($request->post('username'));
         $unit = $request->post('unit');
 
         $user = $this->userRepository->find__with__role__by__id($id);
 
-        //user ber-role 'employee'
+        //memastikan user ber-role 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
-                $validator->errors()->add('username', "tidak bisa diubah.");
+                $validator->errors()->add('username', "user tidak bisa diubah.");
             });
         }
 
-        //username tidak mengandung keyword
+        //memastikan username tidak mengandung keyword
         $validator->after(function ($validator) use ($username) {
-            if (Str::containsAll(strtolower($username), ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+            if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
                 $validator->errors()->add('username', "username sudah tersedia.");
             }
         });
 
         //username diubah
         if ($user->username !== $username) {
-            //username belum terdaftar di DB
-            $result = $this->userRepository->count__all__by__username($username);
-            $validator->after(function ($validator) use ($result) {
-                if ($result > 0) {
-                    $validator->errors()->add('username', "username sudah tersedia.");
+            //memastikan username belum terdaftar di DB
+            $users = $this->userRepository->find__all();
+            $validator->after(function ($validator) use ($users, $username) {
+                foreach ($users as $user) {
+                    if (strtolower($user->username) === $username) {
+                        $validator->errors()->add('username', "username sudah tersedia.");
+                    }
                 }
             });
         }
 
-        //unit terdapat di DB
+        //memastikan unit terdapat di DB
         $result = $this->unitRepository->count__all__by__slug($unit);
         $validator->after(function ($validator) use ($result) {
             if ($result === 0) {
@@ -167,10 +171,10 @@ class UserValidationService {
 
         $user = $this->userRepository->find__with__role__by__id($id);
 
-        //user ber-role 'employee'
+        //memastikan user ber-role 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "tidak bisa diubah.");
+                $validator->errors()->add('id', "user tidak bisa dihapus.");
             });
         }
 

@@ -2,15 +2,30 @@
 
 namespace App\Repositories;
 
+use App\Domains\Level;
 use Illuminate\Support\Arr;
-use App\Models\Level;
+use App\Models\Level as ModelsLevel;
 use App\Models\LevelOnlyId;
 use App\Models\LevelOnlySlug;
 
 class LevelRepository {
+    public function save(Level $level) : void
+    {
+        ModelsLevel::create([
+            'name' => $level->name,
+            'slug' => $level->slug,
+            'parent_id' => $level->parent_id,
+        ]);
+    }
+
+    public function count__all__by__slug(string $slug) : int
+    {
+        return ModelsLevel::where(['slug' => $slug])->count();
+    }
+
     public function find__id__by__slug(string $slug) : string|int
     {
-        return Level::firstWhere(['slug' => $slug])->id;
+        return ModelsLevel::firstWhere(['slug' => $slug])->id;
     }
 
     public function find__allSlug__with__childs__by__root() : array
@@ -45,36 +60,41 @@ class LevelRepository {
 
     public function find__all__with__childs__by__root()
     {
-        return Level::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get();
+        return ModelsLevel::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get();
     }
 
     public function find__all__with__childs__by__id(string|int $id)
     {
-        return Level::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get();
+        return ModelsLevel::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get();
     }
 
     public function find__allId__by__root() : array
     {
-        return Level::whereNull('parent_id')->orderBy('name', 'asc')->get(['id'])->toArray();
+        return ModelsLevel::whereNull('parent_id')->orderBy('name', 'asc')->get(['id'])->toArray();
     }
 
     public function find__allId__by__id(string|int $id) : array
     {
-        return Level::where(['id' => $id])->orderBy('name', 'asc')->get(['id'])->toArray();
+        return ModelsLevel::where(['id' => $id])->orderBy('name', 'asc')->get(['id'])->toArray();
     }
 
     public function find__all__with__childs__by__parentIdList(array $parentIdList)
     {
-        return Level::with('childsRecursive')->whereIn('parent_id', $parentIdList)->orderBy('name', 'asc')->get();
+        return ModelsLevel::with('childsRecursive')->whereIn('parent_id', $parentIdList)->orderBy('name', 'asc')->get();
     }
 
     public function find__all__with__childs__by__parentId(string|int $parentId)
     {
-        return Level::with('childsRecursive')->where(['parent_id' => $parentId])->orderBy('name', 'asc')->get();
+        return ModelsLevel::with('childsRecursive')->where(['parent_id' => $parentId])->orderBy('name', 'asc')->get();
     }
 
     public function find__all__with__parent()
     {
-        return Level::with('parent')->orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
+        return ModelsLevel::with('parent')->orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
+    }
+
+    public function find__all()
+    {
+        return ModelsLevel::orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
     }
 }

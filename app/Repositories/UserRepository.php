@@ -61,4 +61,9 @@ class UserRepository {
     {
         return ModelsUser::with(['role', 'unit.level'])->orderBy('role_id', 'asc')->orderBy('name', 'asc')->get();
     }
+
+    public function find__all()
+    {
+        return ModelsUser::orderBy('role_id', 'asc')->orderBy('name', 'asc')->get();
+    }
 }

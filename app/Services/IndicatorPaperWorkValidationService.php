@@ -38,8 +38,8 @@ class IndicatorPaperWorkValidationService {
     //use repo UserRepository
     public function indexValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
-        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -63,7 +63,7 @@ class IndicatorPaperWorkValidationService {
     //use repo UserRepository
     public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
     {
-        //level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
+        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //memastikan semua KPI yang dikirim mrupakan KPI yang bersumber dari super-master
         //memastikan kertas kerja KPI yang akan dibuat belum tersedia di DB
 
@@ -144,7 +144,7 @@ class IndicatorPaperWorkValidationService {
 
         $res = $this->indicatorRepository->count__all__by__idList_superMasterLabel($new);
 
-        //memastikan jumlah KPI sama dengan di database
+        //memastikan jumlah KPI sama dengan di DB
         $validator->after(function ($validator) use ($new, $res) {
             if (count($new) !== $res) {
                 $validator->errors()->add('indicators', "(#2.1) : Akses ilegal !");
@@ -208,14 +208,14 @@ class IndicatorPaperWorkValidationService {
             }
         }
 
-        //memastikan jumlah KPI sama dengan di database
+        //memastikan jumlah KPI sama dengan di DB
         $validator->after(function ($validator) use ($request, $indicators) {
             if (count($request->post('indicators')) !== count($indicators)) {
                 $validator->errors()->add('indicators', "(#2.2) : Akses ilegal !");
             }
         });
 
-        //memastikan semua KPI terdaftar di database
+        //memastikan semua KPI terdaftar di DB
         $validator->after(function ($validator) use ($request, $indicators) {
             foreach ($request->post('indicators') as $indicator) {
                 if (!in_array($indicator, $indicators)) {
