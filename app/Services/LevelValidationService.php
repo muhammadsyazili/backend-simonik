@@ -59,8 +59,9 @@ class LevelValidationService
         $levels = $this->levelRepository->find__all();
         $validator->after(function ($validator) use ($levels, $name) {
             foreach ($levels as $level) {
-                if ($level->slug === Str::slug(strtolower($name))) {
+                if ($level->slug === Str::slug($name)) {
                     $validator->errors()->add('name', "nama sudah tersedia.");
+                    break;
                 }
             }
         });
@@ -110,13 +111,14 @@ class LevelValidationService
         });
 
         //nama diubah
-        if ($level->name !== $name) {
+        if (strtolower($level->name) !== $name) {
             //memastikan nama jika dijadikan slug belum terdaftar di DB
             $levels = $this->levelRepository->find__all();
             $validator->after(function ($validator) use ($levels, $name) {
                 foreach ($levels as $level) {
-                    if ($level->slug === Str::slug(strtolower($name))) {
+                    if ($level->slug === Str::slug($name)) {
                         $validator->errors()->add('name', "nama sudah tersedia.");
+                        break;
                     }
                 }
             });

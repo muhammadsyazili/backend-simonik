@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Domains\Level;
+use App\Domains\Unit;
 use App\DTO\ConstructRequest;
 use App\DTO\LevelCreateOrEditResponse;
 use App\DTO\LevelInsertOrUpdateRequest;
@@ -68,18 +69,27 @@ class LevelService
     }
 
     //use repo LevelRepository, UnitRepository
-    public function update(LevelInsertOrUpdateRequest $level): void
+    public function update(LevelInsertOrUpdateRequest $levelRequest): void
     {
-        DB::transaction(function () use ($level) {
+        DB::transaction(function () use ($levelRequest) {
             $levelDomain = new Level();
+            $unitDomain = new Unit();
 
-            $levelDomain->name = strtoupper($level->name);
-            $levelDomain->slug = Str::slug(strtolower($level->name));
-            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($level->parent_level);
+            $level = $this->levelRepository->find__by__id($levelRequest->id);
 
-            $units = $this->unitRepository->find__all__by__levelId($level->id);
+            $levelDomain->name = strtoupper($levelRequest->name);
+            $levelDomain->slug = Str::slug(strtolower($levelRequest->name));
+            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
 
-            $this->levelRepository->update__by__id($levelDomain, $level->id);
+            //nama diubah
+            if (strtoupper($level->name) !== strtoupper($levelRequest->name)) {
+                $units = $this->unitRepository->find__all__by__levelId($levelRequest->id);
+                foreach ($units as $unit) {
+                    $this->unitRepository->
+                }
+            }
+
+            $this->levelRepository->update__by__id($levelDomain, $levelRequest->id);
         });
     }
 
