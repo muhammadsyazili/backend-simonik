@@ -2,7 +2,8 @@
 
 namespace App\DTO;
 
-class UserCreateOrEditResponse {
+class UserCreateOrEditResponse
+{
     public mixed $units;
     public mixed $user;
 }

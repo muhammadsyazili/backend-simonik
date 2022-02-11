@@ -5,8 +5,9 @@ namespace App\Repositories;
 use App\Domains\User;
 use App\Models\User as ModelsUser;
 
-class UserRepository {
-    public function save(User $user) : void
+class UserRepository
+{
+    public function save(User $user): void
     {
         ModelsUser::create([
             'id' => $user->id,
@@ -32,12 +33,12 @@ class UserRepository {
         ]);
     }
 
-    public function count__all__by__username(string $username) : int
+    public function count__all__by__username(string $username): int
     {
         return ModelsUser::where(['username' => $username])->count();
     }
 
-    public function delete__by__id(string|int $id) : void
+    public function delete__by__id(string|int $id): void
     {
         ModelsUser::where(['id' => $id])->forceDelete();
     }

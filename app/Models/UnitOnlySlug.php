@@ -53,7 +53,8 @@ class UnitOnlySlug extends Model
      *
      * @return void
      */
-    protected static function boot() {
+    protected static function boot()
+    {
         parent::boot();
 
         static::creating(function ($model) {
@@ -64,7 +65,7 @@ class UnitOnlySlug extends Model
     }
 
     /**
-    * Get the value indicating whether the IDs are incrementing.
+     * Get the value indicating whether the IDs are incrementing.
      *
      * @return bool
      */

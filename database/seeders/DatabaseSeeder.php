@@ -114,7 +114,7 @@ class DatabaseSeeder extends Seeder
             'c836809b-5675-44bf-9241-944aa2aa4014',
         ];
 
-        for ($i=0; $i < count($up3_id); $i++) {
+        for ($i = 0; $i < count($up3_id); $i++) {
             $response = Http::get("http://asiikpro.pln-jatim.co.id/api/peta-pohon/data-migration/ulp", ['unit_id' => $up3_id[$i]]);
 
             for ($j = 0; $j < count($response->object()->data); $j++) {

@@ -14,7 +14,8 @@ use App\Repositories\TargetRepository;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
-class IndicatorService {
+class IndicatorService
+{
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?TargetRepository $targetRepository;
@@ -29,7 +30,7 @@ class IndicatorService {
     }
 
     //use repo IndicatorRepository, LevelRepository
-    public function store(IndicatorInsertOrUpdateRequest $indicator) : void
+    public function store(IndicatorInsertOrUpdateRequest $indicator): void
     {
         DB::transaction(function () use ($indicator) {
             $indicatorDomain = new Indicator();
@@ -88,7 +89,7 @@ class IndicatorService {
     }
 
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
-    public function update(IndicatorInsertOrUpdateRequest $indicatorNew, string|int $id) : void
+    public function update(IndicatorInsertOrUpdateRequest $indicatorNew, string|int $id): void
     {
         DB::transaction(function () use ($indicatorNew, $id) {
             $indicatorDomain = new Indicator();
@@ -497,14 +498,14 @@ class IndicatorService {
     }
 
     //use repo IndicatorRepository
-    public function destroy(string|int $id) : void
+    public function destroy(string|int $id): void
     {
         DB::transaction(function () use ($id) {
             $this->indicatorRepository->delete__by__id($id);
         });
     }
 
-    private function validity_and_weight__to__JSON(?array $validity, ?array $weight) : array
+    private function validity_and_weight__to__JSON(?array $validity, ?array $weight): array
     {
         $jsonString = [];
         if (is_null($validity)) {

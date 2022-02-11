@@ -5,8 +5,9 @@ namespace App\Repositories;
 use App\Domains\Target;
 use App\Models\Target as ModelsTarget;
 
-class TargetRepository {
-    public function save(Target $target) : void
+class TargetRepository
+{
+    public function save(Target $target): void
     {
         ModelsTarget::create([
             'id' => $target->id,
@@ -23,17 +24,17 @@ class TargetRepository {
         ModelsTarget::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['default' => false, 'value' => $value]);
     }
 
-    public function delete__by__id(string|int $id) : void
+    public function delete__by__id(string|int $id): void
     {
         ModelsTarget::where(['id' => $id])->forceDelete();
     }
 
-    public function delete__by__month_indicatorId(string $month, string|int $indicatorId) : void
+    public function delete__by__month_indicatorId(string $month, string|int $indicatorId): void
     {
         ModelsTarget::where(['indicator_id' => $indicatorId, 'month' => $month])->forceDelete();
     }
 
-    public function delete__by__indicatorId(string|int $indicatorId) : void
+    public function delete__by__indicatorId(string|int $indicatorId): void
     {
         ModelsTarget::where(['indicator_id' => $indicatorId])->forceDelete();
     }

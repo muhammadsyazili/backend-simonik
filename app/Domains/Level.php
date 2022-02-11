@@ -2,7 +2,8 @@
 
 namespace App\Domains;
 
-class Level {
+class Level
+{
     public ?int $id;
     public string $name;
     public string $slug;

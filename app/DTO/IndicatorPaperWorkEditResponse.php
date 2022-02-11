@@ -2,7 +2,8 @@
 
 namespace App\DTO;
 
-class IndicatorPaperWorkEditResponse {
+class IndicatorPaperWorkEditResponse
+{
     public mixed $super_master_indicators;
     public mixed $indicators;
 }

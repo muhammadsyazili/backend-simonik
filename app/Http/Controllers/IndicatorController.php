@@ -35,7 +35,7 @@ class IndicatorController extends ApiController
 
         $validation = $indicatorValidationService->storeValidation($request);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -120,7 +120,7 @@ class IndicatorController extends ApiController
 
         $validation = $indicatorValidationService->updateValidation($request);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -173,7 +173,7 @@ class IndicatorController extends ApiController
 
         $validation = $indicatorValidationService->destroyValidation($id);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,

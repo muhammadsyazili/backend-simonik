@@ -7,13 +7,14 @@ use App\Models\Unit;
 use App\Models\UnitOnlyId;
 use App\Models\UnitOnlySlug;
 
-class UnitRepository {
-    public function count__all__by__slug(string $slug) : int
+class UnitRepository
+{
+    public function count__all__by__slug(string $slug): int
     {
         return Unit::where(['slug' => $slug])->count();
     }
 
-    public function find__id__by__slug(string $slug) : string|int
+    public function find__id__by__slug(string $slug): string|int
     {
         return Unit::firstWhere(['slug' => $slug])->id;
     }
@@ -32,25 +33,25 @@ class UnitRepository {
         return Unit::where(['level_id' => $levelId])->orderBy('name', 'asc')->get();
     }
 
-    public function find__allSlug__with__this_childs__by__id(string|int $id) : array
+    public function find__allSlug__with__this_childs__by__id(string|int $id): array
     {
         $result = UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
-    public function find__allSlug__with__childs__by__id(string|int $id) : array
+    public function find__allSlug__with__childs__by__id(string|int $id): array
     {
         $result = UnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
-    public function find__allId__with__this_childs__by__id(string|int $id) : array
+    public function find__allId__with__this_childs__by__id(string|int $id): array
     {
         $result = UnitOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
-    public function find__allId__with__childs__by__id(string|int $id) : array
+    public function find__allId__with__childs__by__id(string|int $id): array
     {
         $result = UnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);

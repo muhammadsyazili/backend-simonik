@@ -2,7 +2,8 @@
 
 namespace App\Domains;
 
-class Indicator {
+class Indicator
+{
     public ?string $id;
     public string $indicator;
     public ?string $formula;

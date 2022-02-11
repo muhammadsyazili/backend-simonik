@@ -61,7 +61,7 @@ class IndicatorReferenceController extends ApiController
 
         $validation = $indicatorReferenceValidationService->storeValidation($request);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -161,7 +161,7 @@ class IndicatorReferenceController extends ApiController
 
         $validation = $indicatorReferenceValidationService->updateValidation($request);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,

@@ -92,7 +92,7 @@ class UserController extends ApiController
 
         $validation = $userValidationService->storeValidation($request);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -178,7 +178,7 @@ class UserController extends ApiController
 
         $validation = $userValidationService->updateValidation($request, $id);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -228,7 +228,7 @@ class UserController extends ApiController
 
         $validation = $userValidationService->destroyValidation($id);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,

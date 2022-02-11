@@ -7,19 +7,23 @@ use App\DTO\ConstructRequest;
 use App\DTO\LevelCreateOrEditResponse;
 use App\DTO\LevelInsertOrUpdateRequest;
 use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class LevelService {
+class LevelService
+{
 
     private ?LevelRepository $levelRepository;
     private ?UserRepository $userRepository;
+    private ?UnitRepository $unitRepository;
 
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->levelRepository = $constructRequest->levelRepository;
         $this->userRepository = $constructRequest->userRepository;
+        $this->unitRepository = $constructRequest->unitRepository;
     }
 
     //use repo LevelRepository
@@ -29,7 +33,7 @@ class LevelService {
     }
 
     //use repo LevelRepository
-    public function create() : LevelCreateOrEditResponse
+    public function create(): LevelCreateOrEditResponse
     {
         $response = new LevelCreateOrEditResponse();
 
@@ -39,7 +43,7 @@ class LevelService {
     }
 
     //use repo LevelRepository
-    public function store(LevelInsertOrUpdateRequest $level) : void
+    public function store(LevelInsertOrUpdateRequest $level): void
     {
         DB::transaction(function () use ($level) {
             $levelDomain = new Level();
@@ -49,6 +53,33 @@ class LevelService {
             $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($level->parent_level);
 
             $this->levelRepository->save($levelDomain);
+        });
+    }
+
+    //use repo LevelRepository
+    public function edit(string|int $id): LevelCreateOrEditResponse
+    {
+        $response = new LevelCreateOrEditResponse();
+
+        $response->levels = $this->levelRepository->find__all();
+        $response->level = $this->levelRepository->find__by__id($id);
+
+        return $response;
+    }
+
+    //use repo LevelRepository, UnitRepository
+    public function update(LevelInsertOrUpdateRequest $level): void
+    {
+        DB::transaction(function () use ($level) {
+            $levelDomain = new Level();
+
+            $levelDomain->name = strtoupper($level->name);
+            $levelDomain->slug = Str::slug(strtolower($level->name));
+            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($level->parent_level);
+
+            $units = $this->unitRepository->find__all__by__levelId($level->id);
+
+            $this->levelRepository->update__by__id($levelDomain, $level->id);
         });
     }
 

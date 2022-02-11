@@ -5,8 +5,9 @@ namespace App\Repositories;
 use App\Domains\Realization;
 use App\Models\Realization as ModelsRealization;
 
-class RealizationRepository {
-    public function save(Realization $realization) : void
+class RealizationRepository
+{
+    public function save(Realization $realization): void
     {
         ModelsRealization::create([
             'id' => $realization->id,
@@ -28,17 +29,17 @@ class RealizationRepository {
         ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->update(['locked' => $locked]);
     }
 
-    public function delete__by__id(string|int $id) : void
+    public function delete__by__id(string|int $id): void
     {
         ModelsRealization::where(['id' => $id])->forceDelete();
     }
 
-    public function delete__by__month_indicatorId(string $month, string|int $indicatorId) : void
+    public function delete__by__month_indicatorId(string $month, string|int $indicatorId): void
     {
         ModelsRealization::where(['indicator_id' => $indicatorId, 'month' => $month])->forceDelete();
     }
 
-    public function delete__by__indicatorId(string|int $indicatorId) : void
+    public function delete__by__indicatorId(string|int $indicatorId): void
     {
         ModelsRealization::where(['indicator_id' => $indicatorId])->forceDelete();
     }

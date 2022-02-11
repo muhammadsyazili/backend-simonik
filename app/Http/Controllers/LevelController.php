@@ -7,6 +7,7 @@ use App\DTO\LevelInsertOrUpdateRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use App\Services\LevelService;
 use App\Services\LevelValidationService;
@@ -87,7 +88,7 @@ class LevelController extends ApiController
 
         $validation = $levelValidationService->storeValidation($request);
 
-        if($validation->fails()){
+        if ($validation->fails()) {
             return $this->APIResponse(
                 false,
                 Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -123,7 +124,26 @@ class LevelController extends ApiController
      */
     public function edit($id)
     {
-        //
+        $levelRepository = new LevelRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $response = $levelService->edit($id);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level - Edit",
+            [
+                'levels' => $response->levels,
+                'level' => $response->level,
+            ],
+            null,
+        );
     }
 
     /**
@@ -135,7 +155,45 @@ class LevelController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        //
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $levelValidationService = new LevelValidationService($constructRequest);
+
+        $validation = $levelValidationService->updateValidation($request, $id);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $levelInsertOrUpdateRequest = new LevelInsertOrUpdateRequest();
+
+        $levelInsertOrUpdateRequest->id = $id;
+        $levelInsertOrUpdateRequest->name = $request->post('name');
+        $levelInsertOrUpdateRequest->parent_level = $request->post('parent_level');
+
+        $levelService = new LevelService($constructRequest);
+
+        $levelService->update($levelInsertOrUpdateRequest);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level berhasil diubah",
+            null,
+            null,
+        );
     }
 
     /**

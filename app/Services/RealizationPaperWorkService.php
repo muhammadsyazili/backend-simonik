@@ -11,7 +11,8 @@ use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 
-class RealizationPaperWorkService {
+class RealizationPaperWorkService
+{
 
     private ?UserRepository $userRepository;
     private ?LevelRepository $levelRepository;
@@ -29,7 +30,7 @@ class RealizationPaperWorkService {
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository
-    public function edit(string|int $userId, string $level, string $unit, string $year) : RealizationPaperWorkEditResponse
+    public function edit(string|int $userId, string $level, string $unit, string $year): RealizationPaperWorkEditResponse
     {
         $response = new RealizationPaperWorkEditResponse();
 
@@ -50,7 +51,7 @@ class RealizationPaperWorkService {
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository, RealizationRepository
-    public function update(string|int $userId, array $indicators, array $realizations, string $level, string $unit, string $year) : void
+    public function update(string|int $userId, array $indicators, array $realizations, string $level, string $unit, string $year): void
     {
         //jika user adalah 'super-admin' or 'admin' maka bisa entry realisasi semua bulan, else hanya bisa bulan saat ini or bulan yang un-locked
         DB::transaction(function () use ($userId, $indicators, $realizations, $level, $unit, $year) {
@@ -83,7 +84,7 @@ class RealizationPaperWorkService {
     }
 
     //use repo RealizationRepository
-    public function changeLock(string|int $indicatorId, string $month) : void
+    public function changeLock(string|int $indicatorId, string $month): void
     {
         DB::transaction(function () use ($indicatorId, $month) {
             $realization = $this->realizationRepository->find__by__indicatorId_month($indicatorId, $month);
@@ -96,7 +97,7 @@ class RealizationPaperWorkService {
         });
     }
 
-    private function monthName__to__monthNumber(string $monthName) : int
+    private function monthName__to__monthNumber(string $monthName): int
     {
         $monthNumber = 1;
 

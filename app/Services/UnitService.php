@@ -6,7 +6,8 @@ use App\DTO\ConstructRequest;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 
-class UnitService {
+class UnitService
+{
 
     private ?UnitRepository $unitRepository;
     private ?LevelRepository $levelRepository;

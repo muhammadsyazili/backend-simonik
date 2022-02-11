@@ -2,6 +2,8 @@
 
 namespace App\DTO;
 
-class LevelCreateOrEditResponse {
+class LevelCreateOrEditResponse
+{
     public mixed $levels;
+    public mixed $level;
 }

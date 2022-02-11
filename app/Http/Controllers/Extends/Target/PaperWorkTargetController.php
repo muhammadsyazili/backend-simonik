@@ -23,7 +23,6 @@ class PaperWorkTargetController extends ApiController
      */
     public function index()
     {
-
     }
 
     /**

@@ -10,7 +10,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class UserValidationService {
+class UserValidationService
+{
     private ?UserRepository $userRepository;
     private ?UnitRepository $unitRepository;
 
@@ -24,16 +25,14 @@ class UserValidationService {
 
     public function indexValidation(Request $request)
     {
-
     }
 
     public function createValidation(Request $request)
     {
-
     }
 
     //use repo UserRepository, UnitRepository
-    public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'name' => ['required', 'string'],
@@ -87,11 +86,10 @@ class UserValidationService {
 
     public function editValidation(Request $request)
     {
-
     }
 
     //use repo UserRepository, UnitRepository
-    public function updateValidation(Request $request, string|int $id) : \Illuminate\Contracts\Validation\Validator
+    public function updateValidation(Request $request, string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'name' => ['required', 'string'],
@@ -156,7 +154,7 @@ class UserValidationService {
     }
 
     //use repo UserRepository
-    public function destroyValidation(string|int $id) : \Illuminate\Contracts\Validation\Validator
+    public function destroyValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'id' => ['required', 'uuid'],

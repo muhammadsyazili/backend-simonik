@@ -2,7 +2,8 @@
 
 namespace App\DTO;
 
-class IndicatorPreferencesCreateResponse {
+class IndicatorPreferencesCreateResponse
+{
     public mixed $indicators;
     public mixed $preferences;
 }

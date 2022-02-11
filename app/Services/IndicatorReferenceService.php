@@ -9,7 +9,8 @@ use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Support\Facades\DB;
 
-class IndicatorReferenceService {
+class IndicatorReferenceService
+{
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
@@ -22,7 +23,7 @@ class IndicatorReferenceService {
     }
 
     //use repo IndicatorRepository
-    public function create() : IndicatorPreferencesCreateResponse
+    public function create(): IndicatorPreferencesCreateResponse
     {
         $response = new IndicatorPreferencesCreateResponse();
         $response->indicators = $this->indicatorRepository->find__allNotReferenced__by__superMasterLabel();
@@ -32,10 +33,10 @@ class IndicatorReferenceService {
     }
 
     //use repo IndicatorRepository
-    public function store(array $indicator, array $preference) : void
+    public function store(array $indicator, array $preference): void
     {
         DB::transaction(function () use ($indicator, $preference) {
-            for ($i=0; $i < count($indicator); $i++) {
+            for ($i = 0; $i < count($indicator); $i++) {
                 $this->indicatorRepository->update__parentHorizontalId_referenced__by__id($indicator[$i], $preference[$i] === 'root' ? null : $preference[$i]);
             }
         });
@@ -45,12 +46,12 @@ class IndicatorReferenceService {
     public function edit(string $level, ?string $unit = null, ?string $year = null)
     {
         return $level === 'super-master' ?
-        $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) :
-        $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
+            $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) :
+            $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function update(array $indicators, array $preferences, string $level, ?string $unit = null, ?string $year = null) : void
+    public function update(array $indicators, array $preferences, string $level, ?string $unit = null, ?string $year = null): void
     {
         DB::transaction(function () use ($indicators, $preferences, $level, $unit, $year) {
             $indicatorsModel = $level === 'super-master' ? $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
@@ -60,7 +61,7 @@ class IndicatorReferenceService {
             if ($level !== 'super-master' && $unit === 'master') {
                 //section: paper work current request updating
                 $temp = [];
-                for ($i=0; $i < count($indicators); $i++) {
+                for ($i = 0; $i < count($indicators); $i++) {
                     $key = array_search($indicators[$i], array_column($indicatorsModel, 'id'));
 
                     $temp[$i]['id'] = $indicators[$i];
@@ -80,13 +81,13 @@ class IndicatorReferenceService {
 
                         if ($key !== false) {
                             $this->indicatorRepository->update__parentHorizontalId_referenced__by__id($indicator->id, is_null($temp[$key]['new_preference']) ? null :
-                            $this->indicatorRepository->find__id__by__parentVerticalId_levelId_unitId_year($temp[$key]['new_preference'], $this->levelRepository->find__id__by__slug($level), $unit->id, $year));
+                                $this->indicatorRepository->find__id__by__parentVerticalId_levelId_unitId_year($temp[$key]['new_preference'], $this->levelRepository->find__id__by__slug($level), $unit->id, $year));
                         }
                     }
                 }
                 //end section: paper work chlids updating
             } else {
-                for ($i=0; $i < count($indicators); $i++) {
+                for ($i = 0; $i < count($indicators); $i++) {
                     $this->indicatorRepository->update__parentHorizontalId_referenced__by__id($indicators[$i], $preferences[$i] === 'root' ? null : $preferences[$i]);
                 }
             }

@@ -2,7 +2,8 @@
 
 namespace App\Domains;
 
-class User {
+class User
+{
     public ?string $id;
     public ?string $nip;
     public string $name;

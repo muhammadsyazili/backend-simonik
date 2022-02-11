@@ -19,7 +19,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class IndicatorPaperWorkValidationService {
+class IndicatorPaperWorkValidationService
+{
     private ?UserRepository $userRepository;
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
@@ -36,7 +37,7 @@ class IndicatorPaperWorkValidationService {
     }
 
     //use repo UserRepository
-    public function indexValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function indexValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
@@ -61,7 +62,7 @@ class IndicatorPaperWorkValidationService {
     }
 
     //use repo UserRepository
-    public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //memastikan semua KPI yang dikirim mrupakan KPI yang bersumber dari super-master
@@ -86,7 +87,7 @@ class IndicatorPaperWorkValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
-    public function editValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
+    public function editValidation(string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
@@ -109,7 +110,7 @@ class IndicatorPaperWorkValidationService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function updateValidation(Request $request, string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
+    public function updateValidation(Request $request, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
@@ -154,7 +155,7 @@ class IndicatorPaperWorkValidationService {
         return $validator;
     }
 
-    public function destroyValidation(string $level, string $unit, string $year) : \Illuminate\Contracts\Validation\Validator
+    public function destroyValidation(string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan semua value target & realisasi masih default
         //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
@@ -178,7 +179,7 @@ class IndicatorPaperWorkValidationService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function reorderValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function reorderValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'level' => ['required', 'string'],

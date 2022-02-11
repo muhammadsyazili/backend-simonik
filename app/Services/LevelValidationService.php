@@ -55,11 +55,11 @@ class LevelValidationService
             }
         });
 
-        //memastikan nama belum terdaftar di DB
+        //memastikan nama jika dijadikan slug belum terdaftar di DB
         $levels = $this->levelRepository->find__all();
         $validator->after(function ($validator) use ($levels, $name) {
             foreach ($levels as $level) {
-                if (strtolower($level->name) === $name) {
+                if ($level->slug === Str::slug(strtolower($name))) {
                     $validator->errors()->add('name', "nama sudah tersedia.");
                 }
             }
@@ -80,8 +80,57 @@ class LevelValidationService
     {
     }
 
-    public function updateValidation(Request $request)
+    //use repo LevelRepository
+    public function updateValidation(Request $request, string|int $id) : \Illuminate\Contracts\Validation\Validator
     {
+        $attributes = [
+            'name' => ['required', 'string', 'not_in:super-master,master,child,super-admin,admin,data-entry,employee'],
+            'parent_level' => ['required', 'string'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
+        ];
+
+        $input = Arr::only($request->post(), array_keys($attributes));
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        $name = strtolower($request->post('name'));
+        $parent_level = $request->post('parent_level');
+
+        $level = $this->levelRepository->find__by__id($id);
+
+        //memastikan nama tidak mengandung keyword
+        $validator->after(function ($validator) use ($name) {
+            if (Str::containsAll($name, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+                $validator->errors()->add('name', "nama sudah tersedia.");
+            }
+        });
+
+        //nama diubah
+        if ($level->name !== $name) {
+            //memastikan nama jika dijadikan slug belum terdaftar di DB
+            $levels = $this->levelRepository->find__all();
+            $validator->after(function ($validator) use ($levels, $name) {
+                foreach ($levels as $level) {
+                    if ($level->slug === Str::slug(strtolower($name))) {
+                        $validator->errors()->add('name', "nama sudah tersedia.");
+                    }
+                }
+            });
+        }
+
+        //memastikan parent level terdapat di DB
+        $result = $this->levelRepository->count__all__by__slug($parent_level);
+        $validator->after(function ($validator) use ($result) {
+            if ($result === 0) {
+                $validator->errors()->add('parent_level', "parent level tidak tersedia.");
+            }
+        });
+
+        return $validator;
     }
 
     public function destroyValidation(Request $request)

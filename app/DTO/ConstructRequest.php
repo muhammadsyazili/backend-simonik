@@ -10,7 +10,8 @@ use App\Repositories\TargetRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 
-class ConstructRequest {
+class ConstructRequest
+{
     public ?IndicatorRepository $indicatorRepository = null;
     public ?LevelRepository $levelRepository = null;
     public ?UnitRepository $unitRepository = null;

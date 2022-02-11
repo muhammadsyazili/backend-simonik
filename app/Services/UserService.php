@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
-class UserService {
+class UserService
+{
     private ?UserRepository $userRepository;
     private ?UnitRepository $unitRepository;
     private ?RoleRepository $roleRepository;
@@ -32,7 +33,7 @@ class UserService {
     }
 
     //use repo UnitRepository
-    public function create() : UserCreateOrEditResponse
+    public function create(): UserCreateOrEditResponse
     {
         $response = new UserCreateOrEditResponse();
 
@@ -42,7 +43,7 @@ class UserService {
     }
 
     //use repo UnitRepository, RoleRepository, UserRepository
-    public function store(UserInsertOrUpdateRequest $user) : void
+    public function store(UserInsertOrUpdateRequest $user): void
     {
         DB::transaction(function () use ($user) {
             $userDomain = new User();
@@ -62,7 +63,7 @@ class UserService {
     }
 
     //use repo UnitRepository, UserRepository
-    public function edit(string|int $id) : UserCreateOrEditResponse
+    public function edit(string|int $id): UserCreateOrEditResponse
     {
         $response = new UserCreateOrEditResponse();
 
@@ -73,7 +74,7 @@ class UserService {
     }
 
     //use repo UserRepository
-    public function update(UserInsertOrUpdateRequest $user) : void
+    public function update(UserInsertOrUpdateRequest $user): void
     {
         DB::transaction(function () use ($user) {
             $userDomain = new User();
@@ -89,7 +90,7 @@ class UserService {
     }
 
     //use repo UserRepository
-    public function destroy(string|int $id) : void
+    public function destroy(string|int $id): void
     {
         DB::transaction(function () use ($id) {
             $this->userRepository->delete__by__id($id);

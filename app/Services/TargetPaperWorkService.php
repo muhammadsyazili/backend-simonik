@@ -11,7 +11,8 @@ use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 
-class TargetPaperWorkService {
+class TargetPaperWorkService
+{
 
     private ?UserRepository $userRepository;
     private ?LevelRepository $levelRepository;
@@ -29,7 +30,7 @@ class TargetPaperWorkService {
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository
-    public function edit(string|int $userId, string $level, string $unit, string $year) : TargetPaperWorkEditResponse
+    public function edit(string|int $userId, string $level, string $unit, string $year): TargetPaperWorkEditResponse
     {
         $response = new TargetPaperWorkEditResponse();
 
@@ -45,14 +46,14 @@ class TargetPaperWorkService {
         $levelId = $this->levelRepository->find__id__by__slug($level);
 
         $response->indicators = $unit === 'master' ?
-        $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
-        $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+            $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
+            $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
         return $response;
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository
-    public function update(string|int $userId, array $indicators, array $targets, string $level, string $unit, string $year) : void
+    public function update(string|int $userId, array $indicators, array $targets, string $level, string $unit, string $year): void
     {
         DB::transaction(function () use ($userId, $indicators, $targets, $level, $unit, $year) {
             $user = $this->userRepository->find__with__role_unit_level__by__id($userId);

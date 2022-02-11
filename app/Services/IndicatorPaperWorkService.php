@@ -18,7 +18,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
-class IndicatorPaperWorkService {
+class IndicatorPaperWorkService
+{
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
@@ -37,7 +38,7 @@ class IndicatorPaperWorkService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, UserRepository
-    public function index(string|int $userId, string $level, ?string $unit, ?string $year) : IndicatorPaperWorkIndexResponse
+    public function index(string|int $userId, string $level, ?string $unit, ?string $year): IndicatorPaperWorkIndexResponse
     {
         $response = new IndicatorPaperWorkIndexResponse();
 
@@ -90,7 +91,7 @@ class IndicatorPaperWorkService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UserRepository
-    public function create(string|int $userId) : IndicatorPaperWorkIndexResponse
+    public function create(string|int $userId): IndicatorPaperWorkIndexResponse
     {
         $response = new IndicatorPaperWorkIndexResponse();
 
@@ -105,7 +106,7 @@ class IndicatorPaperWorkService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
-    public function store(array $indicators, string $level, string $year, string|int $userId) : void
+    public function store(array $indicators, string $level, string $year, string|int $userId): void
     {
         DB::transaction(function () use ($indicators, $level, $year, $userId) {
             $indicatorDomain = new Indicator();
@@ -148,7 +149,7 @@ class IndicatorPaperWorkService {
                 $indicatorDomain->label = 'master';
                 $indicatorDomain->unit_id = null;
                 $indicatorDomain->level_id = $levelId;
-                $indicatorDomain->order = $i+1;
+                $indicatorDomain->order = $i + 1;
                 $indicatorDomain->code = $pathIndicator->code;
                 $indicatorDomain->parent_vertical_id = $pathIndicator->id;
                 $indicatorDomain->parent_horizontal_id = is_null($pathIndicator->parent_horizontal_id) ? null : $idListMaster[$pathIndicator->parent_horizontal_id];
@@ -201,7 +202,7 @@ class IndicatorPaperWorkService {
                     $indicatorDomain->label = 'child';
                     $indicatorDomain->unit_id = $unit->id;
                     $indicatorDomain->level_id = $levelId;
-                    $indicatorDomain->order = $i+1;
+                    $indicatorDomain->order = $i + 1;
                     $indicatorDomain->code = $pathIndicator->code;
                     $indicatorDomain->parent_vertical_id = $pathIndicator->id;
                     $indicatorDomain->parent_horizontal_id = is_null($pathIndicator->parent_horizontal_id) ? null : $idListChild[$pathIndicator->parent_horizontal_id];
@@ -239,7 +240,7 @@ class IndicatorPaperWorkService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function edit(string $level, string $unit, string $year) : IndicatorPaperWorkEditResponse
+    public function edit(string $level, string $unit, string $year): IndicatorPaperWorkEditResponse
     {
         $response = new IndicatorPaperWorkEditResponse;
 
@@ -253,7 +254,7 @@ class IndicatorPaperWorkService {
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository, RealizationRepository, UserRepository
-    public function update(array $indicatorsFromInput, string $level, string $unit, string $year, string|int $userId) : void
+    public function update(array $indicatorsFromInput, string $level, string $unit, string $year, string|int $userId): void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::transaction(function () use ($indicatorsFromInput, $level, $unit, $year, $userId) {
@@ -399,7 +400,7 @@ class IndicatorPaperWorkService {
                     }
 
                     while (count($indicatorsIdSuspended) > 0) {
-                        for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+                        for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
@@ -678,7 +679,7 @@ class IndicatorPaperWorkService {
                             }
 
                             while (count($indicatorsIdSuspended) > 0) {
-                                for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+                                for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
                                     $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
@@ -986,7 +987,7 @@ class IndicatorPaperWorkService {
                                 }
 
                                 while (count($indicatorsIdSuspended) > 0) {
-                                    for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+                                    for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
@@ -1281,7 +1282,7 @@ class IndicatorPaperWorkService {
                     }
 
                     while (count($indicatorsIdSuspended) > 0) {
-                        for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+                        for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
@@ -1533,7 +1534,7 @@ class IndicatorPaperWorkService {
                     }
 
                     while (count($indicatorsIdSuspended) > 0) {
-                        for ($i=0; $i < count($indicatorsIdSuspended); $i++) {
+                        for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
 
@@ -1689,15 +1690,15 @@ class IndicatorPaperWorkService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
-    public function destroy(string $level, string $unit, string $year) : void
+    public function destroy(string $level, string $unit, string $year): void
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::transaction(function () use ($level, $unit, $year) {
             $levelId = $this->levelRepository->find__id__by__slug($level);
 
             $indicators = $unit === 'master' ?
-            $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
-            $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+                $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
+                $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
             //target & realisasi deleting
             foreach ($indicators as $indicator) {
@@ -1717,22 +1718,22 @@ class IndicatorPaperWorkService {
     }
 
     //use repo IndicatorRepository
-    public function reorder(array $indicators, string $level, ?string $unit, ?string $year) : void
+    public function reorder(array $indicators, string $level, ?string $unit, ?string $year): void
     {
         DB::transaction(function () use ($indicators, $level, $unit) {
             if ($level === 'super-master') {
                 foreach ($indicators as $indicatorKey => $indicatorValue) {
-                    $this->indicatorRepository->update__order__by__id($indicatorKey+1, $indicatorValue); //'SUPER-MASTER' updating
+                    $this->indicatorRepository->update__order__by__id($indicatorKey + 1, $indicatorValue); //'SUPER-MASTER' updating
                 }
             } else {
                 if ($unit === 'master') {
                     foreach ($indicators as $indicatorKey => $indicatorValue) {
-                        $this->indicatorRepository->update__order__by__id($indicatorKey+1, $indicatorValue); //'MASTER' updating
-                        $this->indicatorRepository->update__order__by__parentVerticalId($indicatorKey+1, $indicatorValue); //'CHILD' updating
+                        $this->indicatorRepository->update__order__by__id($indicatorKey + 1, $indicatorValue); //'MASTER' updating
+                        $this->indicatorRepository->update__order__by__parentVerticalId($indicatorKey + 1, $indicatorValue); //'CHILD' updating
                     }
                 } else {
                     foreach ($indicators as $indicatorKey => $indicatorValue) {
-                        $this->indicatorRepository->update__order__by__id($indicatorKey+1, $indicatorValue); //'CHILD' updating
+                        $this->indicatorRepository->update__order__by__id($indicatorKey + 1, $indicatorValue); //'CHILD' updating
                     }
                 }
             }

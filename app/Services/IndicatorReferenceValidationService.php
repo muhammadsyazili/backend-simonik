@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use App\Rules\Unit__MatchWith__Level;
 
-class IndicatorReferenceValidationService {
+class IndicatorReferenceValidationService
+{
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
@@ -27,7 +28,7 @@ class IndicatorReferenceValidationService {
     }
 
     //use repo IndicatorRepository
-    public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicators.*' => ['required', 'uuid'],
@@ -70,7 +71,7 @@ class IndicatorReferenceValidationService {
         return $validator;
     }
 
-    public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
@@ -94,7 +95,7 @@ class IndicatorReferenceValidationService {
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicators.*' => ['required', 'uuid'],

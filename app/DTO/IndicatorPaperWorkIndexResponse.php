@@ -2,7 +2,8 @@
 
 namespace App\DTO;
 
-class IndicatorPaperWorkIndexResponse {
+class IndicatorPaperWorkIndexResponse
+{
     public mixed $levels;
     public mixed $indicators;
     public ?array $permissions = null;

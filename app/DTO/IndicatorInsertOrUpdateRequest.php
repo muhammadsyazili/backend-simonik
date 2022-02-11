@@ -2,7 +2,8 @@
 
 namespace App\DTO;
 
-class IndicatorInsertOrUpdateRequest {
+class IndicatorInsertOrUpdateRequest
+{
     public ?string $id = null;
     public ?array $validity = null;
     public ?array $weight = null;

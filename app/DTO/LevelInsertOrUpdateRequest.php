@@ -2,8 +2,9 @@
 
 namespace App\DTO;
 
-class LevelInsertOrUpdateRequest {
-    public ?string $id = null;
+class LevelInsertOrUpdateRequest
+{
+    public ?int $id = null;
     public string $name;
     public string $parent_level;
 }

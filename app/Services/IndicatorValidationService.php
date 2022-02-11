@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
-class IndicatorValidationService {
-    public function storeValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+class IndicatorValidationService
+{
+    public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicator' => ['required', 'string', 'max:100'],
@@ -53,7 +54,7 @@ class IndicatorValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
-    public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
             'indicator' => ['required', 'string', 'max:100'],
@@ -97,7 +98,7 @@ class IndicatorValidationService {
         return Validator::make($input, $attributes, $messages);
     }
 
-    public function destroyValidation(string|int $id) : \Illuminate\Contracts\Validation\Validator
+    public function destroyValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan KPI berlabel super-master
         //memastikan KPI belum memiliki turunan

@@ -14,7 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class RealizationPaperWorkValidationService {
+class RealizationPaperWorkValidationService
+{
 
     private ?UserRepository $userRepository;
     private ?IndicatorRepository $indicatorRepository;
@@ -32,7 +33,7 @@ class RealizationPaperWorkValidationService {
     }
 
     //use repo UserRepository
-    public function editValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
@@ -57,7 +58,7 @@ class RealizationPaperWorkValidationService {
     }
 
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
-    public function updateValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
         //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
@@ -142,7 +143,7 @@ class RealizationPaperWorkValidationService {
     }
 
     //use repo UserRepository, IndicatorRepository, UnitRepository
-    public function changeLockValidation(Request $request) : \Illuminate\Contracts\Validation\Validator
+    public function changeLockValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
