@@ -4,8 +4,8 @@ namespace App\Domains;
 
 class Level
 {
-    public ?int $id;
+    public string|int|null $id;
     public string $name;
     public string $slug;
-    public ?int $parent_id;
+    public string|int|null $parent_id;
 }

@@ -57,29 +57,30 @@ class UserValidationService
         $unit = $request->post('unit');
 
         //memastikan username tidak mengandung keyword
-        $validator->after(function ($validator) use ($username) {
-            if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('username', "username sudah tersedia.");
-            }
-        });
+            });
+        }
 
         //memastikan username belum terdaftar di DB
         $users = $this->userRepository->find__all();
-        $validator->after(function ($validator) use ($users, $username) {
-            foreach ($users as $user) {
-                if (strtolower($user->username) === $username) {
+        foreach ($users as $user) {
+            if (strtolower($user->username) === $username) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('username', "username sudah tersedia.");
-                }
+                });
+                break;
             }
-        });
+        }
 
         //memastikan unit terdapat di DB
         $result = $this->unitRepository->count__all__by__slug($unit);
-        $validator->after(function ($validator) use ($result) {
-            if ($result === 0) {
+        if ($result === 0) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('unit', "unit tidak tersedia.");
-            }
-        });
+            });
+        }
 
         return $validator;
     }
@@ -115,7 +116,7 @@ class UserValidationService
 
         $user = $this->userRepository->find__with__role__by__id($id);
 
-        //memastikan user ber-role 'employee'
+        //memastikan user yanga akan diubah role-nya 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
                 $validator->errors()->add('username', "user tidak bisa diubah.");
@@ -123,32 +124,33 @@ class UserValidationService
         }
 
         //memastikan username tidak mengandung keyword
-        $validator->after(function ($validator) use ($username) {
-            if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('username', "username sudah tersedia.");
-            }
-        });
+            });
+        }
 
         //username diubah
         if ($user->username !== $username) {
             //memastikan username belum terdaftar di DB
             $users = $this->userRepository->find__all();
-            $validator->after(function ($validator) use ($users, $username) {
-                foreach ($users as $user) {
-                    if (strtolower($user->username) === $username) {
+            foreach ($users as $user) {
+                if (strtolower($user->username) === $username) {
+                    $validator->after(function ($validator) {
                         $validator->errors()->add('username', "username sudah tersedia.");
-                    }
+                    });
+                    break;
                 }
-            });
+            }
         }
 
         //memastikan unit terdapat di DB
         $result = $this->unitRepository->count__all__by__slug($unit);
-        $validator->after(function ($validator) use ($result) {
-            if ($result === 0) {
+        if ($result === 0) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('unit', "unit tidak tersedia.");
-            }
-        });
+            });
+        }
 
         return $validator;
     }
@@ -169,7 +171,7 @@ class UserValidationService
 
         $user = $this->userRepository->find__with__role__by__id($id);
 
-        //memastikan user ber-role 'employee'
+        //memastikan user yanga akan dihapus role-nya 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
                 $validator->errors()->add('id', "user tidak bisa dihapus.");

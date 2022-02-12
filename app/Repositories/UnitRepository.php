@@ -5,8 +5,8 @@ namespace App\Repositories;
 use App\Domains\Unit;
 use Illuminate\Support\Arr;
 use App\Models\Unit as ModelsUnit;
-use App\Models\UnitOnlyId;
-use App\Models\UnitOnlySlug;
+use App\Models\UnitOnlyId as ModelsUnitOnlyId;
+use App\Models\UnitOnlySlug as ModelsUnitOnlySlug;
 
 class UnitRepository
 {
@@ -21,6 +21,11 @@ class UnitRepository
     public function count__all__by__slug(string $slug): int
     {
         return ModelsUnit::where(['slug' => $slug])->count();
+    }
+
+    public function count__all__by__levelId(string|int $levelId): int
+    {
+        return ModelsUnit::where(['level_id' => $levelId])->count();
     }
 
     public function find__id__by__slug(string $slug): string|int
@@ -44,25 +49,25 @@ class UnitRepository
 
     public function find__allSlug__with__this_childs__by__id(string|int $id): array
     {
-        $result = UnitOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsUnitOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allSlug__with__childs__by__id(string|int $id): array
     {
-        $result = UnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsUnitOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allId__with__this_childs__by__id(string|int $id): array
     {
-        $result = UnitOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsUnitOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allId__with__childs__by__id(string|int $id): array
     {
-        $result = UnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsUnitOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 

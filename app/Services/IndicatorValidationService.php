@@ -100,8 +100,8 @@ class IndicatorValidationService
 
     public function destroyValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan KPI berlabel super-master
-        //memastikan KPI belum memiliki turunan
+        //memastikan KPI yang akan di-destroy ber-label super-master
+        //memastikan KPI yang akan di-destroy belum memiliki turunan
 
         $attributes = [
             'id' => ['required', 'uuid', new Indicator__IsSuperMaster(), new Indicator__NotHave__Childs()],

@@ -46,34 +46,34 @@ class IndicatorReferenceValidationService
 
         $indicators = $this->indicatorRepository->find__allId__by_SuperMasterLabel(); //get indicators paper work
 
-        //memastikan semua KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('indicators') as $value) {
-                if (!in_array($value, Arr::flatten($indicators))) {
+        //memastikan semua KPI yang akan di-store sesuai dengan kertas kerja KPI yang ber-label super-master
+        foreach ($request->post('indicators') as $value) {
+            if (!in_array($value, Arr::flatten($indicators))) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('indicators', "(#3.1) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         $indicators[count($indicators)] = ['id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
 
-        //memastikan semua preferensi KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('preferences') as $value) {
-                if (!in_array($value, Arr::flatten($indicators))) {
+        //memastikan semua preferensi KPI yang akan di-store sesuai dengan kertas kerja KPI yang ber-label super-master
+        foreach ($request->post('preferences') as $value) {
+            if (!in_array($value, Arr::flatten($indicators))) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('preferences', "(#3.2) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         return $validator;
     }
 
     public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan kertas kerja KPI yang akan di-edit sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
@@ -119,27 +119,27 @@ class IndicatorReferenceValidationService
 
         $indicators = $request->post('level') === 'super-master' ? $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year($request->post('unit') === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($request->post('level')), $request->post('unit') === 'master' ? null : $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan semua KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('indicators') as $value) {
-                if (!in_array($value, Arr::flatten($indicators))) {
+        //memastikan semua KPI yang akan di-update sesuai dengan kertas kerja KPI yang ber-label super-master
+        foreach ($request->post('indicators') as $value) {
+            if (!in_array($value, Arr::flatten($indicators))) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('indicators', "(#3.3) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         $indicators[count($indicators)] = ['id' => 'root', 'parent_horizontal_id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
 
-        //memastikan semua preferensi KPI sesuai dengan kertas kerja KPI 'SUPER MASTER'
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('preferences') as $value) {
-                if (!in_array($value, Arr::flatten($indicators))) {
+        //memastikan semua preferensi KPI yang akan di-update sesuai dengan kertas kerja KPI yang ber-label super-master
+        foreach ($request->post('preferences') as $value) {
+            if (!in_array($value, Arr::flatten($indicators))) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('preferences', "(#3.4) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         return $validator;
     }

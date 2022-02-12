@@ -5,8 +5,8 @@ namespace App\Repositories;
 use App\Domains\Level;
 use Illuminate\Support\Arr;
 use App\Models\Level as ModelsLevel;
-use App\Models\LevelOnlyId;
-use App\Models\LevelOnlySlug;
+use App\Models\LevelOnlyId as ModelsLevelOnlyId;
+use App\Models\LevelOnlySlug as ModelsLevelOnlySlug;
 
 class LevelRepository
 {
@@ -33,6 +33,11 @@ class LevelRepository
         return ModelsLevel::where(['slug' => $slug])->count();
     }
 
+    public function delete__by__id(string|int $id): void
+    {
+        ModelsLevel::where(['id' => $id])->forceDelete();
+    }
+
     public function find__by__id(string|int $id)
     {
         return ModelsLevel::findOrFail($id);
@@ -45,31 +50,31 @@ class LevelRepository
 
     public function find__allSlug__with__childs__by__root(): array
     {
-        $result = LevelOnlySlug::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsLevelOnlySlug::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allSlug__with__this_childs__by__id(string|int $id): array
     {
-        $result = LevelOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsLevelOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allSlug__with__childs__by__id(string|int $id): array
     {
-        $result = LevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsLevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allId__with__this_childs__by__id(string|int $id): array
     {
-        $result = LevelOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsLevelOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__allId__with__childs__by__id(string|int $id): array
     {
-        $result = LevelOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
+        $result = ModelsLevelOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 

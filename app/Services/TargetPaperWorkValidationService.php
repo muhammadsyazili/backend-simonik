@@ -97,47 +97,47 @@ class TargetPaperWorkValidationService
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan KPI yang dikirim terdaftar di DB
-        $validator->after(function ($validator) use ($indicatorsId, $indicators) {
-            foreach ($indicatorsId as $value) {
-                if (!in_array($value, $indicators)) {
+        foreach ($indicatorsId as $value) {
+            if (!in_array($value, $indicators)) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('targets', "(#5.1) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
         //memastikan KPI yang dikirim tidak ada status dummy
-        $validator->after(function ($validator) use ($indicators) {
-            foreach ($indicators as $indicator) {
-                if ($indicator->dummy) {
+        foreach ($indicators as $indicator) {
+            if ($indicator->dummy) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('targets', "(#5.2) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         //pastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
-        $validator->after(function ($validator) use ($targets) {
-            foreach ($targets as $targetK => $targetV) {
-                $indicator = $this->indicatorRepository->find__by__id($targetK);
-                $validityMonths = array_keys($indicator->validity);
+        foreach ($targets as $targetK => $targetV) {
+            $indicator = $this->indicatorRepository->find__by__id($targetK);
+            $validityMonths = array_keys($indicator->validity);
 
-                $isError = false;
-                foreach ($validityMonths as $validityMonth) {
-                    if (!in_array($validityMonth, array_keys($targetV))) {
+            $isError = false;
+            foreach ($validityMonths as $validityMonth) {
+                if (!in_array($validityMonth, array_keys($targetV))) {
+                    $validator->after(function ($validator) {
                         $validator->errors()->add('targets', "(#5.3) : Akses ilegal !");
-                        $isError = true;
-                        break;
-                    }
-                }
-
-                if ($isError) {
+                    });
+                    $isError = true;
                     break;
                 }
             }
-        });
+
+            if ($isError) {
+                break;
+            }
+        }
 
         return $validator;
     }

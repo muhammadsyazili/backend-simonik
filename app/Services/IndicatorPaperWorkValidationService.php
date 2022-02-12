@@ -39,8 +39,8 @@ class IndicatorPaperWorkValidationService
     //use repo UserRepository
     public function indexValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang akan di-read sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-read sesuai dengan level user login saat ini atau level turunan yang diizinkan
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -64,9 +64,9 @@ class IndicatorPaperWorkValidationService
     //use repo UserRepository
     public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //memastikan semua KPI yang dikirim mrupakan KPI yang bersumber dari super-master
-        //memastikan kertas kerja KPI yang akan dibuat belum tersedia di DB
+        //memastikan level yang akan di-store sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan semua KPI yang akan di-store merupakan KPI yang ber-label super-master
+        //memastikan kertas kerja KPI yang akan di-store belum tersedia di DB
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -89,7 +89,7 @@ class IndicatorPaperWorkValidationService
 
     public function editValidation(string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan kertas kerja KPI yang akan di-edit sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
@@ -112,7 +112,7 @@ class IndicatorPaperWorkValidationService
     //use repo IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan kertas kerja KPI yang akan di-update sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
@@ -145,7 +145,7 @@ class IndicatorPaperWorkValidationService
 
         $res = $this->indicatorRepository->count__all__by__idList_superMasterLabel($new);
 
-        //memastikan jumlah KPI sama dengan di DB
+        //memastikan jumlah KPI yang akan di-update sama dengan di DB
         $validator->after(function ($validator) use ($new, $res) {
             if (count($new) !== $res) {
                 $validator->errors()->add('indicators', "(#2.1) : Akses ilegal !");
@@ -157,8 +157,8 @@ class IndicatorPaperWorkValidationService
 
     public function destroyValidation(string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan semua value target & realisasi masih default
-        //memastikan kertas kerja KPI yang akan dibuat sudah tersedia di DB
+        //memastikan semua target & realisasi masih default
+        //memastikan kertas kerja KPI yang akan di-destroy sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $attributes = [
@@ -209,22 +209,22 @@ class IndicatorPaperWorkValidationService
             }
         }
 
-        //memastikan jumlah KPI sama dengan di DB
-        $validator->after(function ($validator) use ($request, $indicators) {
-            if (count($request->post('indicators')) !== count($indicators)) {
+        //memastikan jumlah KPI yang akan di-reorder sama dengan di DB
+        if (count($request->post('indicators')) !== count($indicators)) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('indicators', "(#2.2) : Akses ilegal !");
-            }
-        });
+            });
+        }
 
-        //memastikan semua KPI terdaftar di DB
-        $validator->after(function ($validator) use ($request, $indicators) {
-            foreach ($request->post('indicators') as $indicator) {
-                if (!in_array($indicator, $indicators)) {
+        //memastikan semua KPI yang akan di-reorder terdaftar di DB
+        foreach ($request->post('indicators') as $indicator) {
+            if (!in_array($indicator, $indicators)) {
+                $validator->after(function ($validator) {
                     $validator->errors()->add('indicators', "(#2.3) : Akses ilegal !");
-                    break;
-                }
+                });
+                break;
             }
-        });
+        }
 
         return $validator;
     }

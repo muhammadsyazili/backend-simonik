@@ -204,7 +204,39 @@ class LevelController extends ApiController
      */
     public function destroy($id)
     {
-        //
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $levelValidationService = new LevelValidationService($constructRequest);
+
+        $validation = $levelValidationService->destroyValidation($id);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $levelService = new LevelService($constructRequest);
+
+        $levelService->destroy($id);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level berhasil dihapus",
+            null,
+            null,
+        );
     }
 
     /**

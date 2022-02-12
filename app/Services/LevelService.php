@@ -71,6 +71,14 @@ class LevelService
         return $response;
     }
 
+    //use repo LevelRepository
+    public function destroy(string|int $id): void
+    {
+        DB::transaction(function () use ($id) {
+            $this->levelRepository->delete__by__id($id);
+        });
+    }
+
     //use repo LevelRepository, UnitRepository
     public function update(LevelInsertOrUpdateRequest $levelRequest): void
     {
