@@ -45,21 +45,21 @@ class LevelValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $name = strtolower($request->post('name'));
+        $name__lowercase = strtolower($request->post('name'));
         $parent_level = $request->post('parent_level');
 
         //memastikan nama tidak mengandung keyword
-        $validator->after(function ($validator) use ($name) {
-            if (Str::containsAll($name, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        $validator->after(function ($validator) use ($name__lowercase) {
+            if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
                 $validator->errors()->add('name', "nama sudah tersedia.");
             }
         });
 
         //memastikan nama jika dijadikan slug belum terdaftar di DB
         $levels = $this->levelRepository->find__all();
-        $validator->after(function ($validator) use ($levels, $name) {
+        $validator->after(function ($validator) use ($levels, $name__lowercase) {
             foreach ($levels as $level) {
-                if ($level->slug === Str::slug($name)) {
+                if ($level->slug === Str::slug($name__lowercase)) {
                     $validator->errors()->add('name', "nama sudah tersedia.");
                     break;
                 }
@@ -98,25 +98,25 @@ class LevelValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $name = strtolower($request->post('name'));
+        $name__lowercase = strtolower($request->post('name'));
         $parent_level = $request->post('parent_level');
 
         $level = $this->levelRepository->find__by__id($id);
 
         //memastikan nama tidak mengandung keyword
-        $validator->after(function ($validator) use ($name) {
-            if (Str::containsAll($name, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        $validator->after(function ($validator) use ($name__lowercase) {
+            if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
                 $validator->errors()->add('name', "nama sudah tersedia.");
             }
         });
 
-        //nama diubah
-        if (strtolower($level->name) !== $name) {
+        //nama level diubah
+        if (strtolower($level->name) !== $name__lowercase) {
             //memastikan nama jika dijadikan slug belum terdaftar di DB
             $levels = $this->levelRepository->find__all();
-            $validator->after(function ($validator) use ($levels, $name) {
+            $validator->after(function ($validator) use ($levels, $name__lowercase) {
                 foreach ($levels as $level) {
-                    if ($level->slug === Str::slug($name)) {
+                    if ($level->slug === Str::slug($name__lowercase)) {
                         $validator->errors()->add('name', "nama sudah tersedia.");
                         break;
                     }

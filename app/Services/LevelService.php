@@ -44,14 +44,17 @@ class LevelService
     }
 
     //use repo LevelRepository
-    public function store(LevelInsertOrUpdateRequest $level): void
+    public function store(LevelInsertOrUpdateRequest $levelRequest): void
     {
-        DB::transaction(function () use ($level) {
+        DB::transaction(function () use ($levelRequest) {
             $levelDomain = new Level();
 
-            $levelDomain->name = strtoupper($level->name);
-            $levelDomain->slug = Str::slug(strtolower($level->name));
-            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($level->parent_level);
+            $name__uppercase = strtoupper($levelRequest->name);
+            $name__lowercase = strtolower($levelRequest->name);
+
+            $levelDomain->name = $name__uppercase;
+            $levelDomain->slug = Str::slug($name__lowercase);
+            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
 
             $this->levelRepository->save($levelDomain);
         });
@@ -77,15 +80,22 @@ class LevelService
 
             $level = $this->levelRepository->find__by__id($levelRequest->id);
 
-            $levelDomain->name = strtoupper($levelRequest->name);
-            $levelDomain->slug = Str::slug(strtolower($levelRequest->name));
+            $name__uppercase = strtoupper($levelRequest->name);
+            $name__lowercase = strtolower($levelRequest->name);
+
+            $levelDomain->name = $name__uppercase;
+            $levelDomain->slug = Str::slug($name__lowercase);
             $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
 
-            //nama diubah
-            if (strtoupper($level->name) !== strtoupper($levelRequest->name)) {
+            //nama level diubah
+            if (strtolower($level->name) !== $name__lowercase) {
                 $units = $this->unitRepository->find__all__by__levelId($levelRequest->id);
+
                 foreach ($units as $unit) {
-                    $this->unitRepository->
+                    $unitDomain->name = str_replace(strtoupper($level->name), $name__uppercase, $unit->name);
+                    $unitDomain->slug = str_replace(strtolower($level->name), $name__lowercase, $unit->slug);
+
+                    $this->unitRepository->update__name_slug__by__id($unitDomain, $unit->id);
                 }
             }
 

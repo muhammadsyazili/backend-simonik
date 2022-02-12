@@ -10,13 +10,11 @@ use App\Models\UnitOnlySlug;
 
 class UnitRepository
 {
-    public function update__by__id(Unit $unit, string|int $id)
+    public function update__name_slug__by__id(Unit $unit, string|int $id)
     {
         ModelsUnit::where(['id' => $id])->update([
             'name' => $unit->name,
             'slug' => $unit->slug,
-            'parent_id' => $unit->parent_id,
-            'level_id' => $unit->level_id,
         ]);
     }
 
