@@ -35,8 +35,8 @@ class RealizationPaperWorkValidationService
     //use repo UserRepository
     public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang akan di-edit sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-edit sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -60,8 +60,8 @@ class RealizationPaperWorkValidationService
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang akan di-update sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -79,7 +79,7 @@ class RealizationPaperWorkValidationService
             'numeric' => ':attribute harus numerik.',
         ];
 
-        //memastikan realisasi yang dikirim tipe data 'numeric'
+        //memastikan realisasi yang akan di-update tipe data 'numeric'
         foreach ($request->post('realizations') as $realizationK => $realizationV) {
             foreach ($realizationV as $K => $V) {
                 $attributes["realizations.$realizationK.$K"] = ['numeric'];
@@ -96,7 +96,7 @@ class RealizationPaperWorkValidationService
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang dikirim terdaftar di DB
+        //memastikan KPI yang akan di-update terdaftar di DB
         foreach ($indicatorsId as $value) {
             if (!in_array($value, $indicators)) {
                 $validator->after(function ($validator) {
@@ -108,7 +108,7 @@ class RealizationPaperWorkValidationService
 
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang dikirim tidak ada status dummy
+        //memastikan KPI yang akan di-update tidak ada yang ber-status dummy
         foreach ($indicators as $indicator) {
             if ($indicator->dummy) {
                 $validator->after(function ($validator) {
@@ -118,7 +118,7 @@ class RealizationPaperWorkValidationService
             }
         }
 
-        //memastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
+        //memastikan bulan yang akan di-update sesuai dengan masa berlaku setiap KPI
         foreach ($realizations as $realizationK => $realizationV) {
             $indicator = $this->indicatorRepository->find__by__id($realizationK);
             $validityMonths = array_keys($indicator->validity);
@@ -164,14 +164,14 @@ class RealizationPaperWorkValidationService
 
         $indicator = $this->indicatorRepository->find__by__id($request->id);
 
-        //memastikan KPI yang dikirim berlabel 'child'
+        //memastikan KPI yang akan di-update berlabel 'child'
         if (in_array($indicator->label, ['super-master', 'master'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('id', "(#4.4) : Akses ilegal !");
             });
         }
 
-        //memastikan unit dari KPI yang dikirim merupakan turunan user saat ini
+        //memastikan unit dari KPI yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
         if ($user->role->name !== 'super-admin') {
             if (!in_array($indicator->unit_id, $this->unitRepository->find__allId__with__this_childs__by__id($user->unit->id))) {
                 $validator->after(function ($validator) {

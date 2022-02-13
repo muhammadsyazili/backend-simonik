@@ -40,7 +40,7 @@ class IndicatorPaperWorkValidationService
     public function indexValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang akan di-read sesuai dengan level user login saat ini atau level turunan yang diizinkan
-        //memastikan unit yang akan di-read sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-read sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 

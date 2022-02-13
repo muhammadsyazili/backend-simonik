@@ -35,8 +35,8 @@ class TargetPaperWorkValidationService
     //use repo UserRepository
     public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang akan di-edit sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-edit sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -60,8 +60,8 @@ class TargetPaperWorkValidationService
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan level yang dikirim sesuai dengan level si pengguna yang login atau level turunannya
-        //memastikan unit yang dikirim sesuai dengan unit si pengguna yang login atau unit turunannya
+        //memastikan level yang akan di-update sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -79,7 +79,7 @@ class TargetPaperWorkValidationService
             'numeric' => ':attribute harus numerik.',
         ];
 
-        //memastikan target yang dikirim tipe data 'numeric'
+        //memastikan target yang akan di-update tipe data 'numeric'
         foreach ($request->post('targets') as $targetK => $targetV) {
             foreach ($targetV as $K => $V) {
                 $attributes["targets.$targetK.$K"] = ['numeric'];
@@ -96,7 +96,7 @@ class TargetPaperWorkValidationService
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang dikirim terdaftar di DB
+        //memastikan KPI yang akan di-update terdaftar di DB
         foreach ($indicatorsId as $value) {
             if (!in_array($value, $indicators)) {
                 $validator->after(function ($validator) {
@@ -108,7 +108,7 @@ class TargetPaperWorkValidationService
 
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang dikirim tidak ada status dummy
+        //memastikan KPI yang akan di-update tidak ada yang ber-status dummy
         foreach ($indicators as $indicator) {
             if ($indicator->dummy) {
                 $validator->after(function ($validator) {
@@ -118,7 +118,7 @@ class TargetPaperWorkValidationService
             }
         }
 
-        //pastikan bulan yang dikirim sesuai dengan masa berlaku setiap KPI
+        //pastikan bulan yang akan di-update sesuai dengan masa berlaku setiap KPI
         foreach ($targets as $targetK => $targetV) {
             $indicator = $this->indicatorRepository->find__by__id($targetK);
             $validityMonths = array_keys($indicator->validity);
