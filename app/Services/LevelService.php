@@ -95,6 +95,8 @@ class LevelService
             $levelDomain->slug = Str::slug($name__lowercase);
             $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
 
+            $this->levelRepository->update__by__id($levelDomain, $levelRequest->id);
+            
             //nama level diubah
             if (strtolower($level->name) !== $name__lowercase) {
                 $units = $this->unitRepository->find__all__by__levelId($levelRequest->id);
@@ -106,8 +108,6 @@ class LevelService
                     $this->unitRepository->update__name_slug__by__id($unitDomain, $unit->id);
                 }
             }
-
-            $this->levelRepository->update__by__id($levelDomain, $levelRequest->id);
         });
     }
 

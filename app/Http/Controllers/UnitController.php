@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
+use App\DTO\UnitInsertOrUpdateRequest;
+use App\Repositories\IndicatorRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\LevelRepository;
+use App\Repositories\RealizationRepository;
+use App\Repositories\TargetRepository;
 use App\Repositories\UnitRepository;
 use App\Services\UnitService;
+use App\Services\UnitValidationService;
 
 class UnitController extends ApiController
 {
@@ -47,7 +52,28 @@ class UnitController extends ApiController
      */
     public function create()
     {
-        //
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $unitService = new UnitService($constructRequest);
+
+        $response = $unitService->create();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Unit - Create",
+            [
+                'levels' => $response->levels,
+                'units' => $response->units
+            ],
+            null,
+        );
     }
 
     /**
@@ -58,7 +84,52 @@ class UnitController extends ApiController
      */
     public function store(Request $request)
     {
-        //
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $targetRepository = new TargetRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->targetRepository = $targetRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
+
+        $unitValidationService = new UnitValidationService($constructRequest);
+
+        $validation = $unitValidationService->storeValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $unitInsertOrUpdateRequest = new UnitInsertOrUpdateRequest();
+
+        $unitInsertOrUpdateRequest->name = $request->post('name');
+        $unitInsertOrUpdateRequest->parent_level = $request->post('parent_level');
+        $unitInsertOrUpdateRequest->parent_unit = $request->post('parent_unit');
+        $unitInsertOrUpdateRequest->userId = $request->header('X-User-Id');
+
+        $unitService = new UnitService($constructRequest);
+
+        $unitService->store($unitInsertOrUpdateRequest);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level berhasil ditambahkan",
+            null,
+            null,
+        );
     }
 
     /**

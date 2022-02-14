@@ -73,7 +73,7 @@ class IndicatorReferenceService
                 //section end: paper work current request updating
 
                 //section: paper work chlids updating
-                $units = $this->unitRepository->find__all__with__indicator__by__levelId_year($this->levelRepository->find__id__by__slug($level), $year);
+                $units = $this->unitRepository->find__all__with__indicators__by__levelId_year($this->levelRepository->find__id__by__slug($level), $year);
 
                 foreach ($units as $unit) {
                     foreach ($unit->indicators as $indicator) {

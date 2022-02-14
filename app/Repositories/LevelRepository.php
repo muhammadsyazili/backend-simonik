@@ -54,25 +54,25 @@ class LevelRepository
         return Arr::flatten($result);
     }
 
-    public function find__allSlug__with__this_childs__by__id(string|int $id): array
+    public function find__allFlattenSlug__with__this_childs__by__id(string|int $id): array
     {
         $result = ModelsLevelOnlySlug::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
-    public function find__allSlug__with__childs__by__id(string|int $id): array
+    public function find__allFlattenSlug__with__childs__by__id(string|int $id): array
     {
         $result = ModelsLevelOnlySlug::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
-    public function find__allId__with__this_childs__by__id(string|int $id): array
+    public function find__allFlattenId__with__this_childs__by__id(string|int $id): array
     {
         $result = ModelsLevelOnlyId::with('childsRecursive')->where(['id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
-    public function find__allId__with__childs__by__id(string|int $id): array
+    public function find__allFlattenId__with__childs__by__id(string|int $id): array
     {
         $result = ModelsLevelOnlyId::with('childsRecursive')->where(['parent_id' => $id])->orderBy('name', 'asc')->get()->toArray();
         return Arr::flatten($result);

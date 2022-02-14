@@ -173,7 +173,7 @@ class RealizationPaperWorkValidationService
 
         //memastikan unit dari KPI yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
         if ($user->role->name !== 'super-admin') {
-            if (!in_array($indicator->unit_id, $this->unitRepository->find__allId__with__this_childs__by__id($user->unit->id))) {
+            if (!in_array($indicator->unit_id, $this->unitRepository->find__allFlattenId__with__this_childs__by__id($user->unit->id))) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('id', "Akses ilegal2 !");
                 });

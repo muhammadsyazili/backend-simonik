@@ -90,7 +90,7 @@ class TargetPaperWorkService
                         }
                         //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
                     } else {
-                        $unitsId = $this->unitRepository->find__allId__with__childs__by__id($user->unit->id); //mengambil daftar 'id' unit-unit turunan berdasarkan user
+                        $unitsId = $this->unitRepository->find__allFlattenId__with__childs__by__id($user->unit->id); //mengambil daftar 'id' unit-unit turunan berdasarkan user
 
                         //section: paper work 'CHILD' updating ----------------------------------------------------------------------
                         foreach ($indicatorsChild as $indicatorChild) {

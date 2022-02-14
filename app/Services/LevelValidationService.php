@@ -69,7 +69,7 @@ class LevelValidationService
             }
         }
 
-        //memastikan parent level  yang akan di-store terdaftar di DB
+        //memastikan parent level yang akan di-store terdaftar di DB
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
@@ -127,7 +127,7 @@ class LevelValidationService
             }
         }
 
-        //memastikan parent level  yang akan di-update terdaftar di DB
+        //memastikan parent level yang akan di-update terdaftar di DB
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
