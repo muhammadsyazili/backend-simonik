@@ -2,9 +2,8 @@
 
 namespace App\DTO;
 
-class IndicatorPaperWorkReorderRequest
+class IndicatorReferenceEditRequest
 {
-    public array $indicators;
     public string $level;
     public ?string $unit = null;
     public ?string $year = null;

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Extends\Indicator;
 
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use App\Http\Controllers\ApiController;
 use App\DTO\ConstructRequest;
 use App\DTO\IndicatorPaperWorkCreateRequest;
 use App\DTO\IndicatorPaperWorkDestroyRequest;
@@ -10,9 +13,6 @@ use App\DTO\IndicatorPaperWorkIndexRequest;
 use App\DTO\IndicatorPaperWorkReorderRequest;
 use App\DTO\IndicatorPaperWorkStoreRequest;
 use App\DTO\IndicatorPaperWorkUpdateRequest;
-use App\Http\Controllers\ApiController;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;

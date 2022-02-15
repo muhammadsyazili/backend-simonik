@@ -14,6 +14,7 @@ use App\DTO\IndicatorPaperWorkEditRequest;
 use App\DTO\IndicatorPaperWorkIndexRequest;
 use App\DTO\IndicatorPaperWorkIndexResponse;
 use App\DTO\IndicatorPaperWorkReorderRequest;
+use App\DTO\IndicatorPaperWorkStoreFromMasterRequest;
 use App\DTO\IndicatorPaperWorkStoreRequest;
 use App\DTO\IndicatorPaperWorkUpdateRequest;
 use App\Repositories\IndicatorRepository;
@@ -260,8 +261,13 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
-    public function storeFromMaster(string|int $levelId, string|int $unitId, string $year, string|int $userId): void
+    public function storeFromMaster(IndicatorPaperWorkStoreFromMasterRequest $indicatorPaperWorkRequest): void
     {
+        $levelId = $indicatorPaperWorkRequest->levelId;
+        $unitId = $indicatorPaperWorkRequest->unitId;
+        $year = $indicatorPaperWorkRequest->year;
+        $userId = $indicatorPaperWorkRequest->userId;
+
         DB::transaction(function () use ($levelId, $unitId, $year, $userId) {
             $indicatorDomain = new Indicator();
             $targetDomain = new Target();

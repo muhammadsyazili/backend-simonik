@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Extends\Indicator;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\ApiController;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Controllers\ApiController;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorReferenceStoreOrUpdateRequest;
+use App\DTO\IndicatorReferenceEditRequest;
+use App\DTO\IndicatorReferenceUpdateRequest;
+use App\DTO\IndicatorReferenceStoreRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
@@ -72,7 +74,7 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
-        $requestDTO = new IndicatorReferenceStoreOrUpdateRequest();
+        $requestDTO = new IndicatorReferenceStoreRequest();
 
         $requestDTO->indicators = $request->post('indicators');
         $requestDTO->preferences = $request->post('preferences');
@@ -123,13 +125,15 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
+        $requestDTO = new IndicatorReferenceEditRequest();
+
+        $requestDTO->level = $request->query('level');
+        $requestDTO->unit = $request->query('unit');
+        $requestDTO->year = $request->query('tahun');
+
         $indicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
-        $level = $request->query('level');
-        $unit = $request->query('unit');
-        $tahun = $request->query('tahun');
-
-        $response = $indicatorReferenceService->edit($level, $unit, $tahun);
+        $response = $indicatorReferenceService->edit($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -175,7 +179,7 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
-        $requestDTO = new IndicatorReferenceStoreOrUpdateRequest();
+        $requestDTO = new IndicatorReferenceUpdateRequest();
 
         $requestDTO->indicators = $request->post('indicators');
         $requestDTO->preferences = $request->post('preferences');

@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorReferenceCreateOrUpdateResponse;
-use App\DTO\IndicatorReferenceStoreOrUpdateRequest;
+use App\DTO\IndicatorReferenceUpdateResponse;
+use App\DTO\IndicatorReferenceCreateResponse;
+use App\DTO\IndicatorReferenceEditRequest;
+use App\DTO\IndicatorReferenceUpdateRequest;
+use App\DTO\IndicatorReferenceStoreRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
@@ -24,9 +27,9 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository
-    public function create(): IndicatorReferenceCreateOrUpdateResponse
+    public function create(): IndicatorReferenceCreateResponse
     {
-        $response = new IndicatorReferenceCreateOrUpdateResponse();
+        $response = new IndicatorReferenceCreateResponse();
 
         $response->indicators = $this->indicatorRepository->find__allNotReferenced__by__superMasterLabel();
         $response->preferences = $this->indicatorRepository->find__all__with__childs__by__superMasterLabel();
@@ -35,7 +38,7 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository
-    public function store(IndicatorReferenceStoreOrUpdateRequest $indicatorReferenceRequest): void
+    public function store(IndicatorReferenceStoreRequest $indicatorReferenceRequest): void
     {
         $indicators = $indicatorReferenceRequest->indicators;
         $preferences = $indicatorReferenceRequest->preferences;
@@ -47,9 +50,13 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function edit(string $level, ?string $unit = null, ?string $year = null): IndicatorReferenceCreateOrUpdateResponse
+    public function edit(IndicatorReferenceEditRequest $indicatorReferenceRequest): IndicatorReferenceUpdateResponse
     {
-        $response = new IndicatorReferenceCreateOrUpdateResponse();
+        $response = new IndicatorReferenceUpdateResponse();
+
+        $level = $indicatorReferenceRequest->level;
+        $unit = $indicatorReferenceRequest->unit;
+        $year = $indicatorReferenceRequest->year;
 
         $response->indicators = $level === 'super-master' ?
             $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) :
@@ -62,7 +69,7 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function update(IndicatorReferenceStoreOrUpdateRequest $indicatorReferenceRequest): void
+    public function update(IndicatorReferenceUpdateRequest $indicatorReferenceRequest): void
     {
         $indicators = $indicatorReferenceRequest->indicators;
         $preferences = $indicatorReferenceRequest->preferences;
