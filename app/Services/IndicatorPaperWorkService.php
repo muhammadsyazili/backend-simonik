@@ -6,8 +6,16 @@ use App\Domains\Indicator;
 use App\Domains\Realization;
 use App\Domains\Target;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorPaperWorkCreateOrEditResponse;
+use App\DTO\IndicatorPaperWorkEditResponse;
+use App\DTO\IndicatorPaperWorkCreateRequest;
+use App\DTO\IndicatorPaperWorkCreateResponse;
+use App\DTO\IndicatorPaperWorkDestroyRequest;
+use App\DTO\IndicatorPaperWorkEditRequest;
+use App\DTO\IndicatorPaperWorkIndexRequest;
 use App\DTO\IndicatorPaperWorkIndexResponse;
+use App\DTO\IndicatorPaperWorkReorderRequest;
+use App\DTO\IndicatorPaperWorkStoreRequest;
+use App\DTO\IndicatorPaperWorkUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -38,9 +46,14 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, UserRepository
-    public function index(string|int $userId, string $level, ?string $unit, ?string $year): IndicatorPaperWorkIndexResponse
+    public function index(IndicatorPaperWorkIndexRequest $indicatorPaperWorkRequest): IndicatorPaperWorkIndexResponse
     {
         $response = new IndicatorPaperWorkIndexResponse();
+
+        $level = $indicatorPaperWorkRequest->level;
+        $unit = $indicatorPaperWorkRequest->unit;
+        $year = $indicatorPaperWorkRequest->year;
+        $userId = $indicatorPaperWorkRequest->userId;
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
 
@@ -91,9 +104,11 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, LevelRepository, UserRepository
-    public function create(string|int $userId): IndicatorPaperWorkIndexResponse
+    public function create(IndicatorPaperWorkCreateRequest $indicatorPaperWorkRequest): IndicatorPaperWorkCreateResponse
     {
-        $response = new IndicatorPaperWorkIndexResponse();
+        $response = new IndicatorPaperWorkCreateResponse();
+
+        $userId = $indicatorPaperWorkRequest->userId;
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
 
@@ -106,8 +121,13 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
-    public function store(array $indicators, string $level, string $year, string|int $userId): void
+    public function store(IndicatorPaperWorkStoreRequest $indicatorPaperWorkRequest): void
     {
+        $indicators = $indicatorPaperWorkRequest->indicators;
+        $level = $indicatorPaperWorkRequest->level;
+        $year = $indicatorPaperWorkRequest->year;
+        $userId = $indicatorPaperWorkRequest->userId;
+
         DB::transaction(function () use ($indicators, $level, $year, $userId) {
             $indicatorDomain = new Indicator();
             $targetDomain = new Target();
@@ -311,9 +331,13 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function edit(string $level, string $unit, string $year): IndicatorPaperWorkCreateOrEditResponse
+    public function edit(IndicatorPaperWorkEditRequest $indicatorPaperWorkRequest): IndicatorPaperWorkEditResponse
     {
-        $response = new IndicatorPaperWorkCreateOrEditResponse;
+        $response = new IndicatorPaperWorkEditResponse;
+
+        $level = $indicatorPaperWorkRequest->level;
+        $unit = $indicatorPaperWorkRequest->unit;
+        $year = $indicatorPaperWorkRequest->year;
 
         $response->super_master_indicators = $this->indicatorRepository->find__all__with__childs_referenced__by__superMasterLabel();
 
@@ -325,8 +349,14 @@ class IndicatorPaperWorkService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository, RealizationRepository, UserRepository
-    public function update(array $indicatorsFromInput, string $level, string $unit, string $year, string|int $userId): void
+    public function update(IndicatorPaperWorkUpdateRequest $indicatorPaperWorkRequest): void
     {
+        $indicatorsFromInput = $indicatorPaperWorkRequest->indicators;
+        $level = $indicatorPaperWorkRequest->level;
+        $unit = $indicatorPaperWorkRequest->unit;
+        $year = $indicatorPaperWorkRequest->year;
+        $userId = $indicatorPaperWorkRequest->userId;
+
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::transaction(function () use ($indicatorsFromInput, $level, $unit, $year, $userId) {
             $indicatorDomain = new Indicator();
@@ -1761,8 +1791,12 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
-    public function destroy(string $level, string $unit, string $year): void
+    public function destroy(IndicatorPaperWorkDestroyRequest $indicatorPaperWorkRequest): void
     {
+        $level = $indicatorPaperWorkRequest->level;
+        $unit = $indicatorPaperWorkRequest->unit;
+        $year = $indicatorPaperWorkRequest->year;
+
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::transaction(function () use ($level, $unit, $year) {
             $levelId = $this->levelRepository->find__id__by__slug($level);
@@ -1789,8 +1823,13 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository
-    public function reorder(array $indicators, string $level, ?string $unit, ?string $year): void
+    public function reorder(IndicatorPaperWorkReorderRequest $indicatorPaperWorkRequest): void
     {
+        $indicators = $indicatorPaperWorkRequest->indicators;
+        $level = $indicatorPaperWorkRequest->level;
+        $unit = $indicatorPaperWorkRequest->unit;
+        $year = $indicatorPaperWorkRequest->year;
+
         DB::transaction(function () use ($indicators, $level, $unit) {
             if ($level === 'super-master') {
                 foreach ($indicators as $indicatorKey => $indicatorValue) {
