@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class IndicatorPreferencesCreateResponse
+class IndicatorReferenceCreateOrUpdateResponse
 {
     public mixed $indicators;
     public mixed $preferences;

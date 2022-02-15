@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Domains\User;
 use App\DTO\ConstructRequest;
 use App\DTO\UserCreateOrEditResponse;
-use App\DTO\UserInsertOrUpdateRequest;
+use App\DTO\UserStoreOrUpdateRequest;
 use App\Repositories\RoleRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
@@ -43,7 +43,7 @@ class UserService
     }
 
     //use repo UnitRepository, RoleRepository, UserRepository
-    public function store(UserInsertOrUpdateRequest $user): void
+    public function store(UserStoreOrUpdateRequest $user): void
     {
         DB::transaction(function () use ($user) {
             $userDomain = new User();
@@ -74,7 +74,7 @@ class UserService
     }
 
     //use repo UserRepository
-    public function update(UserInsertOrUpdateRequest $user): void
+    public function update(UserStoreOrUpdateRequest $user): void
     {
         DB::transaction(function () use ($user) {
             $userDomain = new User();

@@ -6,7 +6,7 @@ use App\Domains\Level;
 use App\Domains\Unit;
 use App\DTO\ConstructRequest;
 use App\DTO\LevelCreateOrEditResponse;
-use App\DTO\LevelInsertOrUpdateRequest;
+use App\DTO\LevelStoreOrUpdateRequest;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
@@ -44,7 +44,7 @@ class LevelService
     }
 
     //use repo LevelRepository
-    public function store(LevelInsertOrUpdateRequest $levelRequest): void
+    public function store(LevelStoreOrUpdateRequest $levelRequest): void
     {
         DB::transaction(function () use ($levelRequest) {
             $levelDomain = new Level();
@@ -80,7 +80,7 @@ class LevelService
     }
 
     //use repo LevelRepository, UnitRepository
-    public function update(LevelInsertOrUpdateRequest $levelRequest): void
+    public function update(LevelStoreOrUpdateRequest $levelRequest): void
     {
         DB::transaction(function () use ($levelRequest) {
             $levelDomain = new Level();

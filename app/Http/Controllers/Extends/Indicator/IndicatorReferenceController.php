@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ApiController;
 use Symfony\Component\HttpFoundation\Response;
 use App\DTO\ConstructRequest;
+use App\DTO\IndicatorReferenceStoreOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
@@ -29,15 +30,15 @@ class IndicatorReferenceController extends ApiController
 
         $indicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
-        $create = $indicatorReferenceService->create();
+        $response = $indicatorReferenceService->create();
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Kertas kerja KPI referensi - Create",
             [
-                'indicators' => $create->indicators,
-                'preferences' => $create->preferences,
+                'indicators' => $response->indicators,
+                'preferences' => $response->preferences,
             ],
             null,
         );
@@ -71,12 +72,15 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
+        $requestDTO = new IndicatorReferenceStoreOrUpdateRequest();
+
+        $requestDTO->indicators = $request->post('indicators');
+        $requestDTO->preferences = $request->post('preferences');
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $indicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
-        $indicators = $request->post('indicators');
-        $preferences = $request->post('preferences');
-
-        $indicatorReferenceService->store($indicators, $preferences);
+        $indicatorReferenceService->store($requestDTO);
 
         return $this->APIResponse(
             true,

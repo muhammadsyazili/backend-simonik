@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorPreferencesCreateResponse;
+use App\DTO\IndicatorReferenceCreateOrUpdateResponse;
+use App\DTO\IndicatorReferenceStoreOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
@@ -23,9 +24,9 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository
-    public function create(): IndicatorPreferencesCreateResponse
+    public function create(): IndicatorReferenceCreateOrUpdateResponse
     {
-        $response = new IndicatorPreferencesCreateResponse();
+        $response = new IndicatorReferenceCreateOrUpdateResponse();
         $response->indicators = $this->indicatorRepository->find__allNotReferenced__by__superMasterLabel();
         $response->preferences = $this->indicatorRepository->find__all__with__childs__by__superMasterLabel();
 
@@ -33,11 +34,13 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository
-    public function store(array $indicator, array $preference): void
+    public function store(IndicatorReferenceStoreOrUpdateRequest $indicatorReferenceRequest): void
     {
-        DB::transaction(function () use ($indicator, $preference) {
-            for ($i = 0; $i < count($indicator); $i++) {
-                $this->indicatorRepository->update__parentHorizontalId_referenced__by__id($indicator[$i], $preference[$i] === 'root' ? null : $preference[$i]);
+        $indicators = $indicatorReferenceRequest->indicators;
+        $preferences = $indicatorReferenceRequest->preferences;
+        DB::transaction(function () use ($indicators, $preferences) {
+            for ($i = 0; $i < count($indicators); $i++) {
+                $this->indicatorRepository->update__parentHorizontalId_referenced__by__id($indicators[$i], $preferences[$i] === 'root' ? null : $preferences[$i]);
             }
         });
     }

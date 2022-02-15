@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\UserInsertOrUpdateRequest;
+use App\DTO\UserStoreOrUpdateRequest;
 use App\Repositories\RoleRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
@@ -102,17 +102,17 @@ class UserController extends ApiController
             );
         }
 
-        $userInsertOrUpdateRequest = new UserInsertOrUpdateRequest();
+        $UserStoreOrUpdateRequest = new UserStoreOrUpdateRequest();
 
-        $userInsertOrUpdateRequest->name = $request->post('name');
-        $userInsertOrUpdateRequest->nip = $request->post('nip');
-        $userInsertOrUpdateRequest->username = $request->post('username');
-        $userInsertOrUpdateRequest->email = $request->post('email');
-        $userInsertOrUpdateRequest->unit = $request->post('unit');
+        $UserStoreOrUpdateRequest->name = $request->post('name');
+        $UserStoreOrUpdateRequest->nip = $request->post('nip');
+        $UserStoreOrUpdateRequest->username = $request->post('username');
+        $UserStoreOrUpdateRequest->email = $request->post('email');
+        $UserStoreOrUpdateRequest->unit = $request->post('unit');
 
         $userService = new UserService($constructRequest);
 
-        $userService->store($userInsertOrUpdateRequest);
+        $userService->store($UserStoreOrUpdateRequest);
 
         return $this->APIResponse(
             true,
@@ -188,18 +188,18 @@ class UserController extends ApiController
             );
         }
 
-        $userInsertOrUpdateRequest = new UserInsertOrUpdateRequest();
+        $UserStoreOrUpdateRequest = new UserStoreOrUpdateRequest();
 
-        $userInsertOrUpdateRequest->id = $id;
-        $userInsertOrUpdateRequest->name = $request->post('name');
-        $userInsertOrUpdateRequest->nip = $request->post('nip');
-        $userInsertOrUpdateRequest->username = $request->post('username');
-        $userInsertOrUpdateRequest->email = $request->post('email');
-        $userInsertOrUpdateRequest->unit = $request->post('unit');
+        $UserStoreOrUpdateRequest->id = $id;
+        $UserStoreOrUpdateRequest->name = $request->post('name');
+        $UserStoreOrUpdateRequest->nip = $request->post('nip');
+        $UserStoreOrUpdateRequest->username = $request->post('username');
+        $UserStoreOrUpdateRequest->email = $request->post('email');
+        $UserStoreOrUpdateRequest->unit = $request->post('unit');
 
         $userService = new UserService($constructRequest);
 
-        $userService->update($userInsertOrUpdateRequest);
+        $userService->update($UserStoreOrUpdateRequest);
 
         return $this->APIResponse(
             true,

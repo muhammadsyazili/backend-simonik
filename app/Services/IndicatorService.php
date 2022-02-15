@@ -6,7 +6,7 @@ use App\Domains\Indicator;
 use App\Domains\Realization;
 use App\Domains\Target;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorInsertOrUpdateRequest;
+use App\DTO\IndicatorStoreOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -30,7 +30,7 @@ class IndicatorService
     }
 
     //use repo IndicatorRepository, LevelRepository
-    public function store(IndicatorInsertOrUpdateRequest $indicator): void
+    public function store(IndicatorStoreOrUpdateRequest $indicator): void
     {
         DB::transaction(function () use ($indicator) {
             $indicatorDomain = new Indicator();
@@ -89,7 +89,7 @@ class IndicatorService
     }
 
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
-    public function update(IndicatorInsertOrUpdateRequest $indicatorNew, string|int $id): void
+    public function update(IndicatorStoreOrUpdateRequest $indicatorNew, string|int $id): void
     {
         DB::transaction(function () use ($indicatorNew, $id) {
             $indicatorDomain = new Indicator();

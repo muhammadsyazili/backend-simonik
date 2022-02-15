@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\LevelInsertOrUpdateRequest;
+use App\DTO\LevelStoreOrUpdateRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\LevelRepository;
@@ -98,14 +98,14 @@ class LevelController extends ApiController
             );
         }
 
-        $levelInsertOrUpdateRequest = new LevelInsertOrUpdateRequest();
+        $LevelStoreOrUpdateRequest = new LevelStoreOrUpdateRequest();
 
-        $levelInsertOrUpdateRequest->name = $request->post('name');
-        $levelInsertOrUpdateRequest->parent_level = $request->post('parent_level');
+        $LevelStoreOrUpdateRequest->name = $request->post('name');
+        $LevelStoreOrUpdateRequest->parent_level = $request->post('parent_level');
 
         $levelService = new LevelService($constructRequest);
 
-        $levelService->store($levelInsertOrUpdateRequest);
+        $levelService->store($LevelStoreOrUpdateRequest);
 
         return $this->APIResponse(
             true,
@@ -177,15 +177,15 @@ class LevelController extends ApiController
             );
         }
 
-        $levelInsertOrUpdateRequest = new LevelInsertOrUpdateRequest();
+        $LevelStoreOrUpdateRequest = new LevelStoreOrUpdateRequest();
 
-        $levelInsertOrUpdateRequest->id = $id;
-        $levelInsertOrUpdateRequest->name = $request->post('name');
-        $levelInsertOrUpdateRequest->parent_level = $request->post('parent_level');
+        $LevelStoreOrUpdateRequest->id = $id;
+        $LevelStoreOrUpdateRequest->name = $request->post('name');
+        $LevelStoreOrUpdateRequest->parent_level = $request->post('parent_level');
 
         $levelService = new LevelService($constructRequest);
 
-        $levelService->update($levelInsertOrUpdateRequest);
+        $levelService->update($LevelStoreOrUpdateRequest);
 
         return $this->APIResponse(
             true,

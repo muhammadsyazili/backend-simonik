@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Domains\Unit;
 use App\DTO\ConstructRequest;
 use App\DTO\UnitCreateOrEditResponse;
-use App\DTO\UnitInsertOrUpdateRequest;
+use App\DTO\UnitStoreOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -60,21 +60,21 @@ class UnitService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository, RealizationRepository
-    public function store(UnitInsertOrUpdateRequest $unitRequest): void
+    public function store(UnitStoreOrUpdateRequest $unitRequest): void
     {
         DB::transaction(function () use ($unitRequest) {
             $unitDomain = new Unit();
 
-            $parent_level__uppercase = strtoupper($unitRequest->parent_level);
-            $parent_level__lowercase = strtolower($unitRequest->parent_level);
+            $level__uppercase = strtoupper($unitRequest->level);
+            $level__lowercase = strtolower($unitRequest->level);
 
             $name__uppercase = strtoupper($unitRequest->name);
             $name__lowercase = strtolower($unitRequest->name);
 
             $unitDomain->id = (string) Str::orderedUuid();
-            $unitDomain->name = "$parent_level__uppercase - $name__uppercase";
-            $unitDomain->slug = Str::slug("$parent_level__lowercase-$name__lowercase");
-            $unitDomain->level_id = $this->levelRepository->find__id__by__slug($unitRequest->parent_level);
+            $unitDomain->name = "$level__uppercase - $name__uppercase";
+            $unitDomain->slug = Str::slug("$level__lowercase-$name__lowercase");
+            $unitDomain->level_id = $this->levelRepository->find__id__by__slug($unitRequest->level);
             $unitDomain->parent_id = $this->unitRepository->find__id__by__slug($unitRequest->parent_unit);
 
             $this->unitRepository->save($unitDomain);

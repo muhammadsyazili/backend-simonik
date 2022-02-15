@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorInsertOrUpdateRequest;
+use App\DTO\IndicatorStoreOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -45,21 +45,21 @@ class IndicatorController extends ApiController
             );
         }
 
-        $indicatorInsertOrUpdateRequest = new IndicatorInsertOrUpdateRequest();
+        $IndicatorStoreOrUpdateRequest = new IndicatorStoreOrUpdateRequest();
 
-        $indicatorInsertOrUpdateRequest->validity = $request->post('validity');
-        $indicatorInsertOrUpdateRequest->weight = $request->post('weight');
-        $indicatorInsertOrUpdateRequest->dummy = $request->post('dummy');
-        $indicatorInsertOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
-        $indicatorInsertOrUpdateRequest->polarity = $request->post('polarity');
-        $indicatorInsertOrUpdateRequest->indicator = $request->post('indicator');
-        $indicatorInsertOrUpdateRequest->formula = $request->post('formula');
-        $indicatorInsertOrUpdateRequest->measure = $request->post('measure');
-        $indicatorInsertOrUpdateRequest->user_id = $request->header('X-User-Id');
+        $IndicatorStoreOrUpdateRequest->validity = $request->post('validity');
+        $IndicatorStoreOrUpdateRequest->weight = $request->post('weight');
+        $IndicatorStoreOrUpdateRequest->dummy = $request->post('dummy');
+        $IndicatorStoreOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
+        $IndicatorStoreOrUpdateRequest->polarity = $request->post('polarity');
+        $IndicatorStoreOrUpdateRequest->indicator = $request->post('indicator');
+        $IndicatorStoreOrUpdateRequest->formula = $request->post('formula');
+        $IndicatorStoreOrUpdateRequest->measure = $request->post('measure');
+        $IndicatorStoreOrUpdateRequest->user_id = $request->header('X-User-Id');
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicatorService->store($indicatorInsertOrUpdateRequest);
+        $indicatorService->store($IndicatorStoreOrUpdateRequest);
 
         return $this->APIResponse(
             true,
@@ -130,21 +130,21 @@ class IndicatorController extends ApiController
             );
         }
 
-        $indicatorInsertOrUpdateRequest = new IndicatorInsertOrUpdateRequest();
+        $IndicatorStoreOrUpdateRequest = new IndicatorStoreOrUpdateRequest();
 
-        $indicatorInsertOrUpdateRequest->id = $id;
-        $indicatorInsertOrUpdateRequest->indicator = $request->post('indicator');
-        $indicatorInsertOrUpdateRequest->dummy = $request->post('dummy');
-        $indicatorInsertOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
-        $indicatorInsertOrUpdateRequest->polarity = $request->post('polarity');
-        $indicatorInsertOrUpdateRequest->formula = $request->post('formula');
-        $indicatorInsertOrUpdateRequest->measure = $request->post('measure');
-        $indicatorInsertOrUpdateRequest->validity = $request->post('validity');
-        $indicatorInsertOrUpdateRequest->weight = $request->post('weight');
+        $IndicatorStoreOrUpdateRequest->id = $id;
+        $IndicatorStoreOrUpdateRequest->indicator = $request->post('indicator');
+        $IndicatorStoreOrUpdateRequest->dummy = $request->post('dummy');
+        $IndicatorStoreOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
+        $IndicatorStoreOrUpdateRequest->polarity = $request->post('polarity');
+        $IndicatorStoreOrUpdateRequest->formula = $request->post('formula');
+        $IndicatorStoreOrUpdateRequest->measure = $request->post('measure');
+        $IndicatorStoreOrUpdateRequest->validity = $request->post('validity');
+        $IndicatorStoreOrUpdateRequest->weight = $request->post('weight');
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicatorService->update($indicatorInsertOrUpdateRequest, $id);
+        $indicatorService->update($IndicatorStoreOrUpdateRequest, $id);
 
         return $this->APIResponse(
             true,

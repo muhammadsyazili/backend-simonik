@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class LevelInsertOrUpdateRequest
+class LevelStoreOrUpdateRequest
 {
     public string|int|null $id = null;
     public string $name;

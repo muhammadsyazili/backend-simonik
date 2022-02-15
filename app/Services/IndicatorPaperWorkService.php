@@ -6,7 +6,7 @@ use App\Domains\Indicator;
 use App\Domains\Realization;
 use App\Domains\Target;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorPaperWorkEditResponse;
+use App\DTO\IndicatorPaperWorkCreateOrEditResponse;
 use App\DTO\IndicatorPaperWorkIndexResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
@@ -311,9 +311,9 @@ class IndicatorPaperWorkService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function edit(string $level, string $unit, string $year): IndicatorPaperWorkEditResponse
+    public function edit(string $level, string $unit, string $year): IndicatorPaperWorkCreateOrEditResponse
     {
-        $response = new IndicatorPaperWorkEditResponse;
+        $response = new IndicatorPaperWorkCreateOrEditResponse;
 
         $response->super_master_indicators = $this->indicatorRepository->find__all__with__childs_referenced__by__superMasterLabel();
 

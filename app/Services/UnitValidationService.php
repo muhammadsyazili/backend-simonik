@@ -35,8 +35,8 @@ class UnitValidationService
     {
         $attributes = [
             'name' => ['required', 'string', 'not_in:super-master,master,child,super-admin,admin,data-entry,employee'],
-            'parent_level' => ['required', 'string'],
-            'parent_unit' => ['required', 'string'],
+            'level' => ['required', 'string'],
+            'parent_unit' => ['string'],
         ];
 
         $messages = [
@@ -49,7 +49,7 @@ class UnitValidationService
         $validator = Validator::make($input, $attributes, $messages);
 
         $name__lowercase = strtolower($request->post('name'));
-        $parent_level = $request->post('parent_level');
+        $level = $request->post('level');
         $parent_unit = $request->post('parent_unit');
 
         //memastikan nama yang akan di-store tidak mengandung keyword
@@ -70,29 +70,34 @@ class UnitValidationService
             }
         }
 
-        //memastikan parent level yang akan di-store terdaftar di DB
-        $result = $this->levelRepository->count__all__by__slug($parent_level);
+        //memastikan level yang akan di-store terdaftar di DB
+        $result = $this->levelRepository->count__all__by__slug($level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "parent level tidak tersedia.");
+                $validator->errors()->add('level', "level tidak tersedia.");
             });
         }
 
-        //memastikan parent unit yang akan di-store terdaftar di DB
-        $result = $this->unitRepository->count__all__by__slug($parent_unit);
-        if ($result === 0) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('parent_unit', "parent unit tidak tersedia.");
-            });
-        }
+        $level = $this->levelRepository->find__with__parent__by__slug($level);
+        $units = $this->unitRepository->find__all__by__levelId($level->parent->id);
 
-        //memastikan level-slug dari parent unit yang akan di-store sama dengan parent level
-        $unit = $this->unitRepository->find__with__level__by__slug($parent_unit);
+        if (count($units) !== 0) {
+            //memastikan parent unit yang akan di-store terdaftar di DB
+            $result = $this->unitRepository->count__all__by__slug($parent_unit);
+            if ($result === 0) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('parent_unit', "unit tidak tersedia.");
+                });
+            }
 
-        if ($unit->level->slug !== $parent_level) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('parent_unit', "(#6) : Anda tidak memiliki hak akses.");
-            });
+            //memastikan level yang akan di-store merupakan turunan dari level yang ada di parent unit
+            foreach ($units as $unit) {
+                if ($unit->slug !== $parent_unit) {
+                    $validator->after(function ($validator) {
+                        $validator->errors()->add('parent_unit', "(#6.1) : Akses ilegal !");
+                    });
+                }
+            }
         }
 
         return $validator;

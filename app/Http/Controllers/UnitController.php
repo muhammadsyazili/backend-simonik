@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\UnitInsertOrUpdateRequest;
+use App\DTO\UnitStoreOrUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -117,16 +117,16 @@ class UnitController extends ApiController
             );
         }
 
-        $unitInsertOrUpdateRequest = new UnitInsertOrUpdateRequest();
+        $UnitStoreOrUpdateRequest = new UnitStoreOrUpdateRequest();
 
-        $unitInsertOrUpdateRequest->name = $request->post('name');
-        $unitInsertOrUpdateRequest->parent_level = $request->post('parent_level');
-        $unitInsertOrUpdateRequest->parent_unit = $request->post('parent_unit');
-        $unitInsertOrUpdateRequest->userId = $request->header('X-User-Id');
+        $UnitStoreOrUpdateRequest->name = $request->post('name');
+        $UnitStoreOrUpdateRequest->level = $request->post('level');
+        $UnitStoreOrUpdateRequest->parent_unit = $request->post('parent_unit');
+        $UnitStoreOrUpdateRequest->userId = $request->header('X-User-Id');
 
         $unitService = new UnitService($constructRequest);
 
-        $unitService->store($unitInsertOrUpdateRequest);
+        $unitService->store($UnitStoreOrUpdateRequest);
 
         return $this->APIResponse(
             true,

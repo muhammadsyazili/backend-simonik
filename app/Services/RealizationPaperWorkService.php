@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\RealizationPaperWorkEditResponse;
+use App\DTO\RealizationPaperWorkCreateOrEditResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -30,9 +30,9 @@ class RealizationPaperWorkService
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository
-    public function edit(string|int $userId, string $level, string $unit, string $year): RealizationPaperWorkEditResponse
+    public function edit(string|int $userId, string $level, string $unit, string $year): RealizationPaperWorkCreateOrEditResponse
     {
-        $response = new RealizationPaperWorkEditResponse();
+        $response = new RealizationPaperWorkCreateOrEditResponse();
 
         $constructRequest = new ConstructRequest();
 
