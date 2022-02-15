@@ -96,7 +96,7 @@ class LevelService
             $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
 
             $this->levelRepository->update__by__id($levelDomain, $levelRequest->id);
-            
+
             //nama level diubah
             if (strtolower($level->name) !== $name__lowercase) {
                 $units = $this->unitRepository->find__all__by__levelId($levelRequest->id);
@@ -124,5 +124,13 @@ class LevelService
         }
 
         return $levels;
+    }
+
+    //use repo LevelRepository, UnitRepository
+    public function levelsOfParents(string $slug)
+    {
+        $level = $this->levelRepository->find__with__parent__by__slug($slug);
+
+        return $this->unitRepository->find__all__by__levelId($level->parent->id);
     }
 }

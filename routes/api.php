@@ -148,5 +148,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'unitsOfLevel']);
+Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'levelsOfParents']);
 Route::get('/user/{id}/levels', [App\Http\Controllers\LevelController::class, 'levelsOfUser']);
 Route::get('/realizations/paper-work/{id}/{month}/change-lock', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'changeLock']);

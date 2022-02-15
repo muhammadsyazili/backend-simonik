@@ -12,6 +12,7 @@ use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
 use App\Repositories\TargetRepository;
 use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
 use App\Services\UnitService;
 use App\Services\UnitValidationService;
 
@@ -50,19 +51,23 @@ class UnitController extends ApiController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function create(Request $request)
     {
+        $userRepository = new UserRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
         $unitService = new UnitService($constructRequest);
 
-        $response = $unitService->create();
+        $userId = $request->header('X-User-Id');
+
+        $response = $unitService->create($userId);
 
         return $this->APIResponse(
             true,

@@ -268,4 +268,27 @@ class LevelController extends ApiController
             null,
         );
     }
+
+    public function levelsOfParents(Request $request, $slug)
+    {
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->levelRepository = $levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $levels = $levelService->levelsOfParents($slug);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Parents",
+            $levels,
+            null,
+        );
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
+use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -11,11 +12,13 @@ use Illuminate\Support\Str;
 
 class UnitValidationService
 {
+    private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
 
     public function __construct(?ConstructRequest $constructRequest = null)
     {
         if (!is_null($constructRequest)) {
+            $this->levelRepository = $constructRequest->levelRepository;
             $this->unitRepository = $constructRequest->unitRepository;
         }
     }
@@ -85,6 +88,7 @@ class UnitValidationService
 
         //memastikan level-slug dari parent unit yang akan di-store sama dengan parent level
         $unit = $this->unitRepository->find__with__level__by__slug($parent_unit);
+
         if ($unit->level->slug !== $parent_level) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('parent_unit', "(#6) : Anda tidak memiliki hak akses.");

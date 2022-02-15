@@ -48,6 +48,11 @@ class LevelRepository
         return ModelsLevel::firstWhere(['slug' => $slug])->id;
     }
 
+    public function find__with__parent__by__slug(string $slug)
+    {
+        return ModelsLevel::with('parent')->firstWhere(['slug' => $slug]);
+    }
+
     public function find__allSlug__with__childs__by__root(): array
     {
         $result = ModelsLevelOnlySlug::with('childsRecursive')->whereNull('parent_id')->orderBy('name', 'asc')->get()->toArray();
