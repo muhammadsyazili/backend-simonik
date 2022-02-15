@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\RealizationPaperWorkCreateOrEditResponse;
+use App\DTO\RealizationPaperWorkChangeLockRequest;
+use App\DTO\RealizationPaperWorkEditRequest;
+use App\DTO\RealizationPaperWorkEditResponse;
+use App\DTO\RealizationPaperWorkUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -30,9 +33,14 @@ class RealizationPaperWorkService
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository
-    public function edit(string|int $userId, string $level, string $unit, string $year): RealizationPaperWorkCreateOrEditResponse
+    public function edit(RealizationPaperWorkEditRequest $realizationPaperWorkRequest): RealizationPaperWorkEditResponse
     {
-        $response = new RealizationPaperWorkCreateOrEditResponse();
+        $response = new RealizationPaperWorkEditResponse();
+
+        $level = $realizationPaperWorkRequest->level;
+        $unit = $realizationPaperWorkRequest->unit;
+        $year = $realizationPaperWorkRequest->year;
+        $userId = $realizationPaperWorkRequest->userId;
 
         $constructRequest = new ConstructRequest();
 
@@ -51,8 +59,15 @@ class RealizationPaperWorkService
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository, RealizationRepository
-    public function update(string|int $userId, array $indicators, array $realizations, string $level, string $unit, string $year): void
+    public function update(RealizationPaperWorkUpdateRequest $realizationPaperWorkRequest): void
     {
+        $userId = $realizationPaperWorkRequest->userId;
+        $indicators = $realizationPaperWorkRequest->indicators;
+        $realizations = $realizationPaperWorkRequest->realizations;
+        $level = $realizationPaperWorkRequest->level;
+        $unit = $realizationPaperWorkRequest->unit;
+        $year = $realizationPaperWorkRequest->year;
+
         //jika user adalah 'super-admin' or 'admin' maka bisa entry realisasi semua bulan, else hanya bisa bulan saat ini or bulan yang un-locked
         DB::transaction(function () use ($userId, $indicators, $realizations, $level, $unit, $year) {
             $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
@@ -84,8 +99,11 @@ class RealizationPaperWorkService
     }
 
     //use repo RealizationRepository
-    public function changeLock(string|int $indicatorId, string $month): void
+    public function changeLock(RealizationPaperWorkChangeLockRequest $realizationPaperWorkRequest): void
     {
+        $indicatorId = $realizationPaperWorkRequest->indicatorId;
+        $month = $realizationPaperWorkRequest->month;
+
         DB::transaction(function () use ($indicatorId, $month) {
             $realization = $this->realizationRepository->find__by__indicatorId_month($indicatorId, $month);
 

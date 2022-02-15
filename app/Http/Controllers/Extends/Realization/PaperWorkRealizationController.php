@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Extends\Realization;
 
 use App\DTO\ConstructRequest;
+use App\DTO\RealizationPaperWorkChangeLockRequest;
+use App\DTO\RealizationPaperWorkEditRequest;
+use App\DTO\RealizationPaperWorkUpdateRequest;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
@@ -92,14 +95,16 @@ class PaperWorkRealizationController extends ApiController
             );
         }
 
+        $requestDTO = new RealizationPaperWorkEditRequest();
+
+        $requestDTO->level = $request->query('level');
+        $requestDTO->unit = $request->query('unit');
+        $requestDTO->year = $request->query('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
 
-        $userId = $request->header('X-User-Id');
-        $level = $request->query('level');
-        $unit = $request->query('unit');
-        $year = $request->query('tahun');
-
-        $response = $realizationPaperWorkService->edit($userId, $level, $unit, $year);
+        $response = $realizationPaperWorkService->edit($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -154,21 +159,23 @@ class PaperWorkRealizationController extends ApiController
             );
         }
 
+        $requestDTO = new RealizationPaperWorkUpdateRequest();
+
+        $requestDTO->indicators = array_keys($request->post('realizations'));
+        $requestDTO->realizations = $request->post('realizations');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->unit = $request->post('unit');
+        $requestDTO->year = $request->post('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
 
-        $userId = $request->header('X-User-Id');
-        $indicators = array_keys($request->post('realizations'));
-        $realizations = $request->post('realizations');
-        $level = $request->post('level');
-        $unit = $request->post('unit');
-        $year = $request->post('tahun');
-
-        $realizationPaperWorkService->update($userId, $indicators, $realizations, $level, $unit, $year);
+        $realizationPaperWorkService->update($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja realisasi (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas kerja realisasi (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             null,
             null,
         );
@@ -217,9 +224,14 @@ class PaperWorkRealizationController extends ApiController
             );
         }
 
+        $requestDTO = new RealizationPaperWorkChangeLockRequest();
+
+        $requestDTO->indicatorId = $id;
+        $requestDTO->month = $month;
+
         $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
 
-        $realizationPaperWorkService->changeLock($id, $month);
+        $realizationPaperWorkService->changeLock($requestDTO);
 
         return $this->APIResponse(
             true,

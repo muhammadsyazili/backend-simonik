@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class RealizationPaperWorkCreateOrEditResponse
+class RealizationPaperWorkEditResponse
 {
     public mixed $levels;
     public mixed $indicators;
