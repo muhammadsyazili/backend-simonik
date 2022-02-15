@@ -129,15 +129,15 @@ class IndicatorReferenceController extends ApiController
         $unit = $request->query('unit');
         $tahun = $request->query('tahun');
 
-        $indicators = $indicatorReferenceService->edit($level, $unit, $tahun);
+        $response = $indicatorReferenceService->edit($level, $unit, $tahun);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Kertas kerja KPI referensi - Edit",
             [
-                'indicators' => $indicators,
-                'preferences' => $indicators,
+                'indicators' => $response->indicators,
+                'preferences' => $response->preferences,
             ],
             null,
         );
@@ -175,20 +175,23 @@ class IndicatorReferenceController extends ApiController
             );
         }
 
+        $requestDTO = new IndicatorReferenceStoreOrUpdateRequest();
+
+        $requestDTO->indicators = $request->post('indicators');
+        $requestDTO->preferences = $request->post('preferences');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->unit = $request->post('unit');
+        $requestDTO->year = $request->post('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $IndicatorReferenceService = new IndicatorReferenceService($constructRequest);
 
-        $indicators = $request->post('indicators');
-        $preferences = $request->post('preferences');
-        $level = $request->post('level');
-        $unit = $request->post('unit');
-        $tahun = $request->post('tahun');
-
-        $IndicatorReferenceService->update($indicators, $preferences, $level, $unit, $tahun);
+        $IndicatorReferenceService->update($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            $level === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil direferensikan", strtoupper($level)) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil direferensikan", strtoupper($level), strtoupper($unit), strtoupper($tahun)),
+            $requestDTO->level === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil direferensikan", strtoupper($requestDTO->level)) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil direferensikan", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             null,
             null,
         );

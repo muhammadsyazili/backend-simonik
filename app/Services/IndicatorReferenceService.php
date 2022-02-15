@@ -27,6 +27,7 @@ class IndicatorReferenceService
     public function create(): IndicatorReferenceCreateOrUpdateResponse
     {
         $response = new IndicatorReferenceCreateOrUpdateResponse();
+
         $response->indicators = $this->indicatorRepository->find__allNotReferenced__by__superMasterLabel();
         $response->preferences = $this->indicatorRepository->find__all__with__childs__by__superMasterLabel();
 
@@ -46,16 +47,29 @@ class IndicatorReferenceService
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function edit(string $level, ?string $unit = null, ?string $year = null)
+    public function edit(string $level, ?string $unit = null, ?string $year = null): IndicatorReferenceCreateOrUpdateResponse
     {
-        return $level === 'super-master' ?
+        $response = new IndicatorReferenceCreateOrUpdateResponse();
+
+        $response->indicators = $level === 'super-master' ?
             $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) :
             $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
+        $response->preferences = $level === 'super-master' ?
+            $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) :
+            $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
+
+        return $response;
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
-    public function update(array $indicators, array $preferences, string $level, ?string $unit = null, ?string $year = null): void
+    public function update(IndicatorReferenceStoreOrUpdateRequest $indicatorReferenceRequest): void
     {
+        $indicators = $indicatorReferenceRequest->indicators;
+        $preferences = $indicatorReferenceRequest->preferences;
+        $level = $indicatorReferenceRequest->level;
+        $unit = $indicatorReferenceRequest->unit;
+        $year = $indicatorReferenceRequest->year;
+
         DB::transaction(function () use ($indicators, $preferences, $level, $unit, $year) {
             $indicatorsModel = $level === 'super-master' ? $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
 
