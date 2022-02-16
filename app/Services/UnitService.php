@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Domains\Unit;
 use App\DTO\ConstructRequest;
-use App\DTO\UnitCreateOrEditResponse;
-use App\DTO\UnitStoreOrUpdateRequest;
+use App\DTO\UnitCreateResponse;
+use App\DTO\UnitCreateRequest;
+use App\DTO\UnitIndexResponse;
+use App\DTO\UnitStoreRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -36,15 +38,21 @@ class UnitService
     }
 
     //use repo UnitRepository
-    public function index()
+    public function index(): UnitIndexResponse
     {
-        return $this->unitRepository->find__all__with__level_parent();
+        $response = new UnitIndexResponse();
+
+        $response->units = $this->unitRepository->find__all__with__level_parent();
+
+        return $response;
     }
 
     //use repo LevelRepository, UnitRepository, UserRepository
-    public function create(string|int $userId): UnitCreateOrEditResponse
+    public function create(UnitCreateRequest $unitRequest): UnitCreateResponse
     {
-        $response = new UnitCreateOrEditResponse();
+        $response = new UnitCreateResponse();
+
+        $userId = $unitRequest->userId;
 
         $constructRequest = new ConstructRequest();
 
@@ -60,7 +68,7 @@ class UnitService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository, RealizationRepository
-    public function store(UnitStoreOrUpdateRequest $unitRequest): void
+    public function store(UnitStoreRequest $unitRequest): void
     {
         DB::transaction(function () use ($unitRequest) {
             $unitDomain = new Unit();

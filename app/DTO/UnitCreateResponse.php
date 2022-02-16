@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class UnitCreateOrEditResponse
+class UnitCreateResponse
 {
     public mixed $levels;
     public mixed $units;

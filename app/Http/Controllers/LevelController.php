@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\LevelStoreOrUpdateRequest;
+use App\DTO\LevelDestroyRequest;
+use App\DTO\LevelEditRequest;
+use App\DTO\LevelUpdateRequest;
+use App\DTO\LevelStoreRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repositories\LevelRepository;
@@ -29,14 +32,14 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $levels = $levelService->index();
+        $response = $levelService->index();
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Levels",
             [
-                'levels' => $levels
+                'levels' => $response->levels,
             ],
             null,
         );
@@ -98,14 +101,14 @@ class LevelController extends ApiController
             );
         }
 
-        $LevelStoreOrUpdateRequest = new LevelStoreOrUpdateRequest();
+        $requestDTO = new LevelStoreRequest();
 
-        $LevelStoreOrUpdateRequest->name = $request->post('name');
-        $LevelStoreOrUpdateRequest->parent_level = $request->post('parent_level');
+        $requestDTO->name = $request->post('name');
+        $requestDTO->parent_level = $request->post('parent_level');
 
         $levelService = new LevelService($constructRequest);
 
-        $levelService->store($LevelStoreOrUpdateRequest);
+        $levelService->store($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -130,9 +133,13 @@ class LevelController extends ApiController
 
         $constructRequest->levelRepository = $levelRepository;
 
+        $requestDTO = new LevelEditRequest();
+
+        $requestDTO->id = $id;
+
         $levelService = new LevelService($constructRequest);
 
-        $response = $levelService->edit($id);
+        $response = $levelService->edit($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -177,15 +184,15 @@ class LevelController extends ApiController
             );
         }
 
-        $LevelStoreOrUpdateRequest = new LevelStoreOrUpdateRequest();
+        $requestDTO = new LevelUpdateRequest();
 
-        $LevelStoreOrUpdateRequest->id = $id;
-        $LevelStoreOrUpdateRequest->name = $request->post('name');
-        $LevelStoreOrUpdateRequest->parent_level = $request->post('parent_level');
+        $requestDTO->id = $id;
+        $requestDTO->name = $request->post('name');
+        $requestDTO->parent_level = $request->post('parent_level');
 
         $levelService = new LevelService($constructRequest);
 
-        $levelService->update($LevelStoreOrUpdateRequest);
+        $levelService->update($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -226,9 +233,13 @@ class LevelController extends ApiController
             );
         }
 
+        $requestDTO = new LevelDestroyRequest();
+
+        $requestDTO->id = $id;
+
         $levelService = new LevelService($constructRequest);
 
-        $levelService->destroy($id);
+        $levelService->destroy($requestDTO);
 
         return $this->APIResponse(
             true,

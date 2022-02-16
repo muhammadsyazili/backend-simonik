@@ -5,8 +5,13 @@ namespace App\Services;
 use App\Domains\Level;
 use App\Domains\Unit;
 use App\DTO\ConstructRequest;
-use App\DTO\LevelCreateOrEditResponse;
-use App\DTO\LevelStoreOrUpdateRequest;
+use App\DTO\LevelEditResponse;
+use App\DTO\LevelCreateResponse;
+use App\DTO\LevelDestroyRequest;
+use App\DTO\LevelEditRequest;
+use App\DTO\LevelIndexResponse;
+use App\DTO\LevelUpdateRequest;
+use App\DTO\LevelStoreRequest;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
@@ -28,15 +33,19 @@ class LevelService
     }
 
     //use repo LevelRepository
-    public function index()
+    public function index(): LevelIndexResponse
     {
-        return $this->levelRepository->find__all__with__parent();
+        $response = new LevelIndexResponse();
+
+        $response->levels = $this->levelRepository->find__all__with__parent();
+
+        return $response;
     }
 
     //use repo LevelRepository
-    public function create(): LevelCreateOrEditResponse
+    public function create(): LevelCreateResponse
     {
-        $response = new LevelCreateOrEditResponse();
+        $response = new LevelCreateResponse();
 
         $response->levels = $this->levelRepository->find__all();
 
@@ -44,7 +53,7 @@ class LevelService
     }
 
     //use repo LevelRepository
-    public function store(LevelStoreOrUpdateRequest $levelRequest): void
+    public function store(LevelStoreRequest $levelRequest): void
     {
         DB::transaction(function () use ($levelRequest) {
             $levelDomain = new Level();
@@ -61,9 +70,11 @@ class LevelService
     }
 
     //use repo LevelRepository
-    public function edit(string|int $id): LevelCreateOrEditResponse
+    public function edit(LevelEditRequest $levelRequest): LevelEditResponse
     {
-        $response = new LevelCreateOrEditResponse();
+        $response = new LevelEditResponse();
+
+        $id = $levelRequest->id;
 
         $response->levels = $this->levelRepository->find__all();
         $response->level = $this->levelRepository->find__by__id($id);
@@ -71,16 +82,8 @@ class LevelService
         return $response;
     }
 
-    //use repo LevelRepository
-    public function destroy(string|int $id): void
-    {
-        DB::transaction(function () use ($id) {
-            $this->levelRepository->delete__by__id($id);
-        });
-    }
-
     //use repo LevelRepository, UnitRepository
-    public function update(LevelStoreOrUpdateRequest $levelRequest): void
+    public function update(LevelUpdateRequest $levelRequest): void
     {
         DB::transaction(function () use ($levelRequest) {
             $levelDomain = new Level();
@@ -108,6 +111,15 @@ class LevelService
                     $this->unitRepository->update__name_slug__by__id($unitDomain, $unit->id);
                 }
             }
+        });
+    }
+
+    //use repo LevelRepository
+    public function destroy(LevelDestroyRequest $levelRequest): void
+    {
+        $id = $levelRequest->id;
+        DB::transaction(function () use ($id) {
+            $this->levelRepository->delete__by__id($id);
         });
     }
 

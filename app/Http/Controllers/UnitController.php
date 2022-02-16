@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\UnitStoreOrUpdateRequest;
+use App\DTO\UnitCreateRequest;
+use App\DTO\UnitStoreRequest;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -33,14 +34,14 @@ class UnitController extends ApiController
 
         $unitService = new UnitService($constructRequest);
 
-        $units = $unitService->index();
+        $response = $unitService->index();
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Units",
             [
-                'units' => $units
+                'units' => $response->units
             ],
             null,
         );
@@ -63,11 +64,13 @@ class UnitController extends ApiController
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
+        $requestDTO = new UnitCreateRequest();
+
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $unitService = new UnitService($constructRequest);
 
-        $userId = $request->header('X-User-Id');
-
-        $response = $unitService->create($userId);
+        $response = $unitService->create($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -117,16 +120,16 @@ class UnitController extends ApiController
             );
         }
 
-        $UnitStoreOrUpdateRequest = new UnitStoreOrUpdateRequest();
+        $UnitStoreRequest = new UnitStoreRequest();
 
-        $UnitStoreOrUpdateRequest->name = $request->post('name');
-        $UnitStoreOrUpdateRequest->level = $request->post('level');
-        $UnitStoreOrUpdateRequest->parent_unit = $request->post('parent_unit');
-        $UnitStoreOrUpdateRequest->userId = $request->header('X-User-Id');
+        $UnitStoreRequest->name = $request->post('name');
+        $UnitStoreRequest->level = $request->post('level');
+        $UnitStoreRequest->parent_unit = $request->post('parent_unit');
+        $UnitStoreRequest->userId = $request->header('X-User-Id');
 
         $unitService = new UnitService($constructRequest);
 
-        $unitService->store($UnitStoreOrUpdateRequest);
+        $unitService->store($UnitStoreRequest);
 
         return $this->APIResponse(
             true,

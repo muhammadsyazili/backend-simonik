@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class UserStoreOrUpdateRequest
+class UserUpdateRequest
 {
     public string|int|null $id = null;
     public string $nip;

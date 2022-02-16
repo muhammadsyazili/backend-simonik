@@ -2,8 +2,7 @@
 
 namespace App\DTO;
 
-class LevelCreateOrEditResponse
+class LevelIndexResponse
 {
     public mixed $levels;
-    public mixed $level;
 }

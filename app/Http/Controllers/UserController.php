@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\UserStoreOrUpdateRequest;
+use App\DTO\UserDestroyRequest;
+use App\DTO\UserEditRequest;
+use App\DTO\UserUpdateRequest;
+use App\DTO\UserStoreRequest;
 use App\Repositories\RoleRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
@@ -29,14 +32,14 @@ class UserController extends ApiController
 
         $userService = new UserService($constructRequest);
 
-        $users = $userService->index();
+        $response = $userService->index();
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Users",
             [
-                'users' => $users
+                'users' => $response->users,
             ],
             null,
         );
@@ -102,17 +105,17 @@ class UserController extends ApiController
             );
         }
 
-        $UserStoreOrUpdateRequest = new UserStoreOrUpdateRequest();
+        $requestDTO = new UserStoreRequest();
 
-        $UserStoreOrUpdateRequest->name = $request->post('name');
-        $UserStoreOrUpdateRequest->nip = $request->post('nip');
-        $UserStoreOrUpdateRequest->username = $request->post('username');
-        $UserStoreOrUpdateRequest->email = $request->post('email');
-        $UserStoreOrUpdateRequest->unit = $request->post('unit');
+        $requestDTO->name = $request->post('name');
+        $requestDTO->nip = $request->post('nip');
+        $requestDTO->username = $request->post('username');
+        $requestDTO->email = $request->post('email');
+        $requestDTO->unit = $request->post('unit');
 
         $userService = new UserService($constructRequest);
 
-        $userService->store($UserStoreOrUpdateRequest);
+        $userService->store($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -139,9 +142,13 @@ class UserController extends ApiController
         $constructRequest->userRepository = $userRepository;
         $constructRequest->unitRepository = $unitRepository;
 
+        $requestDTO = new UserEditRequest();
+
+        $requestDTO->id = $id;
+
         $userService = new UserService($constructRequest);
 
-        $response = $userService->edit($id);
+        $response = $userService->edit($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -188,18 +195,18 @@ class UserController extends ApiController
             );
         }
 
-        $UserStoreOrUpdateRequest = new UserStoreOrUpdateRequest();
+        $UserUpdateRequest = new UserUpdateRequest();
 
-        $UserStoreOrUpdateRequest->id = $id;
-        $UserStoreOrUpdateRequest->name = $request->post('name');
-        $UserStoreOrUpdateRequest->nip = $request->post('nip');
-        $UserStoreOrUpdateRequest->username = $request->post('username');
-        $UserStoreOrUpdateRequest->email = $request->post('email');
-        $UserStoreOrUpdateRequest->unit = $request->post('unit');
+        $UserUpdateRequest->id = $id;
+        $UserUpdateRequest->name = $request->post('name');
+        $UserUpdateRequest->nip = $request->post('nip');
+        $UserUpdateRequest->username = $request->post('username');
+        $UserUpdateRequest->email = $request->post('email');
+        $UserUpdateRequest->unit = $request->post('unit');
 
         $userService = new UserService($constructRequest);
 
-        $userService->update($UserStoreOrUpdateRequest);
+        $userService->update($UserUpdateRequest);
 
         return $this->APIResponse(
             true,
@@ -238,9 +245,13 @@ class UserController extends ApiController
             );
         }
 
+        $requestDTO = new UserDestroyRequest();
+
+        $requestDTO->id = $id;
+
         $userService = new UserService($constructRequest);
 
-        $userService->destroy($id);
+        $userService->destroy($requestDTO);
 
         return $this->APIResponse(
             true,

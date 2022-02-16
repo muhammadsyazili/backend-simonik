@@ -2,8 +2,7 @@
 
 namespace App\DTO;
 
-class UserCreateOrEditResponse
+class UnitIndexResponse
 {
     public mixed $units;
-    public mixed $user;
 }
