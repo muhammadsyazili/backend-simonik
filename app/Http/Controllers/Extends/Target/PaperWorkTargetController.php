@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Extends\Target;
 
 use App\DTO\ConstructRequest;
+use App\DTO\TargetPaperWorkEditRequest;
+use App\DTO\TargetPaperWorkUpdateRequest;
 use App\Http\Controllers\ApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
@@ -91,14 +93,16 @@ class PaperWorkTargetController extends ApiController
             );
         }
 
+        $requestDTO = new TargetPaperWorkEditRequest();
+
+        $requestDTO->level = $request->query('level');
+        $requestDTO->unit = $request->query('unit');
+        $requestDTO->year = $request->query('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $targetPaperWorkService = new TargetPaperWorkService($constructRequest);
 
-        $userId = $request->header('X-User-Id');
-        $level = $request->query('level');
-        $unit = $request->query('unit');
-        $year = $request->query('tahun');
-
-        $response = $targetPaperWorkService->edit($userId, $level, $unit, $year);
+        $response = $targetPaperWorkService->edit($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -152,21 +156,23 @@ class PaperWorkTargetController extends ApiController
             );
         }
 
+        $requestDTO = new TargetPaperWorkUpdateRequest();
+
+        $requestDTO->indicators = array_keys($request->post('targets'));
+        $requestDTO->targets = $request->post('targets');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->unit = $request->post('unit');
+        $requestDTO->year = $request->post('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
         $targetPaperWorkService = new TargetPaperWorkService($constructRequest);
 
-        $userId = $request->header('X-User-Id');
-        $indicators = array_keys($request->post('targets'));
-        $targets = $request->post('targets');
-        $level = $request->post('level');
-        $unit = $request->post('unit');
-        $year = $request->post('tahun');
-
-        $targetPaperWorkService->update($userId, $indicators, $targets, $level, $unit, $year);
+        $targetPaperWorkService->update($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas kerja target (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             null,
             null,
         );

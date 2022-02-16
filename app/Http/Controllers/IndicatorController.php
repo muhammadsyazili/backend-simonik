@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorStoreOrUpdateRequest;
+use App\DTO\IndicatorDestroyRequest;
+use App\DTO\IndicatorEditRequest;
+use App\DTO\IndicatorUpdateRequest;
+use App\DTO\IndicatorStoreRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -45,21 +48,21 @@ class IndicatorController extends ApiController
             );
         }
 
-        $IndicatorStoreOrUpdateRequest = new IndicatorStoreOrUpdateRequest();
+        $requestDTO = new IndicatorStoreRequest();
 
-        $IndicatorStoreOrUpdateRequest->validity = $request->post('validity');
-        $IndicatorStoreOrUpdateRequest->weight = $request->post('weight');
-        $IndicatorStoreOrUpdateRequest->dummy = $request->post('dummy');
-        $IndicatorStoreOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
-        $IndicatorStoreOrUpdateRequest->polarity = $request->post('polarity');
-        $IndicatorStoreOrUpdateRequest->indicator = $request->post('indicator');
-        $IndicatorStoreOrUpdateRequest->formula = $request->post('formula');
-        $IndicatorStoreOrUpdateRequest->measure = $request->post('measure');
-        $IndicatorStoreOrUpdateRequest->user_id = $request->header('X-User-Id');
+        $requestDTO->validity = $request->post('validity');
+        $requestDTO->weight = $request->post('weight');
+        $requestDTO->dummy = $request->post('dummy');
+        $requestDTO->reducing_factor = $request->post('reducing_factor');
+        $requestDTO->polarity = $request->post('polarity');
+        $requestDTO->indicator = $request->post('indicator');
+        $requestDTO->formula = $request->post('formula');
+        $requestDTO->measure = $request->post('measure');
+        $requestDTO->user_id = $request->header('X-User-Id');
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicatorService->store($IndicatorStoreOrUpdateRequest);
+        $indicatorService->store($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -84,15 +87,21 @@ class IndicatorController extends ApiController
 
         $constructRequest->indicatorRepository = $indicatorRepository;
 
+        $requestDTO = new IndicatorEditRequest();
+
+        $requestDTO->id = $id;
+
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicator = $indicatorService->edit($id);
+        $response = $indicatorService->edit($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "KPI - Edit",
-            $indicator,
+            [
+                'indicator' => $response->indicator,
+            ],
             null,
         );
     }
@@ -130,21 +139,22 @@ class IndicatorController extends ApiController
             );
         }
 
-        $IndicatorStoreOrUpdateRequest = new IndicatorStoreOrUpdateRequest();
+        $requestDTO = new IndicatorUpdateRequest();
 
-        $IndicatorStoreOrUpdateRequest->id = $id;
-        $IndicatorStoreOrUpdateRequest->indicator = $request->post('indicator');
-        $IndicatorStoreOrUpdateRequest->dummy = $request->post('dummy');
-        $IndicatorStoreOrUpdateRequest->reducing_factor = $request->post('reducing_factor');
-        $IndicatorStoreOrUpdateRequest->polarity = $request->post('polarity');
-        $IndicatorStoreOrUpdateRequest->formula = $request->post('formula');
-        $IndicatorStoreOrUpdateRequest->measure = $request->post('measure');
-        $IndicatorStoreOrUpdateRequest->validity = $request->post('validity');
-        $IndicatorStoreOrUpdateRequest->weight = $request->post('weight');
+        $requestDTO->id = $id;
+        $requestDTO->indicator = $request->post('indicator');
+        $requestDTO->dummy = $request->post('dummy');
+        $requestDTO->reducing_factor = $request->post('reducing_factor');
+        $requestDTO->polarity = $request->post('polarity');
+        $requestDTO->formula = $request->post('formula');
+        $requestDTO->measure = $request->post('measure');
+        $requestDTO->validity = $request->post('validity');
+        $requestDTO->weight = $request->post('weight');
+        $requestDTO->user_id = $request->header('X-User-Id');
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicatorService->update($IndicatorStoreOrUpdateRequest, $id);
+        $indicatorService->update($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -183,9 +193,13 @@ class IndicatorController extends ApiController
             );
         }
 
+        $requestDTO = new IndicatorDestroyRequest();
+
+        $requestDTO->id = $id;
+
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicatorService->destroy($id);
+        $indicatorService->destroy($requestDTO);
 
         return $this->APIResponse(
             true,

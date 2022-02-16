@@ -6,7 +6,11 @@ use App\Domains\Indicator;
 use App\Domains\Realization;
 use App\Domains\Target;
 use App\DTO\ConstructRequest;
-use App\DTO\IndicatorStoreOrUpdateRequest;
+use App\DTO\IndicatorDestroyRequest;
+use App\DTO\IndicatorEditRequest;
+use App\DTO\IndicatorEditResponse;
+use App\DTO\IndicatorUpdateRequest;
+use App\DTO\IndicatorStoreRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -30,7 +34,7 @@ class IndicatorService
     }
 
     //use repo IndicatorRepository, LevelRepository
-    public function store(IndicatorStoreOrUpdateRequest $indicator): void
+    public function store(IndicatorStoreRequest $indicator): void
     {
         DB::transaction(function () use ($indicator) {
             $indicatorDomain = new Indicator();
@@ -81,22 +85,29 @@ class IndicatorService
     }
 
     //use repo IndicatorRepository
-    public function edit(string|int $id)
+    public function edit(IndicatorEditRequest $indicatorRequest): IndicatorEditResponse
     {
+        $response = new IndicatorEditResponse();
+
+        $id = $indicatorRequest->id;
+
         $indicator = $this->indicatorRepository->find__with__level__by__id($id);
         $indicator->original_polarity = $indicator->getRawOriginal('polarity');
-        return $indicator;
+
+        $response->indicator = $indicator;
+
+        return $response;
     }
 
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
-    public function update(IndicatorStoreOrUpdateRequest $indicatorNew, string|int $id): void
+    public function update(IndicatorUpdateRequest $indicatorNew): void
     {
-        DB::transaction(function () use ($indicatorNew, $id) {
+        DB::transaction(function () use ($indicatorNew) {
             $indicatorDomain = new Indicator();
             $targetDomain = new Target();
             $realizationDomain = new Realization();
 
-            $indicatorOld = $this->indicatorRepository->find__by__id($id);
+            $indicatorOld = $this->indicatorRepository->find__by__id($indicatorNew->id);
 
             if ($indicatorOld->label === 'super-master') {
                 //convert (validity & weight) from array to JSON string
@@ -135,7 +146,7 @@ class IndicatorService
                 $indicatorDomain->parent_vertical_id = $indicatorOld->parent_vertical_id;
                 $indicatorDomain->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
-                $this->indicatorRepository->update__by__id($indicatorDomain, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain, $indicatorOld->id); //update KPI
             } else if ($indicatorOld->label === 'master') {
                 /**
                  * section: master
@@ -194,7 +205,7 @@ class IndicatorService
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
                             $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $id;
+                            $targetDomain->indicator_id = $indicatorOld->id;
                             $targetDomain->month = $v;
                             $targetDomain->value = 0;
                             $targetDomain->locked = true;
@@ -203,7 +214,7 @@ class IndicatorService
                             $this->targetRepository->save($targetDomain); //save target
 
                             $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->indicator_id = $indicatorOld->id;
                             $realizationDomain->month = $v;
                             $realizationDomain->value = 0;
                             $realizationDomain->locked = true;
@@ -225,15 +236,15 @@ class IndicatorService
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                         foreach ($old as $v) {
-                            $this->targetRepository->delete__by__month_indicatorId($v, $id); //delete target
-                            $this->realizationRepository->delete__by__month_indicatorId($v, $id); //delete realisasi
+                            $this->targetRepository->delete__by__month_indicatorId($v, $indicatorOld->id); //delete target
+                            $this->realizationRepository->delete__by__month_indicatorId($v, $indicatorOld->id); //delete realisasi
                         }
                     }
                 } else { //masa berlaku lama nol
                     if (count($indicatorNew->validity) > 0) {
                         foreach ($indicatorNew->validity as $key => $value) {
                             $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $id;
+                            $targetDomain->indicator_id = $indicatorOld->id;
                             $targetDomain->month = $key;
                             $targetDomain->value = 0;
                             $targetDomain->locked = true;
@@ -242,7 +253,7 @@ class IndicatorService
                             $this->targetRepository->save($targetDomain); //save target
 
                             $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->indicator_id = $indicatorOld->id;
                             $realizationDomain->month = $key;
                             $realizationDomain->value = 0;
                             $realizationDomain->locked = true;
@@ -253,14 +264,14 @@ class IndicatorService
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicatorDomain, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain, $indicatorOld->id); //update KPI
 
                 /**
                  * section: childs
                  */
 
                 //semua turunan KPI yang dipilih
-                $familiesIndicatorOld = $this->indicatorRepository->findAllByParentVerticalId($id);
+                $familiesIndicatorOld = $this->indicatorRepository->findAllByParentVerticalId($indicatorOld->id);
 
                 if (count($familiesIndicatorOld) > 0) {
                     foreach ($familiesIndicatorOld as $familyIndicatorOld) {
@@ -433,7 +444,7 @@ class IndicatorService
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
                             $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $id;
+                            $targetDomain->indicator_id = $indicatorOld->id;
                             $targetDomain->month = $v;
                             $targetDomain->value = 0;
                             $targetDomain->locked = true;
@@ -442,7 +453,7 @@ class IndicatorService
                             $this->targetRepository->save($targetDomain); //save target
 
                             $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->indicator_id = $indicatorOld->id;
                             $realizationDomain->month = $v;
                             $realizationDomain->value = 0;
                             $realizationDomain->locked = true;
@@ -464,15 +475,15 @@ class IndicatorService
 
                     if (count($old) > 0) { //terdapat selisih antara masa berlaku lama dengan baru
                         foreach ($old as $v) {
-                            $this->targetRepository->delete__by__month_indicatorId($v, $id); //delete target
-                            $this->realizationRepository->delete__by__month_indicatorId($v, $id); //delete realisasi
+                            $this->targetRepository->delete__by__month_indicatorId($v, $indicatorOld->id); //delete target
+                            $this->realizationRepository->delete__by__month_indicatorId($v, $indicatorOld->id); //delete realisasi
                         }
                     }
                 } else { //masa berlaku lama nol
                     if (count($indicatorNew->validity) > 0) {
                         foreach ($indicatorNew->validity as $key => $value) {
                             $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $id;
+                            $targetDomain->indicator_id = $indicatorOld->id;
                             $targetDomain->month = $key;
                             $targetDomain->value = 0;
                             $targetDomain->locked = true;
@@ -481,7 +492,7 @@ class IndicatorService
                             $this->targetRepository->save($targetDomain); //save target
 
                             $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $id;
+                            $realizationDomain->indicator_id = $indicatorOld->id;
                             $realizationDomain->month = $key;
                             $realizationDomain->value = 0;
                             $realizationDomain->locked = true;
@@ -492,14 +503,15 @@ class IndicatorService
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicatorDomain, $id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain, $indicatorOld->id); //update KPI
             }
         });
     }
 
     //use repo IndicatorRepository
-    public function destroy(string|int $id): void
+    public function destroy(IndicatorDestroyRequest $indicatorRequest): void
     {
+        $id = $indicatorRequest->id;
         DB::transaction(function () use ($id) {
             $this->indicatorRepository->delete__by__id($id);
         });

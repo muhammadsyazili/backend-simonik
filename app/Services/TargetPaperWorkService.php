@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DTO\ConstructRequest;
 use App\DTO\TargetPaperWorkCreateOrEditResponse;
+use App\DTO\TargetPaperWorkEditRequest;
+use App\DTO\TargetPaperWorkUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\TargetRepository;
@@ -30,9 +32,14 @@ class TargetPaperWorkService
     }
 
     //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository
-    public function edit(string|int $userId, string $level, string $unit, string $year): TargetPaperWorkCreateOrEditResponse
+    public function edit(TargetPaperWorkEditRequest $targetPaperWorkRequest): TargetPaperWorkCreateOrEditResponse
     {
         $response = new TargetPaperWorkCreateOrEditResponse();
+
+        $level = $targetPaperWorkRequest->level;
+        $unit = $targetPaperWorkRequest->unit;
+        $year = $targetPaperWorkRequest->year;
+        $userId = $targetPaperWorkRequest->userId;
 
         $constructRequest = new ConstructRequest();
 
@@ -53,8 +60,15 @@ class TargetPaperWorkService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository
-    public function update(string|int $userId, array $indicators, array $targets, string $level, string $unit, string $year): void
+    public function update(TargetPaperWorkUpdateRequest $targetPaperWorkRequest): void
     {
+        $userId = $targetPaperWorkRequest->userId;
+        $indicators = $targetPaperWorkRequest->indicators;
+        $targets = $targetPaperWorkRequest->targets;
+        $level = $targetPaperWorkRequest->level;
+        $unit = $targetPaperWorkRequest->unit;
+        $year = $targetPaperWorkRequest->year;
+
         DB::transaction(function () use ($userId, $indicators, $targets, $level, $unit, $year) {
             $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
 

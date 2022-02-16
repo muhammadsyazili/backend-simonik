@@ -2,9 +2,8 @@
 
 namespace App\DTO;
 
-class IndicatorStoreOrUpdateRequest
+class IndicatorStoreRequest
 {
-    public string|int|null $id = null;
     public ?array $validity = null;
     public ?array $weight = null;
     public string $dummy;
