@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Domains\Indicator;
+use App\Domains\Realization;
+use App\Domains\Target;
 use App\Domains\Unit;
 use App\DTO\ConstructRequest;
+use App\DTO\IndicatorPaperWorkStoreFromMasterRequest;
 use App\DTO\UnitCreateResponse;
 use App\DTO\UnitCreateRequest;
 use App\DTO\UnitIndexResponse;
@@ -83,20 +87,27 @@ class UnitService
             $unitDomain->name = "$level__uppercase - $name__uppercase";
             $unitDomain->slug = Str::slug("$level__lowercase-$name__lowercase");
             $unitDomain->level_id = $this->levelRepository->find__id__by__slug($unitRequest->level);
-            $unitDomain->parent_id = $this->unitRepository->find__id__by__slug($unitRequest->parent_unit);
+            $unitDomain->parent_id = is_null($unitRequest->parent_unit) ? null : $this->unitRepository->find__id__by__slug($unitRequest->parent_unit);
 
             $this->unitRepository->save($unitDomain);
 
             //buat kertas kerja KPI tahun saat ini, jika sudah tersedia
-            // $constructRequest = new ConstructRequest();
+            $constructRequest = new ConstructRequest();
 
-            // $constructRequest->indicatorRepository = $this->indicatorRepository;
-            // $constructRequest->targetRepository = $this->targetRepository;
-            // $constructRequest->realizationRepository = $this->realizationRepository;
+            $constructRequest->indicatorRepository = $this->indicatorRepository;
+            $constructRequest->targetRepository = $this->targetRepository;
+            $constructRequest->realizationRepository = $this->realizationRepository;
 
-            // $IndicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+            $requestDTO = new IndicatorPaperWorkStoreFromMasterRequest();
 
-            // $IndicatorPaperWorkService->storeFromMaster($unitDomain->level_id, $unitDomain->id, (string) now()->year, $unitRequest->userId);
+            $requestDTO->levelId = $unitDomain->level_id;
+            $requestDTO->unitId = $this->unitRepository->find__id__by__slug($unitDomain->slug);
+            $requestDTO->year = (string) now()->year;
+            $requestDTO->userId = $unitRequest->userId;
+
+            $IndicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+
+            $IndicatorPaperWorkService->storeFromMaster($requestDTO);
         });
     }
 

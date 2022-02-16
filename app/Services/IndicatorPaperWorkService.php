@@ -268,72 +268,69 @@ class IndicatorPaperWorkService
         $year = $indicatorPaperWorkRequest->year;
         $userId = $indicatorPaperWorkRequest->userId;
 
-        DB::transaction(function () use ($levelId, $unitId, $year, $userId) {
-            $indicatorDomain = new Indicator();
-            $targetDomain = new Target();
-            $realizationDomain = new Realization();
+        $indicatorDomain = new Indicator();
+        $targetDomain = new Target();
+        $realizationDomain = new Realization();
 
-            $masterIndicators = $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, null, $year);
+        $masterIndicators = $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, null, $year);
 
-            if (count($masterIndicators) !== 0) { //kertas kerja KPI sudah tersedia
-                # code...
-                //build ID
-                $idListChild = [];
-                foreach ($masterIndicators as $masterIndicator) {
-                    $idListChild[$masterIndicator->id] = (string) Str::orderedUuid();
-                }
-
-                $i = 0;
-                foreach ($masterIndicators as $masterIndicator) {
-                    $indicatorDomain->id = $idListChild[$masterIndicator->id];
-                    $indicatorDomain->indicator = $masterIndicator->indicator;
-                    $indicatorDomain->formula = $masterIndicator->formula;
-                    $indicatorDomain->measure = $masterIndicator->measure;
-                    $indicatorDomain->weight = $masterIndicator->getRawOriginal('weight');
-                    $indicatorDomain->polarity = $masterIndicator->getRawOriginal('polarity');
-                    $indicatorDomain->year = $year;
-                    $indicatorDomain->reducing_factor = $masterIndicator->reducing_factor;
-                    $indicatorDomain->validity = $masterIndicator->getRawOriginal('validity');
-                    $indicatorDomain->reviewed = $masterIndicator->reviewed;
-                    $indicatorDomain->referenced = $masterIndicator->referenced;
-                    $indicatorDomain->dummy = $masterIndicator->dummy;
-                    $indicatorDomain->label = 'child';
-                    $indicatorDomain->unit_id = $unitId;
-                    $indicatorDomain->level_id = $levelId;
-                    $indicatorDomain->order = $i + 1;
-                    $indicatorDomain->code = $masterIndicator->code;
-                    $indicatorDomain->parent_vertical_id = $masterIndicator->id;
-                    $indicatorDomain->parent_horizontal_id = is_null($masterIndicator->parent_horizontal_id) ? null : $idListChild[$masterIndicator->parent_horizontal_id];
-                    $indicatorDomain->created_by = $userId;
-
-                    $this->indicatorRepository->save($indicatorDomain);
-
-                    //target & realisasi 'CHILD' creating
-                    if (!is_null($masterIndicator->validity)) {
-                        foreach ($masterIndicator->validity as $validityKey => $validityValue) {
-                            $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $idListChild[$masterIndicator->id];
-                            $targetDomain->month = $validityKey;
-                            $targetDomain->value = 0;
-                            $targetDomain->locked = false;
-                            $targetDomain->default = true;
-
-                            $this->targetRepository->save($targetDomain);
-
-                            $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $idListChild[$masterIndicator->id];
-                            $realizationDomain->month = $validityKey;
-                            $realizationDomain->value = 0;
-                            $realizationDomain->locked = true;
-                            $realizationDomain->default = true;
-
-                            $this->realizationRepository->save($realizationDomain);
-                        }
-                    }
-                    $i++;
-                }
+        if (count($masterIndicators) !== 0) { //kertas kerja KPI sudah tersedia
+            //build ID
+            $idListChild = [];
+            foreach ($masterIndicators as $masterIndicator) {
+                $idListChild[$masterIndicator->id] = (string) Str::orderedUuid();
             }
-        });
+
+            $i = 0;
+            foreach ($masterIndicators as $masterIndicator) {
+                $indicatorDomain->id = $idListChild[$masterIndicator->id];
+                $indicatorDomain->indicator = $masterIndicator->indicator;
+                $indicatorDomain->formula = $masterIndicator->formula;
+                $indicatorDomain->measure = $masterIndicator->measure;
+                $indicatorDomain->weight = $masterIndicator->getRawOriginal('weight');
+                $indicatorDomain->polarity = $masterIndicator->getRawOriginal('polarity');
+                $indicatorDomain->year = $year;
+                $indicatorDomain->reducing_factor = $masterIndicator->reducing_factor;
+                $indicatorDomain->validity = $masterIndicator->getRawOriginal('validity');
+                $indicatorDomain->reviewed = $masterIndicator->reviewed;
+                $indicatorDomain->referenced = $masterIndicator->referenced;
+                $indicatorDomain->dummy = $masterIndicator->dummy;
+                $indicatorDomain->label = 'child';
+                $indicatorDomain->unit_id = $unitId;
+                $indicatorDomain->level_id = $levelId;
+                $indicatorDomain->order = $i + 1;
+                $indicatorDomain->code = $masterIndicator->code;
+                $indicatorDomain->parent_vertical_id = $masterIndicator->id;
+                $indicatorDomain->parent_horizontal_id = is_null($masterIndicator->parent_horizontal_id) ? null : $idListChild[$masterIndicator->parent_horizontal_id];
+                $indicatorDomain->created_by = $userId;
+
+                $this->indicatorRepository->save($indicatorDomain);
+
+                //target & realisasi 'CHILD' creating
+                if (!is_null($masterIndicator->validity)) {
+                    foreach ($masterIndicator->validity as $validityKey => $validityValue) {
+                        $targetDomain->id = (string) Str::orderedUuid();
+                        $targetDomain->indicator_id = $idListChild[$masterIndicator->id];
+                        $targetDomain->month = $validityKey;
+                        $targetDomain->value = 0;
+                        $targetDomain->locked = false;
+                        $targetDomain->default = true;
+
+                        $this->targetRepository->save($targetDomain);
+
+                        $realizationDomain->id = (string) Str::orderedUuid();
+                        $realizationDomain->indicator_id = $idListChild[$masterIndicator->id];
+                        $realizationDomain->month = $validityKey;
+                        $realizationDomain->value = 0;
+                        $realizationDomain->locked = true;
+                        $realizationDomain->default = true;
+
+                        $this->realizationRepository->save($realizationDomain);
+                    }
+                }
+                $i++;
+            }
+        }
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
