@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
 use App\DTO\UnitCreateRequest;
+use App\DTO\UnitEditRequest;
 use App\DTO\UnitStoreRequest;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Http\Request;
@@ -78,7 +79,6 @@ class UnitController extends ApiController
             "Unit - Create",
             [
                 'levels' => $response->levels,
-                'units' => $response->units
             ],
             null,
         );
@@ -120,16 +120,16 @@ class UnitController extends ApiController
             );
         }
 
-        $UnitStoreRequest = new UnitStoreRequest();
+        $requestDTO = new UnitStoreRequest();
 
-        $UnitStoreRequest->name = $request->post('name');
-        $UnitStoreRequest->level = $request->post('level');
-        $UnitStoreRequest->parent_unit = $request->post('parent_unit');
-        $UnitStoreRequest->userId = $request->header('X-User-Id');
+        $requestDTO->name = $request->post('name');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->parent_unit = $request->post('parent_unit');
+        $requestDTO->userId = $request->header('X-User-Id');
 
         $unitService = new UnitService($constructRequest);
 
-        $unitService->store($UnitStoreRequest);
+        $unitService->store($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -146,9 +146,37 @@ class UnitController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
-        //
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $requestDTO = new UnitEditRequest();
+
+        $requestDTO->id = $id;
+        $requestDTO->userId = $request->header('X-User-Id');
+
+        $unitService = new UnitService($constructRequest);
+
+        $response = $unitService->edit($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Unit - Edit",
+            [
+                'levels' => $response->levels,
+                'unit' => $response->unit,
+            ],
+            null,
+        );
     }
 
     /**

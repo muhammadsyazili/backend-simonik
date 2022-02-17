@@ -48,6 +48,11 @@ class UnitRepository
         return ModelsUnit::firstWhere(['slug' => $slug])->id;
     }
 
+    public function find__by__id(string|int $id)
+    {
+        return ModelsUnit::findOrFail($id);
+    }
+
     public function find__all()
     {
         return ModelsUnit::orderBy('name', 'asc')->get();

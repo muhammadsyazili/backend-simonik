@@ -10,6 +10,8 @@ use App\DTO\ConstructRequest;
 use App\DTO\IndicatorPaperWorkStoreFromMasterRequest;
 use App\DTO\UnitCreateResponse;
 use App\DTO\UnitCreateRequest;
+use App\DTO\UnitEditRequest;
+use App\DTO\UnitEditResponse;
 use App\DTO\UnitIndexResponse;
 use App\DTO\UnitStoreRequest;
 use App\Repositories\IndicatorRepository;
@@ -66,7 +68,6 @@ class UnitService
         $levelService = new LevelService($constructRequest);
 
         $response->levels = $levelService->levelsOfUser($userId, false);
-        $response->units = $this->unitRepository->find__all();
 
         return $response;
     }
@@ -109,6 +110,24 @@ class UnitService
 
             $IndicatorPaperWorkService->storeFromMaster($requestDTO);
         });
+    }
+
+    //use repo LevelRepository, UnitRepository, UserRepository
+    public function edit(UnitEditRequest $unitRequest): UnitEditResponse
+    {
+        $response = new UnitEditResponse();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $this->userRepository;
+        $constructRequest->levelRepository = $this->levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $response->levels = $levelService->levelsOfUser($unitRequest->userId, false);
+        $response->unit = $this->unitRepository->find__by__id($unitRequest->id);
+
+        return $response;
     }
 
     //use repo LevelRepository, UnitRepository
