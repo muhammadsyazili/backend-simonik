@@ -4,7 +4,7 @@ namespace App\Domains;
 
 class Indicator
 {
-    public string|int|null $id;
+    public string|int $id;
     public string $indicator;
     public ?string $formula;
     public ?string $measure;

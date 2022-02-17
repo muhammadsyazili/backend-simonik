@@ -53,11 +53,11 @@ class UserValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $username = strtolower($request->post('username'));
+        $username__lowercase = strtolower($request->post('username'));
         $unit = $request->post('unit');
 
         //memastikan username yang akan di-store tidak mengandung keyword
-        if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        if (Str::containsAll($username__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('username', "username sudah tersedia.");
             });
@@ -66,7 +66,7 @@ class UserValidationService
         //memastikan username yang akan di-store belum terdaftar di DB
         $users = $this->userRepository->find__all();
         foreach ($users as $user) {
-            if (strtolower($user->username) === $username) {
+            if (strtolower($user->username) === $username__lowercase) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('username', "username sudah tersedia.");
                 });
@@ -111,7 +111,7 @@ class UserValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        $username = strtolower($request->post('username'));
+        $username__lowercase = strtolower($request->post('username'));
         $unit = $request->post('unit');
 
         $user = $this->userRepository->find__with__role__by__id($id);
@@ -124,18 +124,18 @@ class UserValidationService
         }
 
         //memastikan username yang akan di-update tidak mengandung keyword
-        if (Str::containsAll($username, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        if (Str::containsAll($username__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('username', "username sudah tersedia.");
             });
         }
 
         //username diubah
-        if ($user->username !== $username) {
+        if (strtolower($user->username) !== $username__lowercase) {
             //memastikan username yang akan di-update belum terdaftar di DB
             $users = $this->userRepository->find__all();
             foreach ($users as $user) {
-                if (strtolower($user->username) === $username) {
+                if (strtolower($user->username) === $username__lowercase) {
                     $validator->after(function ($validator) {
                         $validator->errors()->add('username', "username sudah tersedia.");
                     });

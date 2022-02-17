@@ -19,9 +19,9 @@ class LevelRepository
         ]);
     }
 
-    public function update__by__id(Level $level, string|int $id)
+    public function update__by__id(Level $level)
     {
-        ModelsLevel::where(['id' => $id])->update([
+        ModelsLevel::where(['id' => $level->id])->update([
             'name' => $level->name,
             'slug' => $level->slug,
             'parent_id' => $level->parent_id,

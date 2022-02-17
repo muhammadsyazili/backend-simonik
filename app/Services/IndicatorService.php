@@ -61,9 +61,7 @@ class IndicatorService
                 $indicatorDomain->weight =  $toJson['weight'];
             }
 
-            $id = (string) Str::orderedUuid();
-
-            $indicatorDomain->id = $id;
+            $indicatorDomain->id = (string) Str::orderedUuid();
             $indicatorDomain->indicator = $indicator->indicator;
             $indicatorDomain->formula = $indicator->formula;
             $indicatorDomain->measure = $indicator->measure;
@@ -80,7 +78,7 @@ class IndicatorService
             $indicatorDomain->created_by = $indicator->user_id;
 
             $this->indicatorRepository->save($indicatorDomain);
-            $this->indicatorRepository->update__code__by__id($id);
+            $this->indicatorRepository->update__code__by__id($indicatorDomain->id);
         });
     }
 
@@ -89,9 +87,7 @@ class IndicatorService
     {
         $response = new IndicatorEditResponse();
 
-        $id = $indicatorRequest->id;
-
-        $indicator = $this->indicatorRepository->find__with__level__by__id($id);
+        $indicator = $this->indicatorRepository->find__with__level__by__id($indicatorRequest->id);
         $indicator->original_polarity = $indicator->getRawOriginal('polarity');
 
         $response->indicator = $indicator;
@@ -133,6 +129,7 @@ class IndicatorService
                     $indicatorDomain->weight =  $toJson['weight'];
                 }
 
+                $indicatorDomain->id = $indicatorOld->id;
                 $indicatorDomain->indicator = $indicatorNew->indicator;
                 $indicatorDomain->formula = $indicatorNew->formula;
                 $indicatorDomain->measure = $indicatorNew->measure;
@@ -146,7 +143,7 @@ class IndicatorService
                 $indicatorDomain->parent_vertical_id = $indicatorOld->parent_vertical_id;
                 $indicatorDomain->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
-                $this->indicatorRepository->update__by__id($indicatorDomain, $indicatorOld->id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
             } else if ($indicatorOld->label === 'master') {
                 /**
                  * section: master
@@ -175,6 +172,7 @@ class IndicatorService
                     $indicatorDomain->weight =  $toJson['weight'];
                 }
 
+                $indicatorDomain->id = $indicatorOld->id;
                 $indicatorDomain->indicator = $indicatorNew->indicator;
                 $indicatorDomain->formula = $indicatorNew->formula;
                 $indicatorDomain->measure = $indicatorNew->measure;
@@ -264,7 +262,7 @@ class IndicatorService
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicatorDomain, $indicatorOld->id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
 
                 /**
                  * section: childs
@@ -298,6 +296,7 @@ class IndicatorService
                             $indicatorDomain->weight =  $toJson['weight'];
                         }
 
+                        $indicatorDomain->id = $familyIndicatorOld->id;
                         $indicatorDomain->indicator = $indicatorNew->indicator;
                         $indicatorDomain->formula = $indicatorNew->formula;
                         $indicatorDomain->measure = $indicatorNew->measure;
@@ -387,7 +386,7 @@ class IndicatorService
                             }
                         }
 
-                        $this->indicatorRepository->update__by__id($indicatorDomain, $familyIndicatorOld->id); //update KPI
+                        $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
                     }
                 }
             } else if ($indicatorOld->label === 'child') {
@@ -414,6 +413,7 @@ class IndicatorService
                     $indicatorDomain->weight =  $toJson['weight'];
                 }
 
+                $indicatorDomain->id = $indicatorOld->id;
                 $indicatorDomain->indicator = $indicatorNew->indicator;
                 $indicatorDomain->formula = $indicatorNew->formula;
                 $indicatorDomain->measure = $indicatorNew->measure;
@@ -503,7 +503,7 @@ class IndicatorService
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicatorDomain, $indicatorOld->id); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
             }
         });
     }
@@ -511,9 +511,8 @@ class IndicatorService
     //use repo IndicatorRepository
     public function destroy(IndicatorDestroyRequest $indicatorRequest): void
     {
-        $id = $indicatorRequest->id;
-        DB::transaction(function () use ($id) {
-            $this->indicatorRepository->delete__by__id($id);
+        DB::transaction(function () use ($indicatorRequest) {
+            $this->indicatorRepository->delete__by__id($indicatorRequest->id);
         });
     }
 

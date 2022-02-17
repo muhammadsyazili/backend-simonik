@@ -40,7 +40,7 @@ class IndicatorRepository
         DB::table('indicators')->insert($data);
     }
 
-    public function update__by__id(Indicator $indicator, string|int $id): void
+    public function update__by__id(Indicator $indicator): void
     {
         $data['indicator'] = $indicator->indicator;
         $data['formula'] = $indicator->formula;
@@ -62,7 +62,7 @@ class IndicatorRepository
 
         $data['updated_at'] = \Carbon\Carbon::now();
 
-        DB::table('indicators')->where(['id' => $id])->update($data);
+        DB::table('indicators')->where(['id' => $indicator->id])->update($data);
     }
 
     public function count__allPlusOne__by__levelId_unitId_year(string|int $levelId, string|int|null $unitId = null, string|int|null $year = null): int

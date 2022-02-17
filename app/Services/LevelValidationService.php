@@ -156,7 +156,7 @@ class LevelValidationService
         $result = $this->unitRepository->count__all__by__levelId($id);
         if ($result !== 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "level tidak bisa dihapus.");
+                $validator->errors()->add('id', "level tidak bisa dihapus, karena sudah memiliki unit.");
             });
         }
 

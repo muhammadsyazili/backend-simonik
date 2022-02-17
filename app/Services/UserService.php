@@ -76,9 +76,7 @@ class UserService
     {
         $response = new UserEditResponse();
 
-        $id = $userRequest->id;
-
-        $response->user = $this->userRepository->find__by__id($id);
+        $response->user = $this->userRepository->find__by__id($userRequest->id);
         $response->units = $this->unitRepository->find__all();
 
         return $response;
@@ -90,22 +88,22 @@ class UserService
         DB::transaction(function () use ($user) {
             $userDomain = new User();
 
+            $userDomain->id = $user->id;
             $userDomain->nip = $user->nip;
             $userDomain->name = $user->name;
             $userDomain->username = $user->username;
             $userDomain->email = $user->email;
             $userDomain->unit_id = $this->unitRepository->find__id__by__slug($user->unit);
 
-            $this->userRepository->update__by__id($userDomain, $user->id);
+            $this->userRepository->update__by__id($userDomain);
         });
     }
 
     //use repo UserRepository
     public function destroy(UserDestroyRequest $userRequest): void
     {
-        $id = $userRequest->id;
-        DB::transaction(function () use ($id) {
-            $this->userRepository->delete__by__id($id);
+        DB::transaction(function () use ($userRequest) {
+            $this->userRepository->delete__by__id($userRequest->id);
         });
     }
 }

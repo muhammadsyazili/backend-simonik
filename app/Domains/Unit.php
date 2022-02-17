@@ -4,7 +4,7 @@ namespace App\Domains;
 
 class Unit
 {
-    public string|int|null $id;
+    public string|int $id;
     public string $name;
     public string $slug;
     public string|int|null $parent_id;

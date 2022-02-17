@@ -6,6 +6,7 @@ use App\DTO\ConstructRequest;
 use App\DTO\UnitCreateRequest;
 use App\DTO\UnitEditRequest;
 use App\DTO\UnitStoreRequest;
+use App\DTO\UnitUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -188,7 +189,47 @@ class UnitController extends ApiController
      */
     public function update(Request $request, $id)
     {
-        //
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $unitValidationService = new UnitValidationService($constructRequest);
+
+        $validation = $unitValidationService->updateValidation($request, $id);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $requestDTO = new UnitUpdateRequest();
+
+        $requestDTO->id = $id;
+        $requestDTO->name = $request->post('name');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->parent_unit = $request->post('parent_unit');
+        $requestDTO->userId = $request->header('X-User-Id');
+
+        $unitService = new UnitService($constructRequest);
+
+        $unitService->update($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Level berhasil diubah",
+            null,
+            null,
+        );
     }
 
     /**

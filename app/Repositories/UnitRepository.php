@@ -20,9 +20,19 @@ class UnitRepository
         ]);
     }
 
-    public function update__name_slug__by__id(Unit $unit, string|int $id)
+    public function update__by__id(Unit $unit)
     {
-        ModelsUnit::where(['id' => $id])->update([
+        ModelsUnit::where(['id' => $unit->id])->update([
+            'name' => $unit->name,
+            'slug' => $unit->slug,
+            'parent_id' => $unit->parent_id,
+            'level_id' => $unit->level_id,
+        ]);
+    }
+
+    public function update__name_slug__by__id(Unit $unit)
+    {
+        ModelsUnit::where(['id' => $unit->id])->update([
             'name' => $unit->name,
             'slug' => $unit->slug,
         ]);
@@ -51,6 +61,11 @@ class UnitRepository
     public function find__by__id(string|int $id)
     {
         return ModelsUnit::findOrFail($id);
+    }
+
+    public function find__with__level__by__id(string|int $id)
+    {
+        return ModelsUnit::with(['level'])->findOrFail($id);
     }
 
     public function find__all()

@@ -74,10 +74,8 @@ class LevelService
     {
         $response = new LevelEditResponse();
 
-        $id = $levelRequest->id;
-
         $response->levels = $this->levelRepository->find__all();
-        $response->level = $this->levelRepository->find__by__id($id);
+        $response->level = $this->levelRepository->find__by__id($levelRequest->id);
 
         return $response;
     }
@@ -94,21 +92,23 @@ class LevelService
             $name__uppercase = strtoupper($levelRequest->name);
             $name__lowercase = strtolower($levelRequest->name);
 
+            $levelDomain->id = $levelRequest->id;
             $levelDomain->name = $name__uppercase;
             $levelDomain->slug = Str::slug($name__lowercase);
             $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
 
-            $this->levelRepository->update__by__id($levelDomain, $levelRequest->id);
+            $this->levelRepository->update__by__id($levelDomain);
 
             //nama level diubah
             if (strtolower($level->name) !== $name__lowercase) {
                 $units = $this->unitRepository->find__all__by__levelId($levelRequest->id);
 
                 foreach ($units as $unit) {
+                    $unitDomain->id = $unit->id;
                     $unitDomain->name = str_replace(strtoupper($level->name), $name__uppercase, $unit->name);
                     $unitDomain->slug = str_replace(strtolower($level->name), $name__lowercase, $unit->slug);
 
-                    $this->unitRepository->update__name_slug__by__id($unitDomain, $unit->id);
+                    $this->unitRepository->update__name_slug__by__id($unitDomain);
                 }
             }
         });
@@ -117,10 +117,11 @@ class LevelService
     //use repo LevelRepository
     public function destroy(LevelDestroyRequest $levelRequest): void
     {
-        $id = $levelRequest->id;
-        DB::transaction(function () use ($id) {
-            $this->levelRepository->delete__by__id($id);
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::transaction(function () use ($levelRequest) {
+            $this->levelRepository->delete__by__id($levelRequest->id);
         });
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     //use repo LevelRepository, UserRepository

@@ -14,6 +14,7 @@ use App\DTO\UnitEditRequest;
 use App\DTO\UnitEditResponse;
 use App\DTO\UnitIndexResponse;
 use App\DTO\UnitStoreRequest;
+use App\DTO\UnitUpdateRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -128,6 +129,32 @@ class UnitService
         $response->unit = $this->unitRepository->find__by__id($unitRequest->id);
 
         return $response;
+    }
+
+    //use repo LevelRepository, UnitRepository
+    public function update(UnitUpdateRequest $unitRequest): void
+    {
+        DB::transaction(function () use ($unitRequest) {
+            $unitDomain = new Unit();
+
+            $unit = $this->unitRepository->find__with__level__by__id($unitRequest->id);
+
+            $unitRequest->name = str_replace($unit->level->name.' - ', '', $unitRequest->name); //menghapus prefix
+
+            $level__uppercase = strtoupper($unitRequest->level);
+            $level__lowercase = strtolower($unitRequest->level);
+
+            $name__uppercase = strtoupper($unitRequest->name);
+            $name__lowercase = strtolower($unitRequest->name);
+
+            $unitDomain->id = $unitRequest->id;
+            $unitDomain->name = "$level__uppercase - $name__uppercase";
+            $unitDomain->slug = Str::slug("$level__lowercase-$name__lowercase");
+            $unitDomain->level_id = $this->levelRepository->find__id__by__slug($unitRequest->level);
+            $unitDomain->parent_id = is_null($unitRequest->parent_unit) ? null : $this->unitRepository->find__id__by__slug($unitRequest->parent_unit);
+
+            $this->unitRepository->update__by__id($unitDomain);
+        });
     }
 
     //use repo LevelRepository, UnitRepository

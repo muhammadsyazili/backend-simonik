@@ -22,9 +22,9 @@ class UserRepository
         ]);
     }
 
-    public function update__by__id(User $user, string|int $id)
+    public function update__by__id(User $user)
     {
-        ModelsUser::where(['id' => $id])->update([
+        ModelsUser::where(['id' => $user->id])->update([
             'nip' => $user->nip,
             'name' => $user->name,
             'username' => $user->username,

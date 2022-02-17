@@ -4,7 +4,7 @@ namespace App\Domains;
 
 class User
 {
-    public string|int|null $id;
+    public string|int $id;
     public ?string $nip;
     public string $name;
     public string $username;
