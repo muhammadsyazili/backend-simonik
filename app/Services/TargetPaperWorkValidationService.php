@@ -100,7 +100,7 @@ class TargetPaperWorkValidationService
         foreach ($indicatorsId as $value) {
             if (!in_array($value, $indicators)) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('targets', "(#5.1) : Akses ilegal !");
+                    $validator->errors()->add('targets', "(#5.1) : Akses Ilegal !");
                 });
                 break;
             }
@@ -112,7 +112,7 @@ class TargetPaperWorkValidationService
         foreach ($indicators as $indicator) {
             if ($indicator->dummy) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('targets', "(#5.2) : Akses ilegal !");
+                    $validator->errors()->add('targets', "(#5.2) : Akses Ilegal !");
                 });
                 break;
             }
@@ -127,7 +127,7 @@ class TargetPaperWorkValidationService
             foreach ($validityMonths as $validityMonth) {
                 if (!in_array($validityMonth, array_keys($targetV))) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('targets', "(#5.3) : Akses ilegal !");
+                        $validator->errors()->add('targets', "(#5.3) : Akses Ilegal !");
                     });
                     $isError = true;
                     break;

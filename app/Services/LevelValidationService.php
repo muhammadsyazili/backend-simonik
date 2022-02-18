@@ -35,13 +35,12 @@ class LevelValidationService
     public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'name' => ['required', 'string', 'not_in:super-master,master,child,super-admin,admin,data-entry,employee'],
+            'name' => ['required', 'string'],
             'parent_level' => ['required', 'string'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
-            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -54,7 +53,7 @@ class LevelValidationService
         //memastikan nama yang akan di-store tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "nama sudah tersedia.");
+                $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
             });
         }
 
@@ -63,7 +62,7 @@ class LevelValidationService
         foreach ($levels as $level) {
             if ($level->slug === Str::slug($name__lowercase)) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('name', "nama sudah tersedia.");
+                    $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
                 });
                 break;
             }
@@ -73,7 +72,7 @@ class LevelValidationService
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "parent level tidak tersedia.");
+                $validator->errors()->add('parent_level', "Pada Turunan Dari Level, Level Belum Tersedia.");
             });
         }
 
@@ -88,13 +87,12 @@ class LevelValidationService
     public function updateValidation(Request $request, string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'name' => ['required', 'string', 'not_in:super-master,master,child,super-admin,admin,data-entry,employee'],
+            'name' => ['required', 'string'],
             'parent_level' => ['required', 'string'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
-            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -109,7 +107,7 @@ class LevelValidationService
         //memastikan nama yang akan di-update tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "nama sudah tersedia.");
+                $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
             });
         }
 
@@ -120,7 +118,7 @@ class LevelValidationService
             foreach ($levels as $level) {
                 if ($level->slug === Str::slug($name__lowercase)) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('name', "nama sudah tersedia.");
+                        $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
                     });
                     break;
                 }
@@ -130,7 +128,7 @@ class LevelValidationService
         //memastikan parent level yang akan di-update bukan merupakan level yang saat ini di-update
         if ($level->slug === $parent_level) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "tidak diizinkan memilih level yang sama.");
+                $validator->errors()->add('parent_level', "Pada Turunan Dari Level, Tidak Diizinkan Memilih Level Yang Sama.");
             });
         }
 
@@ -138,7 +136,7 @@ class LevelValidationService
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "parent level tidak tersedia.");
+                $validator->errors()->add('parent_level', "Pada Turunan Dari Level, Level Belum Tersedia.");
             });
         }
 
@@ -163,7 +161,7 @@ class LevelValidationService
         $result = $this->unitRepository->count__all__by__levelId($id);
         if ($result !== 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "level tidak bisa dihapus, karena sudah memiliki unit.");
+                $validator->errors()->add('id', "Level Tidak Bisa Dihapus, Karena Sudah Memiliki Unit Kerja.");
             });
         }
 

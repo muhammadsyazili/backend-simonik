@@ -148,7 +148,7 @@ class IndicatorPaperWorkValidationService
         //memastikan jumlah KPI yang akan di-update sama dengan di DB
         $validator->after(function ($validator) use ($new, $res) {
             if (count($new) !== $res) {
-                $validator->errors()->add('indicators', "(#2.1) : Akses ilegal !");
+                $validator->errors()->add('indicators', "(#2.1) : Akses Ilegal !");
             }
         });
 
@@ -212,7 +212,7 @@ class IndicatorPaperWorkValidationService
         //memastikan jumlah KPI yang akan di-reorder sama dengan di DB
         if (count($request->post('indicators')) !== count($indicators)) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('indicators', "(#2.2) : Akses ilegal !");
+                $validator->errors()->add('indicators', "(#2.2) : Akses Ilegal !");
             });
         }
 
@@ -220,7 +220,7 @@ class IndicatorPaperWorkValidationService
         foreach ($request->post('indicators') as $indicator) {
             if (!in_array($indicator, $indicators)) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('indicators', "(#2.3) : Akses ilegal !");
+                    $validator->errors()->add('indicators', "(#2.3) : Akses Ilegal !");
                 });
                 break;
             }

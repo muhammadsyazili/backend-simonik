@@ -100,7 +100,7 @@ class RealizationPaperWorkValidationService
         foreach ($indicatorsId as $value) {
             if (!in_array($value, $indicators)) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('realizations', "(#4.1) : Akses ilegal !");
+                    $validator->errors()->add('realizations', "(#4.1) : Akses Ilegal !");
                 });
                 break;
             }
@@ -112,7 +112,7 @@ class RealizationPaperWorkValidationService
         foreach ($indicators as $indicator) {
             if ($indicator->dummy) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('realizations', "(#4.2) : Akses ilegal !");
+                    $validator->errors()->add('realizations', "(#4.2) : Akses Ilegal !");
                 });
                 break;
             }
@@ -127,7 +127,7 @@ class RealizationPaperWorkValidationService
             foreach ($validityMonths as $validityMonth) {
                 if (!in_array($validityMonth, array_keys($realizationV))) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('realizations', "(#4.3) : Akses ilegal !");
+                        $validator->errors()->add('realizations', "(#4.3) : Akses Ilegal !");
                     });
                     $isError = true;
                     break;
@@ -167,7 +167,7 @@ class RealizationPaperWorkValidationService
         //memastikan KPI yang akan di-update berlabel 'child'
         if (in_array($indicator->label, ['super-master', 'master'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "(#4.4) : Akses ilegal !");
+                $validator->errors()->add('id', "(#4.4) : Akses Ilegal !");
             });
         }
 
@@ -175,7 +175,7 @@ class RealizationPaperWorkValidationService
         if ($user->role->name !== 'super-admin') {
             if (!in_array($indicator->unit_id, $this->unitRepository->find__allFlattenId__with__this_childs__by__id($user->unit->id))) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('id', "Akses ilegal2 !");
+                    $validator->errors()->add('id', "Akses Ilegal2 !");
                 });
             }
         }

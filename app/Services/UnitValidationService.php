@@ -35,13 +35,12 @@ class UnitValidationService
     public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'name' => ['required', 'string', 'not_in:super-master,master,child,super-admin,admin,data-entry,employee'],
+            'name' => ['required', 'string'],
             'level' => ['required', 'string'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
-            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -56,7 +55,7 @@ class UnitValidationService
         //memastikan nama yang akan di-store tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "nama sudah tersedia.");
+                $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
             });
         }
 
@@ -65,7 +64,7 @@ class UnitValidationService
         foreach ($units as $unit) {
             if ($unit->slug === Str::slug("$level__lowercase-$name__lowercase")) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('name', "nama sudah tersedia.");
+                    $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
                 });
                 break;
             }
@@ -75,7 +74,7 @@ class UnitValidationService
         $result = $this->levelRepository->count__all__by__slug($level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('level', "level tidak tersedia.");
+                $validator->errors()->add('level', "Level Belum Tersedia.");
             });
         }
 
@@ -87,7 +86,7 @@ class UnitValidationService
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "unit tidak tersedia.");
+                    $validator->errors()->add('parent_unit', "Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
                 });
             }
 
@@ -102,7 +101,7 @@ class UnitValidationService
 
             if (!$isAvailable) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "(#6.1) : Akses ilegal !");
+                    $validator->errors()->add('parent_unit', "(#6.1) : Akses Ilegal !");
                 });
             }
         }
@@ -118,13 +117,12 @@ class UnitValidationService
     public function updateValidation(Request $request, string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'name' => ['required', 'string', 'not_in:super-master,master,child,super-admin,admin,data-entry,employee'],
+            'name' => ['required', 'string'],
             'level' => ['required', 'string'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
-            'not_in' => ':attribute yang dipilih tidak sah.',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -142,7 +140,7 @@ class UnitValidationService
         //memastikan nama yang akan di-update tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "nama sudah tersedia.");
+                $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
             });
         }
 
@@ -153,7 +151,7 @@ class UnitValidationService
             foreach ($units as $unit) {
                 if ($unit->slug === Str::slug("$level__lowercase-$name__lowercase")) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('name', "nama sudah tersedia.");
+                        $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
                     });
                     break;
                 }
@@ -164,7 +162,7 @@ class UnitValidationService
         $result = $this->levelRepository->count__all__by__slug($level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('level', "level tidak tersedia.");
+                $validator->errors()->add('level', "Level Belum Tersedia.");
             });
         }
 
@@ -175,7 +173,7 @@ class UnitValidationService
             //memastikan parent unit yang akan di-update bukan merupakan unit yang saat ini di-update
             if ($unit->slug === $parent_unit) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "tidak diizinkan memilih unit yang sama.");
+                    $validator->errors()->add('parent_unit', "Pada Turunan Dari Unit Kerja, Tidak Diizinkan Memilih Unit Kerja Yang Sama.");
                 });
             }
 
@@ -183,7 +181,7 @@ class UnitValidationService
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "unit tidak tersedia.");
+                    $validator->errors()->add('parent_unit', "Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
                 });
             }
 
@@ -198,7 +196,7 @@ class UnitValidationService
 
             if (!$isAvailable) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "(#6.2) : Akses ilegal !");
+                    $validator->errors()->add('parent_unit', "(#6.2) : Akses Ilegal !");
                 });
             }
         }

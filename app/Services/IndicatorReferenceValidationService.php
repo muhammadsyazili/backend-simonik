@@ -50,7 +50,7 @@ class IndicatorReferenceValidationService
         foreach ($request->post('indicators') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('indicators', "(#3.1) : Akses ilegal !");
+                    $validator->errors()->add('indicators', "(#3.1) : Akses Ilegal !");
                 });
                 break;
             }
@@ -62,7 +62,7 @@ class IndicatorReferenceValidationService
         foreach ($request->post('preferences') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('preferences', "(#3.2) : Akses ilegal !");
+                    $validator->errors()->add('preferences', "(#3.2) : Akses Ilegal !");
                 });
                 break;
             }
@@ -123,7 +123,7 @@ class IndicatorReferenceValidationService
         foreach ($request->post('indicators') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('indicators', "(#3.3) : Akses ilegal !");
+                    $validator->errors()->add('indicators', "(#3.3) : Akses Ilegal !");
                 });
                 break;
             }
@@ -135,7 +135,7 @@ class IndicatorReferenceValidationService
         foreach ($request->post('preferences') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('preferences', "(#3.4) : Akses ilegal !");
+                    $validator->errors()->add('preferences', "(#3.4) : Akses Ilegal !");
                 });
                 break;
             }
