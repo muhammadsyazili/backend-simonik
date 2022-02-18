@@ -49,6 +49,6 @@ class Unit__IsChildFromUser__Except__DataEntry_And_Employee implements Rule
      */
     public function message()
     {
-        return "(#3.1) : Anda tidak memiliki hak akses !";
+        return "(#3.1) : Anda Tidak Memiliki Hak Akses !";
     }
 }

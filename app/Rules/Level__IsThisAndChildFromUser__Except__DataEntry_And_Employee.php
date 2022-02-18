@@ -49,6 +49,6 @@ class Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee implements R
      */
     public function message()
     {
-        return "(#2.2) : Anda tidak memiliki hak akses !";
+        return "(#2.2) : Anda Tidak Memiliki Hak Akses !";
     }
 }

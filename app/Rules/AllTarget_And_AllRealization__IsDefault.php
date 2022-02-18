@@ -76,6 +76,6 @@ class AllTarget_And_AllRealization__IsDefault implements Rule
      */
     public function message()
     {
-        return 'Terdapat target/realisasi berstatus un-default !';
+        return 'Terdapat Target/Realisasi Berstatus Un-default !';
     }
 }

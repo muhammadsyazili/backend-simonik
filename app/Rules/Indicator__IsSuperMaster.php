@@ -39,6 +39,6 @@ class Indicator__IsSuperMaster implements Rule
      */
     public function message()
     {
-        return "(#1) : KPI tidak bisa dihapus !";
+        return "(#1) : Kpi Tidak Bisa Dihapus !";
     }
 }

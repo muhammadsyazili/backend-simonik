@@ -46,6 +46,6 @@ class IndicatorPaperWork__NotAvailable implements Rule
      */
     public function message()
     {
-        return "Kertas kerja KPI sudah tersedia !";
+        return "Kertas Kerja KPI Sudah Tersedia !";
     }
 }

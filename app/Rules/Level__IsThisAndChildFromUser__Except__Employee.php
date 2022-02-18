@@ -51,6 +51,6 @@ class Level__IsThisAndChildFromUser__Except__Employee implements Rule
      */
     public function message()
     {
-        return "(#2.1) : Anda tidak memiliki hak akses !";
+        return "(#2.1) : Anda Tidak Memiliki Hak Akses !";
     }
 }

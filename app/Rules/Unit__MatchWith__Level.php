@@ -49,6 +49,6 @@ class Unit__MatchWith__Level implements Rule
      */
     public function message()
     {
-        return "(#5) : Anda tidak memiliki hak akses !";
+        return "(#5) : Anda Tidak Memiliki Hak Akses !";
     }
 }

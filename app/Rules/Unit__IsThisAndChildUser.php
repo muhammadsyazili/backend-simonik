@@ -51,6 +51,6 @@ class Unit__IsThisAndChildUser implements Rule
      */
     public function message()
     {
-        return "(#4) : Anda tidak memiliki hak akses !";
+        return "(#4) : Anda Tidak Memiliki Hak Akses !";
     }
 }

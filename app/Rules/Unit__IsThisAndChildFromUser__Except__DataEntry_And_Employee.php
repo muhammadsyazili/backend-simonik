@@ -49,6 +49,6 @@ class Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee implements Ru
      */
     public function message()
     {
-        return "(#4.2) : Anda tidak memiliki hak akses !";
+        return "(#4.2) : Anda Tidak Memiliki Hak Akses !";
     }
 }
