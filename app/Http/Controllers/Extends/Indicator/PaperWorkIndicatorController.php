@@ -72,7 +72,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s)", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
+            sprintf("Kertas Kerja KPI (Level: %s) (Unit: %s) (Tahun: %s)", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             [
                 'levels' => $response->levels,
                 'indicators' => $response->indicators,
@@ -110,7 +110,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja KPI - Create",
+            "Kertas Kerja KPI - Create",
             [
                 'indicators' => $response->indicators,
                 'levels' => $response->levels,
@@ -171,7 +171,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja KPI (Level: %s) (Tahun: %s) berhasil dibuat", strtoupper($requestDTO->level), strtoupper($requestDTO->year)),
+            sprintf("Kertas Kerja KPI (Level: %s) (Tahun: %s) Berhasil Dibuat", strtoupper($requestDTO->level), strtoupper($requestDTO->year)),
             null,
             null,
         );
@@ -224,7 +224,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas kerja KPI - Edit",
+            "Kertas Kerja KPI - Edit",
             [
                 'super_master_indicators' => $response->super_master_indicators,
                 'indicators' => $response->indicators,
@@ -289,7 +289,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil diubah", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas Kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Diubah", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );
@@ -346,7 +346,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil dihapus", strtoupper($level), strtoupper($unit), strtoupper($year)),
+            sprintf("Kertas Kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Dihapus", strtoupper($level), strtoupper($unit), strtoupper($year)),
             null,
             null,
         );
@@ -398,7 +398,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            $requestDTO->level === 'super-master' ? sprintf("Kertas kerja KPI (Level: %s) berhasil diurutkan ulang", strtoupper($requestDTO->level)) : sprintf("Kertas kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) berhasil diurutkan ulang", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
+            $requestDTO->level === 'super-master' ? sprintf("Kertas Kerja KPI (Level: %s) Berhasil Diurutkan Ulang", strtoupper($requestDTO->level)) : sprintf("Kertas Kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Diurutkan Ulang", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             null,
             null,
         );

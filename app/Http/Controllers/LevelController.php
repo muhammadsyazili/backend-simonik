@@ -113,7 +113,7 @@ class LevelController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level berhasil ditambahkan",
+            "Level Berhasil Ditambahkan",
             null,
             null,
         );
@@ -197,7 +197,7 @@ class LevelController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level berhasil diubah",
+            "Level Berhasil Diubah",
             null,
             null,
         );
@@ -244,7 +244,7 @@ class LevelController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level berhasil dihapus",
+            "Level Berhasil Dihapus",
             null,
             null,
         );

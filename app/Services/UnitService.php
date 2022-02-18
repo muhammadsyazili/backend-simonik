@@ -10,6 +10,7 @@ use App\DTO\ConstructRequest;
 use App\DTO\IndicatorPaperWorkStoreFromMasterRequest;
 use App\DTO\UnitCreateResponse;
 use App\DTO\UnitCreateRequest;
+use App\DTO\UnitDestroyRequest;
 use App\DTO\UnitEditRequest;
 use App\DTO\UnitEditResponse;
 use App\DTO\UnitIndexResponse;
@@ -155,6 +156,16 @@ class UnitService
 
             $this->unitRepository->update__by__id($unitDomain);
         });
+    }
+
+    //use repo UnitRepository
+    public function destroy(UnitDestroyRequest $levelRequest): void
+    {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::transaction(function () use ($levelRequest) {
+            $this->unitRepository->delete__by__id($levelRequest->id);
+        });
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     //use repo LevelRepository, UnitRepository

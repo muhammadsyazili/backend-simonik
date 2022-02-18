@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
 use App\DTO\UnitCreateRequest;
+use App\DTO\UnitDestroyRequest;
 use App\DTO\UnitEditRequest;
 use App\DTO\UnitStoreRequest;
 use App\DTO\UnitUpdateRequest;
@@ -135,7 +136,7 @@ class UnitController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level berhasil ditambahkan",
+            "Level Berhasil Ditambahkan",
             null,
             null,
         );
@@ -226,7 +227,7 @@ class UnitController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level berhasil diubah",
+            "Level Berhasil Diubah",
             null,
             null,
         );
@@ -240,7 +241,43 @@ class UnitController extends ApiController
      */
     public function destroy($id)
     {
-        //
+        $indicatorRepository = new IndicatorRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $unitValidationService = new UnitValidationService($constructRequest);
+
+        $validation = $unitValidationService->destroyValidation($id);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $requestDTO = new UnitDestroyRequest();
+
+        $requestDTO->id = $id;
+
+        $levelService = new UnitService($constructRequest);
+
+        $levelService->destroy($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Unit Berhasil Dihapus",
+            null,
+            null,
+        );
     }
 
     /**

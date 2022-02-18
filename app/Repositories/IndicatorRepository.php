@@ -76,6 +76,11 @@ class IndicatorRepository
         }
     }
 
+    public function count__all__by__unitId(string|int $unitId): int
+    {
+        return ModelsIndicator::where(['unit_id' => $unitId])->count();
+    }
+
     public function count__all__by__code(string|int $code): int
     {
         return ModelsIndicator::where(['code' => $code])->count();

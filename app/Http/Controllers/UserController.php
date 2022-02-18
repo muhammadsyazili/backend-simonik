@@ -120,7 +120,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User berhasil ditambahkan",
+            "User Berhasil Ditambahkan",
             null,
             null,
         );
@@ -211,7 +211,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User berhasil diubah",
+            "User Berhasil Diubah",
             null,
             null,
         );
@@ -256,7 +256,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User berhasil dihapus",
+            "User Berhasil Dihapus",
             null,
             null,
         );

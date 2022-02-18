@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
+use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Http\Request;
@@ -14,12 +15,14 @@ class UnitValidationService
 {
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
+    private ?IndicatorRepository $indicatorRepository;
 
     public function __construct(?ConstructRequest $constructRequest = null)
     {
         if (!is_null($constructRequest)) {
             $this->levelRepository = $constructRequest->levelRepository;
             $this->unitRepository = $constructRequest->unitRepository;
+            $this->indicatorRepository = $constructRequest->indicatorRepository;
         }
     }
 
@@ -204,7 +207,28 @@ class UnitValidationService
         return $validator;
     }
 
-    public function destroyValidation(Request $request)
+    //use repo IndicatorRepository
+    public function destroyValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
     {
+        $attributes = [
+            'id' => ['required', 'uuid'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'uuid' => ':attribute harus UUID format.',
+        ];
+
+        $validator = Validator::make(['id' => $id], $attributes, $messages);
+
+        //memastikan unit yang akan dihapus belum memiliki kertas kerja KPI
+        $result = $this->indicatorRepository->count__all__by__unitId($id);
+        if ($result !== 0) {
+            $validator->after(function ($validator) {
+                $validator->errors()->add('id', "Unit Kerja Tidak Bisa Dihapus, Karena Sudah Memiliki Kertas Kerja KPI.");
+            });
+        }
+
+        return $validator;
     }
 }

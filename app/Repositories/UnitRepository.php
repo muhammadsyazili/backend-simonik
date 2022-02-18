@@ -38,6 +38,11 @@ class UnitRepository
         ]);
     }
 
+    public function delete__by__id(string|int $id): void
+    {
+        ModelsUnit::where(['id' => $id])->forceDelete();
+    }
+
     public function count__all__by__slug(string $slug): int
     {
         return ModelsUnit::where(['slug' => $slug])->count();
