@@ -127,6 +127,13 @@ class LevelValidationService
             }
         }
 
+        //memastikan parent level yang akan di-update bukan merupakan level yang saat ini di-update
+        if ($level->slug === $parent_level) {
+            $validator->after(function ($validator) {
+                $validator->errors()->add('parent_level', "tidak diizinkan memilih level yang sama.");
+            });
+        }
+
         //memastikan parent level yang akan di-update terdaftar di DB
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {

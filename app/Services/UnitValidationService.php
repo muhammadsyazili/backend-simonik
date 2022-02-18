@@ -139,7 +139,7 @@ class UnitValidationService
 
         $unit = $this->unitRepository->find__by__id($id);
 
-        //memastikan nama yang akan di-store tidak mengandung keyword
+        //memastikan nama yang akan di-update tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('name', "nama sudah tersedia.");
@@ -148,7 +148,7 @@ class UnitValidationService
 
         //nama unit diubah
         if ($unit->name !== $name__uppercase) {
-            //memastikan nama yang akan di-store jika dijadikan slug belum terdaftar di DB
+            //memastikan nama yang akan di-update jika dijadikan slug belum terdaftar di DB
             $units = $this->unitRepository->find__all();
             foreach ($units as $unit) {
                 if ($unit->slug === Str::slug("$level__lowercase-$name__lowercase")) {
@@ -160,7 +160,7 @@ class UnitValidationService
             }
         }
 
-        //memastikan level yang akan di-store terdaftar di DB
+        //memastikan level yang akan di-update terdaftar di DB
         $result = $this->levelRepository->count__all__by__slug($level);
         if ($result === 0) {
             $validator->after(function ($validator) {
@@ -172,7 +172,14 @@ class UnitValidationService
         $units = $this->unitRepository->find__all__by__levelId($level->parent->id);
 
         if (count($units) !== 0) {
-            //memastikan parent unit yang akan di-store terdaftar di DB
+            //memastikan parent unit yang akan di-update bukan merupakan unit yang saat ini di-update
+            if ($unit->slug === $parent_unit) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('parent_unit', "tidak diizinkan memilih unit yang sama.");
+                });
+            }
+
+            //memastikan parent unit yang akan di-update terdaftar di DB
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
@@ -180,7 +187,7 @@ class UnitValidationService
                 });
             }
 
-            //memastikan level yang akan di-store merupakan turunan dari level yang ada di parent unit
+            //memastikan level yang akan di-update merupakan turunan dari level yang ada di parent unit
             $isAvailable = false;
             foreach ($units as $unit) {
                 if ($unit->slug === $parent_unit) {
