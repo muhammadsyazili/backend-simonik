@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\Domains\User;
+use App\Domains\User__PasswordReset;
 use App\DTO\ConstructRequest;
 use App\DTO\UserEditResponse;
 use App\DTO\UserCreateResponse;
 use App\DTO\UserDestroyRequest;
 use App\DTO\UserEditRequest;
 use App\DTO\UserIndexResponse;
+use App\DTO\UserPasswordResetRequest;
 use App\DTO\UserUpdateRequest;
 use App\DTO\UserStoreRequest;
 use App\Repositories\RoleRepository;
@@ -104,6 +106,19 @@ class UserService
     {
         DB::transaction(function () use ($userRequest) {
             $this->userRepository->delete__by__id($userRequest->id);
+        });
+    }
+
+    //use repo UserRepository
+    public function password_reset(UserPasswordResetRequest $userRequest): void
+    {
+        DB::transaction(function () use ($userRequest) {
+            $userDomain = new User__PasswordReset();
+
+            $userDomain->id = $userRequest->id;
+            $userDomain->password = Hash::make('1234567890');
+
+            $this->userRepository->update__password__by__id($userDomain);
         });
     }
 }

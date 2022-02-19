@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\ConstructRequest;
 use App\DTO\UserDestroyRequest;
 use App\DTO\UserEditRequest;
+use App\DTO\UserPasswordResetRequest;
 use App\DTO\UserUpdateRequest;
 use App\DTO\UserStoreRequest;
 use App\Repositories\RoleRepository;
@@ -257,6 +258,38 @@ class UserController extends ApiController
             true,
             Response::HTTP_OK,
             "User Berhasil Dihapus",
+            null,
+            null,
+        );
+    }
+
+    /**
+     * Resetting password the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function password_reset($id)
+    {
+        $userRepository = new UserRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+
+        $requestDTO = new UserPasswordResetRequest();
+
+        $requestDTO->id = $id;
+
+        $userService = new UserService($constructRequest);
+
+        $userService->password_reset($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Password User Berhasil Di-reset",
             null,
             null,
         );

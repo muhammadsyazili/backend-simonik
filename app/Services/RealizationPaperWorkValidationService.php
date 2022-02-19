@@ -148,7 +148,7 @@ class RealizationPaperWorkValidationService
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
-            'id' => ['required', 'string', 'uuid'], //new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)
+            'id' => ['required', 'string', 'uuid'],
             'month' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
@@ -175,7 +175,7 @@ class RealizationPaperWorkValidationService
         if ($user->role->name !== 'super-admin') {
             if (!in_array($indicator->unit_id, $this->unitRepository->find__allFlattenId__with__this_childs__by__id($user->unit->id))) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('id', "Akses Ilegal2 !");
+                    $validator->errors()->add('id', "(#4.5) : Akses Ilegal !");
                 });
             }
         }

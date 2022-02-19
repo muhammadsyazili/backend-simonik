@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Domains\User;
+use App\Domains\User__PasswordReset;
 use App\Models\User as ModelsUser;
 
 class UserRepository
@@ -30,6 +31,14 @@ class UserRepository
             'username' => $user->username,
             'email' => $user->email,
             'unit_id' => $user->unit_id,
+        ]);
+    }
+
+    public function update__password__by__id(User__PasswordReset $user)
+    {
+        ModelsUser::where(['id' => $user->id])->update([
+            'password' => $user->password,
+            'actived' => false,
         ]);
     }
 
