@@ -202,14 +202,16 @@ class IndicatorService
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
-                            $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $indicatorOld->id;
-                            $targetDomain->month = $v;
-                            $targetDomain->value = 0;
-                            $targetDomain->locked = true;
-                            $targetDomain->default = true;
+                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                $targetDomain->id = (string) Str::orderedUuid();
+                                $targetDomain->indicator_id = $indicatorOld->id;
+                                $targetDomain->month = $v;
+                                $targetDomain->value = 0;
+                                $targetDomain->locked = true;
+                                $targetDomain->default = true;
 
-                            $this->targetRepository->save($targetDomain); //save target
+                                $this->targetRepository->save($targetDomain); //save target
+                            }
 
                             $realizationDomain->id = (string) Str::orderedUuid();
                             $realizationDomain->indicator_id = $indicatorOld->id;
@@ -241,14 +243,16 @@ class IndicatorService
                 } else { //masa berlaku lama nol
                     if (count($indicatorNew->validity) > 0) {
                         foreach ($indicatorNew->validity as $key => $value) {
-                            $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $indicatorOld->id;
-                            $targetDomain->month = $key;
-                            $targetDomain->value = 0;
-                            $targetDomain->locked = true;
-                            $targetDomain->default = true;
+                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                $targetDomain->id = (string) Str::orderedUuid();
+                                $targetDomain->indicator_id = $indicatorOld->id;
+                                $targetDomain->month = $key;
+                                $targetDomain->value = 0;
+                                $targetDomain->locked = true;
+                                $targetDomain->default = true;
 
-                            $this->targetRepository->save($targetDomain); //save target
+                                $this->targetRepository->save($targetDomain); //save target
+                            }
 
                             $realizationDomain->id = (string) Str::orderedUuid();
                             $realizationDomain->indicator_id = $indicatorOld->id;
@@ -326,14 +330,16 @@ class IndicatorService
 
                             if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                                 foreach ($new as $v) {
-                                    $targetDomain->id = (string) Str::orderedUuid();
-                                    $targetDomain->indicator_id = $familyIndicatorOld->id;
-                                    $targetDomain->month = $v;
-                                    $targetDomain->value = 0;
-                                    $targetDomain->locked = true;
-                                    $targetDomain->default = true;
+                                    if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $familyIndicatorOld->id;
+                                        $targetDomain->month = $v;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = true;
+                                        $targetDomain->default = true;
 
-                                    $this->targetRepository->save($targetDomain); //save target
+                                        $this->targetRepository->save($targetDomain); //save target
+                                    }
 
                                     $realizationDomain->id = (string) Str::orderedUuid();
                                     $realizationDomain->indicator_id = $familyIndicatorOld->id;
@@ -365,14 +371,16 @@ class IndicatorService
                         } else { //masa berlaku lama nol
                             if (count($indicatorNew->validity) > 0) {
                                 foreach ($indicatorNew->validity as $key => $value) {
-                                    $targetDomain->id = (string) Str::orderedUuid();
-                                    $targetDomain->indicator_id = $familyIndicatorOld->id;
-                                    $targetDomain->month = $key;
-                                    $targetDomain->value = 0;
-                                    $targetDomain->locked = true;
-                                    $targetDomain->default = true;
+                                    if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                        $targetDomain->id = (string) Str::orderedUuid();
+                                        $targetDomain->indicator_id = $familyIndicatorOld->id;
+                                        $targetDomain->month = $key;
+                                        $targetDomain->value = 0;
+                                        $targetDomain->locked = true;
+                                        $targetDomain->default = true;
 
-                                    $this->targetRepository->save($targetDomain); //save target
+                                        $this->targetRepository->save($targetDomain); //save target
+                                    }
 
                                     $realizationDomain->id = (string) Str::orderedUuid();
                                     $realizationDomain->indicator_id = $familyIndicatorOld->id;
@@ -443,14 +451,16 @@ class IndicatorService
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
-                            $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $indicatorOld->id;
-                            $targetDomain->month = $v;
-                            $targetDomain->value = 0;
-                            $targetDomain->locked = true;
-                            $targetDomain->default = true;
+                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                $targetDomain->id = (string) Str::orderedUuid();
+                                $targetDomain->indicator_id = $indicatorOld->id;
+                                $targetDomain->month = $v;
+                                $targetDomain->value = 0;
+                                $targetDomain->locked = true;
+                                $targetDomain->default = true;
 
-                            $this->targetRepository->save($targetDomain); //save target
+                                $this->targetRepository->save($targetDomain); //save target
+                            }
 
                             $realizationDomain->id = (string) Str::orderedUuid();
                             $realizationDomain->indicator_id = $indicatorOld->id;
@@ -482,14 +492,16 @@ class IndicatorService
                 } else { //masa berlaku lama nol
                     if (count($indicatorNew->validity) > 0) {
                         foreach ($indicatorNew->validity as $key => $value) {
-                            $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $indicatorOld->id;
-                            $targetDomain->month = $key;
-                            $targetDomain->value = 0;
-                            $targetDomain->locked = true;
-                            $targetDomain->default = true;
+                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                $targetDomain->id = (string) Str::orderedUuid();
+                                $targetDomain->indicator_id = $indicatorOld->id;
+                                $targetDomain->month = $key;
+                                $targetDomain->value = 0;
+                                $targetDomain->locked = true;
+                                $targetDomain->default = true;
 
-                            $this->targetRepository->save($targetDomain); //save target
+                                $this->targetRepository->save($targetDomain); //save target
+                            }
 
                             $realizationDomain->id = (string) Str::orderedUuid();
                             $realizationDomain->indicator_id = $indicatorOld->id;

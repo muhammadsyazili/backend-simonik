@@ -181,14 +181,16 @@ class IndicatorPaperWorkService
                 //target 'MASTER' creating
                 if (!is_null($superMasterIndicator->validity)) {
                     foreach ($superMasterIndicator->validity as $validityKey => $validityValue) {
-                        $targetDomain->id = (string) Str::orderedUuid();
-                        $targetDomain->indicator_id = $idListMaster[$superMasterIndicator->id];
-                        $targetDomain->month = $validityKey;
-                        $targetDomain->value = 0;
-                        $targetDomain->locked = false;
-                        $targetDomain->default = true;
+                        if (!$superMasterIndicator->reducing_factor) { //bukan faktor reduksi
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $idListMaster[$superMasterIndicator->id];
+                            $targetDomain->month = $validityKey;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = false;
+                            $targetDomain->default = true;
 
-                        $this->targetRepository->save($targetDomain);
+                            $this->targetRepository->save($targetDomain);
+                        }
                     }
                 }
                 $i++;
@@ -234,14 +236,16 @@ class IndicatorPaperWorkService
                     //target & realisasi 'CHILD' creating
                     if (!is_null($masterIndicator->validity)) {
                         foreach ($masterIndicator->validity as $validityKey => $validityValue) {
-                            $targetDomain->id = (string) Str::orderedUuid();
-                            $targetDomain->indicator_id = $idListChild[$masterIndicator->id];
-                            $targetDomain->month = $validityKey;
-                            $targetDomain->value = 0;
-                            $targetDomain->locked = false;
-                            $targetDomain->default = true;
+                            if (!$masterIndicator->reducing_factor) { //bukan faktor reduksi
+                                $targetDomain->id = (string) Str::orderedUuid();
+                                $targetDomain->indicator_id = $idListChild[$masterIndicator->id];
+                                $targetDomain->month = $validityKey;
+                                $targetDomain->value = 0;
+                                $targetDomain->locked = false;
+                                $targetDomain->default = true;
 
-                            $this->targetRepository->save($targetDomain);
+                                $this->targetRepository->save($targetDomain);
+                            }
 
                             $realizationDomain->id = (string) Str::orderedUuid();
                             $realizationDomain->indicator_id = $idListChild[$masterIndicator->id];
@@ -309,14 +313,16 @@ class IndicatorPaperWorkService
                 //target & realisasi 'CHILD' creating
                 if (!is_null($masterIndicator->validity)) {
                     foreach ($masterIndicator->validity as $validityKey => $validityValue) {
-                        $targetDomain->id = (string) Str::orderedUuid();
-                        $targetDomain->indicator_id = $idListChild[$masterIndicator->id];
-                        $targetDomain->month = $validityKey;
-                        $targetDomain->value = 0;
-                        $targetDomain->locked = false;
-                        $targetDomain->default = true;
+                        if (!$masterIndicator->reducing_factor) { //bukan faktor reduksi
+                            $targetDomain->id = (string) Str::orderedUuid();
+                            $targetDomain->indicator_id = $idListChild[$masterIndicator->id];
+                            $targetDomain->month = $validityKey;
+                            $targetDomain->value = 0;
+                            $targetDomain->locked = false;
+                            $targetDomain->default = true;
 
-                        $this->targetRepository->save($targetDomain);
+                            $this->targetRepository->save($targetDomain);
+                        }
 
                         $realizationDomain->id = (string) Str::orderedUuid();
                         $realizationDomain->indicator_id = $idListChild[$masterIndicator->id];
@@ -486,14 +492,16 @@ class IndicatorPaperWorkService
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityvalue) {
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomain->month = $validityKey;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = false;
-                                        $targetDomain->default = true;
+                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                            $targetDomain->month = $validityKey;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = false;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain);
+                                            $this->targetRepository->save($targetDomain);
+                                        }
                                     }
                                 }
                             } else {
@@ -535,14 +543,16 @@ class IndicatorPaperWorkService
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomain->month = $validityKey;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = false;
-                                        $targetDomain->default = true;
+                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                            $targetDomain->month = $validityKey;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = false;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain);
+                                            $this->targetRepository->save($targetDomain);
+                                        }
                                     }
                                 }
 
@@ -598,14 +608,16 @@ class IndicatorPaperWorkService
                                                 //target 'MASTER' creating
                                                 if (!is_null($indicatorSuperMaster->validity)) {
                                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                        $targetDomain->id = (string) Str::orderedUuid();
-                                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                                        $targetDomain->month = $validityKey;
-                                                        $targetDomain->value = 0;
-                                                        $targetDomain->locked = false;
-                                                        $targetDomain->default = true;
+                                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                            $targetDomain->id = (string) Str::orderedUuid();
+                                                            $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                                            $targetDomain->month = $validityKey;
+                                                            $targetDomain->value = 0;
+                                                            $targetDomain->locked = false;
+                                                            $targetDomain->default = true;
 
-                                                        $this->targetRepository->save($targetDomain);
+                                                            $this->targetRepository->save($targetDomain);
+                                                        }
                                                     }
                                                 }
 
@@ -756,14 +768,16 @@ class IndicatorPaperWorkService
                                         //target & realisasi 'CHILD' creating
                                         if (!is_null($indicatorSuperMaster->validity)) {
                                             foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
-                                                $targetDomain->id = (string) Str::orderedUuid();
-                                                $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $targetDomain->month = $validitykey;
-                                                $targetDomain->value = 0;
-                                                $targetDomain->locked = false;
-                                                $targetDomain->default = true;
+                                                if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                    $targetDomain->id = (string) Str::orderedUuid();
+                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                    $targetDomain->month = $validitykey;
+                                                    $targetDomain->value = 0;
+                                                    $targetDomain->locked = false;
+                                                    $targetDomain->default = true;
 
-                                                $this->targetRepository->save($targetDomain);
+                                                    $this->targetRepository->save($targetDomain);
+                                                }
 
                                                 $realizationDomain->id = (string) Str::orderedUuid();
                                                 $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -814,14 +828,16 @@ class IndicatorPaperWorkService
                                         //target & realisasi 'CHILD' creating
                                         if (!is_null($indicatorSuperMaster->validity)) {
                                             foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                $targetDomain->id = (string) Str::orderedUuid();
-                                                $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                $targetDomain->month = $validityKey;
-                                                $targetDomain->value = 0;
-                                                $targetDomain->locked = false;
-                                                $targetDomain->default = true;
+                                                if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                    $targetDomain->id = (string) Str::orderedUuid();
+                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                    $targetDomain->month = $validityKey;
+                                                    $targetDomain->value = 0;
+                                                    $targetDomain->locked = false;
+                                                    $targetDomain->default = true;
 
-                                                $this->targetRepository->save($targetDomain);
+                                                    $this->targetRepository->save($targetDomain);
+                                                }
 
                                                 $realizationDomain->id = (string) Str::orderedUuid();
                                                 $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -887,14 +903,16 @@ class IndicatorPaperWorkService
                                                         //target & realisasi 'CHILD' creating
                                                         if (!is_null($indicatorSuperMaster->validity)) {
                                                             foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                                $targetDomain->id = (string) Str::orderedUuid();
-                                                                $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                                $targetDomain->month = $validityKey;
-                                                                $targetDomain->value = 0;
-                                                                $targetDomain->locked = false;
-                                                                $targetDomain->default = true;
+                                                                if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                                    $targetDomain->id = (string) Str::orderedUuid();
+                                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                                    $targetDomain->month = $validityKey;
+                                                                    $targetDomain->value = 0;
+                                                                    $targetDomain->locked = false;
+                                                                    $targetDomain->default = true;
 
-                                                                $this->targetRepository->save($targetDomain);
+                                                                    $this->targetRepository->save($targetDomain);
+                                                                }
 
                                                                 $realizationDomain->id = (string) Str::orderedUuid();
                                                                 $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -1064,14 +1082,16 @@ class IndicatorPaperWorkService
                                             //target & realisasi 'CHILD' creating
                                             if (!is_null($indicatorSuperMaster->validity)) {
                                                 foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
-                                                    $targetDomain->id = (string) Str::orderedUuid();
-                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $targetDomain->month = $validitykey;
-                                                    $targetDomain->value = 0;
-                                                    $targetDomain->locked = false;
-                                                    $targetDomain->default = true;
+                                                    if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                        $targetDomain->id = (string) Str::orderedUuid();
+                                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                        $targetDomain->month = $validitykey;
+                                                        $targetDomain->value = 0;
+                                                        $targetDomain->locked = false;
+                                                        $targetDomain->default = true;
 
-                                                    $this->targetRepository->save($targetDomain);
+                                                        $this->targetRepository->save($targetDomain);
+                                                    }
 
                                                     $realizationDomain->id = (string) Str::orderedUuid();
                                                     $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -1122,14 +1142,16 @@ class IndicatorPaperWorkService
                                             //target & realisasi 'CHILD' creating
                                             if (!is_null($indicatorSuperMaster->validity)) {
                                                 foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                    $targetDomain->id = (string) Str::orderedUuid();
-                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                    $targetDomain->month = $validityKey;
-                                                    $targetDomain->value = 0;
-                                                    $targetDomain->locked = false;
-                                                    $targetDomain->default = true;
+                                                    if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                        $targetDomain->id = (string) Str::orderedUuid();
+                                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                        $targetDomain->month = $validityKey;
+                                                        $targetDomain->value = 0;
+                                                        $targetDomain->locked = false;
+                                                        $targetDomain->default = true;
 
-                                                    $this->targetRepository->save($targetDomain);
+                                                        $this->targetRepository->save($targetDomain);
+                                                    }
 
                                                     $realizationDomain->id = (string) Str::orderedUuid();
                                                     $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -1195,14 +1217,16 @@ class IndicatorPaperWorkService
                                                             //target & realisasi 'CHILD' creating
                                                             if (!is_null($indicatorSuperMaster->validity)) {
                                                                 foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                                    $targetDomain->id = (string) Str::orderedUuid();
-                                                                    $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                                    $targetDomain->month = $validityKey;
-                                                                    $targetDomain->value = 0;
-                                                                    $targetDomain->locked = false;
-                                                                    $targetDomain->default = true;
+                                                                    if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                                        $targetDomain->id = (string) Str::orderedUuid();
+                                                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                                        $targetDomain->month = $validityKey;
+                                                                        $targetDomain->value = 0;
+                                                                        $targetDomain->locked = false;
+                                                                        $targetDomain->default = true;
 
-                                                                    $this->targetRepository->save($targetDomain);
+                                                                        $this->targetRepository->save($targetDomain);
+                                                                    }
 
                                                                     $realizationDomain->id = (string) Str::orderedUuid();
                                                                     $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -1368,14 +1392,16 @@ class IndicatorPaperWorkService
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validitykey => $validityvalue) {
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomain->month = $validitykey;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = false;
-                                        $targetDomain->default = true;
+                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                            $targetDomain->month = $validitykey;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = false;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain);
+                                            $this->targetRepository->save($targetDomain);
+                                        }
                                     }
                                 }
                             } else {
@@ -1417,14 +1443,16 @@ class IndicatorPaperWorkService
                                 //target 'MASTER' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                        $targetDomain->month = $validityKey;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = false;
-                                        $targetDomain->default = true;
+                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                            $targetDomain->month = $validityKey;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = false;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain);
+                                            $this->targetRepository->save($targetDomain);
+                                        }
                                     }
                                 }
 
@@ -1480,14 +1508,16 @@ class IndicatorPaperWorkService
                                                 //target 'MASTER' creating
                                                 if (!is_null($indicatorSuperMaster->validity)) {
                                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                        $targetDomain->id = (string) Str::orderedUuid();
-                                                        $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
-                                                        $targetDomain->month = $validityKey;
-                                                        $targetDomain->value = 0;
-                                                        $targetDomain->locked = false;
-                                                        $targetDomain->default = true;
+                                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                            $targetDomain->id = (string) Str::orderedUuid();
+                                                            $targetDomain->indicator_id = $idListMaster[$indicatorSuperMaster->id];
+                                                            $targetDomain->month = $validityKey;
+                                                            $targetDomain->value = 0;
+                                                            $targetDomain->locked = false;
+                                                            $targetDomain->default = true;
 
-                                                        $this->targetRepository->save($targetDomain);
+                                                            $this->targetRepository->save($targetDomain);
+                                                        }
                                                     }
                                                 }
 
@@ -1611,14 +1641,16 @@ class IndicatorPaperWorkService
                                 //target & realisasi 'CHILD' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validitykey => $validityValue) {
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                        $targetDomain->month = $validitykey;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = false;
-                                        $targetDomain->default = true;
+                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                            $targetDomain->month = $validitykey;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = false;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain);
+                                            $this->targetRepository->save($targetDomain);
+                                        }
 
                                         $realizationDomain->id = (string) Str::orderedUuid();
                                         $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -1669,14 +1701,16 @@ class IndicatorPaperWorkService
                                 //target & realisasi 'CHILD' creating
                                 if (!is_null($indicatorSuperMaster->validity)) {
                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                        $targetDomain->month = $validityKey;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = false;
-                                        $targetDomain->default = true;
+                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                            $targetDomain->month = $validityKey;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = false;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain);
+                                            $this->targetRepository->save($targetDomain);
+                                        }
 
                                         $realizationDomain->id = (string) Str::orderedUuid();
                                         $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
@@ -1742,14 +1776,16 @@ class IndicatorPaperWorkService
                                                 //target & realisasi 'CHILD' creating
                                                 if (!is_null($indicatorSuperMaster->validity)) {
                                                     foreach ($indicatorSuperMaster->validity as $validityKey => $validityValue) {
-                                                        $targetDomain->id = (string) Str::orderedUuid();
-                                                        $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
-                                                        $targetDomain->month = $validityKey;
-                                                        $targetDomain->value = 0;
-                                                        $targetDomain->locked = false;
-                                                        $targetDomain->default = true;
+                                                        if (!$indicatorSuperMaster->reducing_factor) { //bukan faktor reduksi
+                                                            $targetDomain->id = (string) Str::orderedUuid();
+                                                            $targetDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
+                                                            $targetDomain->month = $validityKey;
+                                                            $targetDomain->value = 0;
+                                                            $targetDomain->locked = false;
+                                                            $targetDomain->default = true;
 
-                                                        $this->targetRepository->save($targetDomain);
+                                                            $this->targetRepository->save($targetDomain);
+                                                        }
 
                                                         $realizationDomain->id = (string) Str::orderedUuid();
                                                         $realizationDomain->indicator_id = $idListChild[$indicatorSuperMaster->id];
