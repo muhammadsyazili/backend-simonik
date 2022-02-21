@@ -354,7 +354,7 @@ class PaperWorkIndicatorController extends ApiController
     }
 
     /**
-     * Reorder the specified resource in storage.
+     * Reorder KPI.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse

@@ -193,14 +193,14 @@ class PaperWorkRealizationController extends ApiController
     }
 
     /**
-     * Change lock.
+     * Lock change.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string|int  $id
      * @param  string  $month
      * @return \Illuminate\Http\JsonResponse
      */
-    public function change_lock(Request $request, $id, $month)
+    public function lock_change(Request $request, $id, $month)
     {
         $userRepository = new UserRepository();
         $unitRepository = new UnitRepository();

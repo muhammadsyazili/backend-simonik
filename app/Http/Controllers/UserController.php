@@ -265,7 +265,7 @@ class UserController extends ApiController
     }
 
     /**
-     * Resetting password.
+     * Password reset.
      *
      * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse

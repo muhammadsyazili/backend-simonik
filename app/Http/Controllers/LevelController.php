@@ -281,12 +281,12 @@ class LevelController extends ApiController
     }
 
     /**
-     * Levels of parents.
+     * Parents of level.
      *
      * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
      */
-    public function levels_of_parents($slug)
+    public function parents_of_level($slug)
     {
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();

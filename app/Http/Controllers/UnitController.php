@@ -281,7 +281,7 @@ class UnitController extends ApiController
     }
 
     /**
-     * Display a listing of units by level the resource.
+     * Units of level.
      *
      * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
