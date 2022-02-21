@@ -57,6 +57,11 @@ class UserRepository
         return ModelsUser::findOrFail($id);
     }
 
+    public function find__actived__by__id(string|int $id): bool
+    {
+        return ModelsUser::findOrFail($id)->actived;
+    }
+
     public function find__with__role_unit_level__by__id(string|int $id)
     {
         return ModelsUser::with(['role', 'unit.level'])->findOrFail($id);

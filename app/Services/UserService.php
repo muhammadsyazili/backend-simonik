@@ -11,6 +11,8 @@ use App\DTO\UserDestroyRequest;
 use App\DTO\UserEditRequest;
 use App\DTO\UserIndexResponse;
 use App\DTO\UserPasswordResetRequest;
+use App\DTO\UserStatusCheckRequest;
+use App\DTO\UserStatusCheckResponse;
 use App\DTO\UserUpdateRequest;
 use App\DTO\UserStoreRequest;
 use App\Repositories\RoleRepository;
@@ -120,5 +122,15 @@ class UserService
 
             $this->userRepository->update__password__by__id($userDomain);
         });
+    }
+
+    //use repo UserRepository
+    public function status_check(UserStatusCheckRequest $userRequest): UserStatusCheckResponse
+    {
+        $response = new UserStatusCheckResponse();
+
+        $response->actived = $this->userRepository->find__actived__by__id($userRequest->id);
+
+        return $response;
     }
 }

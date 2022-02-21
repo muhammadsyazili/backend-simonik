@@ -122,7 +122,7 @@ class LevelController extends ApiController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
@@ -157,7 +157,7 @@ class LevelController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
@@ -206,7 +206,7 @@ class LevelController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
@@ -251,13 +251,13 @@ class LevelController extends ApiController
     }
 
     /**
-     * Display a listing of levels by user the resource.
+     * Levels of user.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function levelsOfUser(Request $request, $id)
+    public function levels_of_user(Request $request, $id)
     {
         $levelRepository = new LevelRepository();
         $userRepository = new UserRepository();
@@ -280,7 +280,13 @@ class LevelController extends ApiController
         );
     }
 
-    public function levelsOfParents(Request $request, $slug)
+    /**
+     * Levels of parents.
+     *
+     * @param  string  $slug
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function levels_of_parents($slug)
     {
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();

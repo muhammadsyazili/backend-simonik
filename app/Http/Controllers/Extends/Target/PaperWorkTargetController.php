@@ -51,7 +51,7 @@ class PaperWorkTargetController extends ApiController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
@@ -181,7 +181,7 @@ class PaperWorkTargetController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)

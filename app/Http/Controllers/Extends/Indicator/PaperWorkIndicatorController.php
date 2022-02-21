@@ -85,6 +85,7 @@ class PaperWorkIndicatorController extends ApiController
     /**
      * Show the form for creating a new resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function create(Request $request)

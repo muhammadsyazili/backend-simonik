@@ -107,6 +107,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/user/{id}/password/reset', [App\Http\Controllers\UserController::class, 'password_reset'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
+
+    Route::get('/user/{id}/status/check', [App\Http\Controllers\UserController::class, 'status_check'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
     //End Route : user
 
     //Route : level
@@ -150,7 +153,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //End Route : unit
 });
 
-Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'unitsOfLevel']);
-Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'levelsOfParents']);
-Route::get('/user/{id}/levels', [App\Http\Controllers\LevelController::class, 'levelsOfUser']);
-Route::get('/realizations/paper-work/{id}/{month}/change-lock', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'changeLock']);
+Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'units_of_level']);
+Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'levels_of_parents']);
+Route::get('/user/{id}/levels', [App\Http\Controllers\LevelController::class, 'levels_of_user']);
+Route::get('/realizations/paper-work/{id}/{month}/change-lock', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'change_lock']);

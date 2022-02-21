@@ -6,6 +6,7 @@ use App\DTO\ConstructRequest;
 use App\DTO\UserDestroyRequest;
 use App\DTO\UserEditRequest;
 use App\DTO\UserPasswordResetRequest;
+use App\DTO\UserStatusCheckRequest;
 use App\DTO\UserUpdateRequest;
 use App\DTO\UserStoreRequest;
 use App\Repositories\RoleRepository;
@@ -130,7 +131,7 @@ class UserController extends ApiController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
@@ -167,7 +168,7 @@ class UserController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
@@ -221,7 +222,7 @@ class UserController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
@@ -264,10 +265,9 @@ class UserController extends ApiController
     }
 
     /**
-     * Resetting password the specified resource in storage.
+     * Resetting password.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function password_reset($id)
@@ -291,6 +291,39 @@ class UserController extends ApiController
             Response::HTTP_OK,
             "Password User Berhasil Di-reset",
             null,
+            null,
+        );
+    }
+
+    /**
+     * Status check.
+     *
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function status_check($id)
+    {
+        $userRepository = new UserRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+
+        $requestDTO = new UserStatusCheckRequest();
+
+        $requestDTO->id = $id;
+
+        $userService = new UserService($constructRequest);
+
+        $response = $userService->status_check($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "User Status",
+            [
+                'user' => ['status' => $response->actived],
+            ],
             null,
         );
     }

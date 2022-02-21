@@ -145,7 +145,7 @@ class UnitController extends ApiController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function edit(Request $request, $id)
@@ -185,7 +185,7 @@ class UnitController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
@@ -236,7 +236,7 @@ class UnitController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
@@ -283,16 +283,11 @@ class UnitController extends ApiController
     /**
      * Display a listing of units by level the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
      */
-    public function unitsOfLevel(Request $request, $slug)
+    public function units_of_level($slug)
     {
-        //logging
-        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
-
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 

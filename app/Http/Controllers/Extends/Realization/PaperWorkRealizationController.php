@@ -22,7 +22,7 @@ class PaperWorkRealizationController extends ApiController
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -32,7 +32,7 @@ class PaperWorkRealizationController extends ApiController
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create()
     {
@@ -43,7 +43,7 @@ class PaperWorkRealizationController extends ApiController
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -53,8 +53,8 @@ class PaperWorkRealizationController extends ApiController
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
@@ -65,7 +65,7 @@ class PaperWorkRealizationController extends ApiController
      * Show the form for editing the specified resource.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit(Request $request)
     {
@@ -122,8 +122,8 @@ class PaperWorkRealizationController extends ApiController
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request)
     {
@@ -184,20 +184,24 @@ class PaperWorkRealizationController extends ApiController
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
         //
     }
 
-    public function changeLock(Request $request, $id, $month)
+    /**
+     * Change lock.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|int  $id
+     * @param  string  $month
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function change_lock(Request $request, $id, $month)
     {
-        //logging
-        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $output->writeln(sprintf('id: %s', $request->header('X-User-Id')));
-
         $userRepository = new UserRepository();
         $unitRepository = new UnitRepository();
         $indicatorRepository = new IndicatorRepository();
