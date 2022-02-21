@@ -69,7 +69,7 @@ class UnitService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levelsOfUser($userId, false);
+        $response->levels = $levelService->levels_of_user($userId, false);
 
         return $response;
     }
@@ -126,7 +126,7 @@ class UnitService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levelsOfUser($unitRequest->userId, false);
+        $response->levels = $levelService->levels_of_user($unitRequest->userId, false);
         $response->unit = $this->unitRepository->find__by__id($unitRequest->id);
 
         return $response;
@@ -140,7 +140,7 @@ class UnitService
 
             $unit = $this->unitRepository->find__with__level__by__id($unitRequest->id);
 
-            $unitRequest->name = str_replace($unit->level->name.' - ', '', $unitRequest->name); //menghapus prefix
+            $unitRequest->name = str_replace($unit->level->name . ' - ', '', $unitRequest->name); //menghapus prefix
 
             $level__uppercase = strtoupper($unitRequest->level);
             $level__lowercase = strtolower($unitRequest->level);
@@ -169,7 +169,7 @@ class UnitService
     }
 
     //use repo LevelRepository, UnitRepository
-    public function unitsOfLevel(string $slug)
+    public function units_of_level(string $slug)
     {
         return $this->unitRepository->find__allSlug_allName__by__levelId($this->levelRepository->find__id__by__slug($slug));
     }

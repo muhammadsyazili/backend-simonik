@@ -49,7 +49,7 @@ class RealizationPaperWorkService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levelsOfUser($userId, false);
+        $response->levels = $levelService->levels_of_user($userId, false);
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
 
@@ -99,7 +99,7 @@ class RealizationPaperWorkService
     }
 
     //use repo RealizationRepository
-    public function changeLock(RealizationPaperWorkChangeLockRequest $realizationPaperWorkRequest): void
+    public function lock_change(RealizationPaperWorkChangeLockRequest $realizationPaperWorkRequest): void
     {
         $indicatorId = $realizationPaperWorkRequest->indicatorId;
         $month = $realizationPaperWorkRequest->month;

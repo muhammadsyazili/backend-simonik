@@ -79,7 +79,7 @@ class IndicatorPaperWorkService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levelsOfUser($userId, true);
+        $response->levels = $levelService->levels_of_user($userId, true);
 
         $response->indicators = $level === 'super-master' ? $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
 

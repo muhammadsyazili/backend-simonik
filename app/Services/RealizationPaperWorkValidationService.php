@@ -143,7 +143,7 @@ class RealizationPaperWorkValidationService
     }
 
     //use repo UserRepository, IndicatorRepository, UnitRepository
-    public function changeLockValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    public function lockChangeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 

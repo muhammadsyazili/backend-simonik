@@ -296,12 +296,12 @@ class UserController extends ApiController
     }
 
     /**
-     * Status check.
+     * Active check.
      *
      * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function status_check($id)
+    public function active_check($id)
     {
         $userRepository = new UserRepository();
 
@@ -315,7 +315,7 @@ class UserController extends ApiController
 
         $userService = new UserService($constructRequest);
 
-        $response = $userService->status_check($requestDTO);
+        $response = $userService->active_check($requestDTO);
 
         return $this->APIResponse(
             true,

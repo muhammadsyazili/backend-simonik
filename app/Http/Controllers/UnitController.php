@@ -298,7 +298,7 @@ class UnitController extends ApiController
 
         $unitService = new UnitService($constructRequest);
 
-        $units = $unitService->unitsOfLevel($slug);
+        $units = $unitService->units_of_level($slug);
 
         return $this->APIResponse(
             true,

@@ -48,7 +48,7 @@ class TargetPaperWorkService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levelsOfUser($userId, false);
+        $response->levels = $levelService->levels_of_user($userId, false);
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
 

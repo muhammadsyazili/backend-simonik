@@ -216,7 +216,7 @@ class PaperWorkRealizationController extends ApiController
 
         $realizationPaperWorkValidationService = new RealizationPaperWorkValidationService($constructRequest);
 
-        $validation = $realizationPaperWorkValidationService->changeLockValidation($request);
+        $validation = $realizationPaperWorkValidationService->lockChangeValidation($request);
 
         if ($validation->fails()) {
             return $this->APIResponse(
@@ -235,7 +235,7 @@ class PaperWorkRealizationController extends ApiController
 
         $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
 
-        $realizationPaperWorkService->changeLock($requestDTO);
+        $realizationPaperWorkService->lock_change($requestDTO);
 
         return $this->APIResponse(
             true,

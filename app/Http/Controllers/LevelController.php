@@ -269,7 +269,7 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $levels = $levelService->levelsOfUser($id, $request->query('with-super-master') === 'true' ? true : false);
+        $levels = $levelService->levels_of_user($id, $request->query('with-super-master') === 'true' ? true : false);
 
         return $this->APIResponse(
             true,
@@ -298,7 +298,7 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $levels = $levelService->levelsOfParents($slug);
+        $levels = $levelService->parents_of_level($slug);
 
         return $this->APIResponse(
             true,

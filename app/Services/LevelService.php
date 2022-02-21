@@ -125,7 +125,7 @@ class LevelService
     }
 
     //use repo LevelRepository, UserRepository
-    public function levelsOfUser(string|int $id, bool $withSuperMaster)
+    public function levels_of_user(string|int $id, bool $withSuperMaster)
     {
         $user = $this->userRepository->find__with__role_unit_level__by__id($id);
 
@@ -140,7 +140,7 @@ class LevelService
     }
 
     //use repo LevelRepository, UnitRepository
-    public function levelsOfParents(string $slug)
+    public function parents_of_level(string $slug)
     {
         $level = $this->levelRepository->find__with__parent__by__slug($slug);
 

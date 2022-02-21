@@ -125,7 +125,7 @@ class UserService
     }
 
     //use repo UserRepository
-    public function status_check(UserStatusCheckRequest $userRequest): UserStatusCheckResponse
+    public function active_check(UserStatusCheckRequest $userRequest): UserStatusCheckResponse
     {
         $response = new UserStatusCheckResponse();
 
