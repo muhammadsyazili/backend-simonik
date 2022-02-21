@@ -296,6 +296,18 @@ class UserController extends ApiController
     }
 
     /**
+     * Password reset.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function password_change(Request $request, $id)
+    {
+
+    }
+
+    /**
      * Active check.
      *
      * @param  string|int  $id
@@ -320,9 +332,9 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User Status",
+            "Active Check",
             [
-                'user' => ['status' => $response->actived],
+                'user' => ['actived' => $response->actived],
             ],
             null,
         );

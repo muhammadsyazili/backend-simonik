@@ -105,8 +105,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user/{id}', [App\Http\Controllers\UserController::class, 'destroy'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
 
-    Route::put('/user/{id}/password/reset', [App\Http\Controllers\UserController::class, 'password_reset'])
+    Route::get('/user/{id}/password/reset', [App\Http\Controllers\UserController::class, 'password_reset'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
+
+    Route::put('/user/{id}/password/change', [App\Http\Controllers\UserController::class, 'password_change'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
 
     Route::get('/user/{id}/active/check', [App\Http\Controllers\UserController::class, 'active_check'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
