@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Domains\User;
-use App\Domains\User__PasswordReset;
+use App\Domains\User__PasswordModify;
 use App\Models\User as ModelsUser;
 
 class UserRepository
@@ -34,11 +34,11 @@ class UserRepository
         ]);
     }
 
-    public function update__password__by__id(User__PasswordReset $user)
+    public function update__password__by__id(User__PasswordModify $user, bool $actived = false)
     {
         ModelsUser::where(['id' => $user->id])->update([
             'password' => $user->password,
-            'actived' => false,
+            'actived' => $actived,
         ]);
     }
 

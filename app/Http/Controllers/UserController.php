@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\ConstructRequest;
 use App\DTO\UserDestroyRequest;
 use App\DTO\UserEditRequest;
+use App\DTO\UserPasswordChangeRequest;
 use App\DTO\UserPasswordResetRequest;
 use App\DTO\UserStatusCheckRequest;
 use App\DTO\UserUpdateRequest;
@@ -289,7 +290,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Password User Berhasil Di-reset",
+            "Password Berhasil Di-reset",
             null,
             null,
         );
@@ -304,7 +305,28 @@ class UserController extends ApiController
      */
     public function password_change(Request $request, $id)
     {
+        $userRepository = new UserRepository();
 
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+
+        $requestDTO = new UserPasswordChangeRequest();
+
+        $requestDTO->id = $id;
+        $requestDTO->password = $request->post('password');
+
+        $userService = new UserService($constructRequest);
+
+        $userService->password_change($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Password Berhasil Diubah",
+            null,
+            null,
+        );
     }
 
     /**
