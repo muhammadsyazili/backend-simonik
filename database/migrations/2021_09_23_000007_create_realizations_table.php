@@ -18,7 +18,7 @@ class CreateRealizationsTable extends Migration
             $table->primary('id');
             $table->foreignUuid('indicator_id')->constrained()->onUpdate('cascade')->onDelete('restrict');
             $table->enum('month', ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']);
-            $table->float('value', 8, 5, true);
+            $table->double('value', 14, 4, true);
             $table->boolean('locked')->default(0);
             $table->boolean('default')->default(1);
             $table->timestamps();
