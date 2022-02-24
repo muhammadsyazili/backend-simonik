@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\DB;
 
 class TargetPaperWorkService
 {
-
     private ?UserRepository $userRepository;
     private ?LevelRepository $levelRepository;
     private ?IndicatorRepository $indicatorRepository;

@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 
 class RealizationPaperWorkService
 {
-
     private ?UserRepository $userRepository;
     private ?LevelRepository $levelRepository;
     private ?IndicatorRepository $indicatorRepository;
@@ -52,8 +51,9 @@ class RealizationPaperWorkService
         $response->levels = $levelService->levels_of_user($userId, false);
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
+        $unitId = $this->unitRepository->find__id__by__slug($unit);
 
-        $response->indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+        $response->indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
 
         return $response;
     }

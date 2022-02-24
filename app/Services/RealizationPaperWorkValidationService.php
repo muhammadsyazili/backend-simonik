@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Validator;
 
 class RealizationPaperWorkValidationService
 {
-
     private ?UserRepository $userRepository;
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
@@ -42,7 +41,7 @@ class RealizationPaperWorkValidationService
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)], //new Unit__MatchWith__Level($request->query('level'))
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 

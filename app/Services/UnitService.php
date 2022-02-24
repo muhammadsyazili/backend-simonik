@@ -27,7 +27,6 @@ use Illuminate\Support\Str;
 
 class UnitService
 {
-
     private ?UserRepository $userRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;

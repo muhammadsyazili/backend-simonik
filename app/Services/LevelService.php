@@ -20,7 +20,6 @@ use Illuminate\Support\Str;
 
 class LevelService
 {
-
     private ?LevelRepository $levelRepository;
     private ?UserRepository $userRepository;
     private ?UnitRepository $unitRepository;

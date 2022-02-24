@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Validator;
 
 class TargetPaperWorkValidationService
 {
-
     private ?UserRepository $userRepository;
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
@@ -42,7 +41,7 @@ class TargetPaperWorkValidationService
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
-            'unit' => ['required', 'string', new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)], //new Unit__MatchWith__Level($request->query('level'))
+            'unit' => ['required', 'string', new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 

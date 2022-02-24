@@ -160,3 +160,4 @@ Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, '
 Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'parents_of_level']);
 Route::get('/user/{id}/levels', [App\Http\Controllers\LevelController::class, 'levels_of_user']);
 Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
+Route::get('/analytic', [App\Http\Controllers\AnalyticController::class, 'index']);
