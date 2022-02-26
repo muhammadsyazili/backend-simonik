@@ -107,9 +107,8 @@ class PaperWorkTargetController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja Target - Edit",
+            "Kertas Kerja Target",
             [
-                'levels' => $response->levels,
                 'indicators' => $response->indicators,
             ],
             null,

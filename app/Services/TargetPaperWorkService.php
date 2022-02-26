@@ -13,6 +13,7 @@ use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class TargetPaperWorkService
 {
@@ -22,7 +23,7 @@ class TargetPaperWorkService
     private ?UnitRepository $unitRepository;
     private ?TargetRepository $targetRepository;
 
-    private mixed $newIndicators;
+    private mixed $indicators = null;
     private int $iter = 0;
 
     public function __construct(ConstructRequest $constructRequest)
@@ -34,7 +35,7 @@ class TargetPaperWorkService
         $this->targetRepository = $constructRequest->targetRepository;
     }
 
-    //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository
+    //use repo LevelRepository, UnitRepository, IndicatorRepository
     public function edit(TargetPaperWorkEditRequest $targetPaperWorkRequest): TargetPaperWorkCreateOrEditResponse
     {
         $response = new TargetPaperWorkCreateOrEditResponse();
@@ -44,31 +45,22 @@ class TargetPaperWorkService
         $year = $targetPaperWorkRequest->year;
         $userId = $targetPaperWorkRequest->userId;
 
-        $constructRequest = new ConstructRequest();
-
-        $constructRequest->userRepository = $this->userRepository;
-        $constructRequest->levelRepository = $this->levelRepository;
-
-        $levelService = new LevelService($constructRequest);
-
-        $response->levels = $levelService->levels_of_user($userId, false);
-
         $levelId = $this->levelRepository->find__id__by__slug($level);
 
         $indicators = $unit === 'master' ?
             $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
             $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
-        $this->editMapping($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
+        $this->mapping__edit__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-        //dd($this->newIndicators);
+        //dd($this->indicators);
 
-        $response->indicators = $this->newIndicators;
+        $response->indicators = $this->indicators;
 
         return $response;
     }
 
-    public function editMapping(\Illuminate\Database\Eloquent\Collection $indicators, array $bg_color, string $prefix = null, bool $first = true)
+    private function mapping__edit__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true)
     {
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key+1) : (string) $prefix.'.'.($key+1);
@@ -79,89 +71,89 @@ class TargetPaperWorkService
             $jan = $item->targets->search(function ($value) {
                 return $value->month === 'jan';
             });
-            $this->newIndicators[$iteration]['targets']['jan']['value'] = $jan === false ? null : $item->targets[$jan]->value;
-            $this->newIndicators[$iteration]['targets']['jan']['updated_at'] = $jan === false ? null : Carbon::parse($item->targets[$jan]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['jan']['value'] = $jan === false ? null : $item->targets[$jan]->value;
+            $this->indicators[$iteration]['targets']['jan']['updated_at'] = $jan === false ? null : Carbon::parse($item->targets[$jan]->updated_at)->format('d/m/Y H:i:s');
 
             $feb = $item->targets->search(function ($value) {
                 return $value->month === 'feb';
             });
-            $this->newIndicators[$iteration]['targets']['feb']['value'] = $feb === false ? null : $item->targets[$feb]->value;
-            $this->newIndicators[$iteration]['targets']['feb']['updated_at'] = $feb === false ? null : Carbon::parse($item->targets[$feb]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['feb']['value'] = $feb === false ? null : $item->targets[$feb]->value;
+            $this->indicators[$iteration]['targets']['feb']['updated_at'] = $feb === false ? null : Carbon::parse($item->targets[$feb]->updated_at)->format('d/m/Y H:i:s');
 
             $mar = $item->targets->search(function ($value) {
                 return $value->month === 'mar';
             });
-            $this->newIndicators[$iteration]['targets']['mar']['value'] = $mar === false ? null : $item->targets[$mar]->value;
-            $this->newIndicators[$iteration]['targets']['mar']['updated_at'] = $mar === false ? null : Carbon::parse($item->targets[$mar]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['mar']['value'] = $mar === false ? null : $item->targets[$mar]->value;
+            $this->indicators[$iteration]['targets']['mar']['updated_at'] = $mar === false ? null : Carbon::parse($item->targets[$mar]->updated_at)->format('d/m/Y H:i:s');
 
             $apr = $item->targets->search(function ($value) {
                 return $value->month === 'apr';
             });
-            $this->newIndicators[$iteration]['targets']['apr']['value'] = $apr === false ? null : $item->targets[$apr]->value;
-            $this->newIndicators[$iteration]['targets']['apr']['updated_at'] = $apr === false ? null : Carbon::parse($item->targets[$apr]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['apr']['value'] = $apr === false ? null : $item->targets[$apr]->value;
+            $this->indicators[$iteration]['targets']['apr']['updated_at'] = $apr === false ? null : Carbon::parse($item->targets[$apr]->updated_at)->format('d/m/Y H:i:s');
 
             $may = $item->targets->search(function ($value) {
                 return $value->month === 'may';
             });
-            $this->newIndicators[$iteration]['targets']['may']['value'] = $may === false ? null : $item->targets[$may]->value;
-            $this->newIndicators[$iteration]['targets']['may']['updated_at'] = $may === false ? null : Carbon::parse($item->targets[$may]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['may']['value'] = $may === false ? null : $item->targets[$may]->value;
+            $this->indicators[$iteration]['targets']['may']['updated_at'] = $may === false ? null : Carbon::parse($item->targets[$may]->updated_at)->format('d/m/Y H:i:s');
 
             $jun = $item->targets->search(function ($value) {
                 return $value->month === 'jun';
             });
-            $this->newIndicators[$iteration]['targets']['jun']['value'] = $jun === false ? null : $item->targets[$jun]->value;
-            $this->newIndicators[$iteration]['targets']['jun']['updated_at'] = $jun === false ? null : Carbon::parse($item->targets[$jun]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['jun']['value'] = $jun === false ? null : $item->targets[$jun]->value;
+            $this->indicators[$iteration]['targets']['jun']['updated_at'] = $jun === false ? null : Carbon::parse($item->targets[$jun]->updated_at)->format('d/m/Y H:i:s');
 
             $jul = $item->targets->search(function ($value) {
                 return $value->month === 'jul';
             });
-            $this->newIndicators[$iteration]['targets']['jul']['value'] = $jul === false ? null : $item->targets[$jul]->value;
-            $this->newIndicators[$iteration]['targets']['jul']['updated_at'] = $jul === false ? null : Carbon::parse($item->targets[$jul]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['jul']['value'] = $jul === false ? null : $item->targets[$jul]->value;
+            $this->indicators[$iteration]['targets']['jul']['updated_at'] = $jul === false ? null : Carbon::parse($item->targets[$jul]->updated_at)->format('d/m/Y H:i:s');
 
             $aug = $item->targets->search(function ($value) {
                 return $value->month === 'aug';
             });
-            $this->newIndicators[$iteration]['targets']['aug']['value'] = $aug === false ? null : $item->targets[$aug]->value;
-            $this->newIndicators[$iteration]['targets']['aug']['updated_at'] = $aug === false ? null : Carbon::parse($item->targets[$aug]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['aug']['value'] = $aug === false ? null : $item->targets[$aug]->value;
+            $this->indicators[$iteration]['targets']['aug']['updated_at'] = $aug === false ? null : Carbon::parse($item->targets[$aug]->updated_at)->format('d/m/Y H:i:s');
 
             $sep = $item->targets->search(function ($value) {
                 return $value->month === 'sep';
             });
-            $this->newIndicators[$iteration]['targets']['sep']['value'] = $sep === false ? null : $item->targets[$sep]->value;
-            $this->newIndicators[$iteration]['targets']['sep']['updated_at'] = $sep === false ? null : Carbon::parse($item->targets[$sep]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['sep']['value'] = $sep === false ? null : $item->targets[$sep]->value;
+            $this->indicators[$iteration]['targets']['sep']['updated_at'] = $sep === false ? null : Carbon::parse($item->targets[$sep]->updated_at)->format('d/m/Y H:i:s');
 
             $oct = $item->targets->search(function ($value) {
                 return $value->month === 'oct';
             });
-            $this->newIndicators[$iteration]['targets']['oct']['value'] = $oct === false ? null : $item->targets[$oct]->value;
-            $this->newIndicators[$iteration]['targets']['oct']['updated_at'] = $oct === false ? null : Carbon::parse($item->targets[$oct]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['oct']['value'] = $oct === false ? null : $item->targets[$oct]->value;
+            $this->indicators[$iteration]['targets']['oct']['updated_at'] = $oct === false ? null : Carbon::parse($item->targets[$oct]->updated_at)->format('d/m/Y H:i:s');
 
             $nov = $item->targets->search(function ($value) {
                 return $value->month === 'nov';
             });
-            $this->newIndicators[$iteration]['targets']['nov']['value'] = $nov === false ? null : $item->targets[$nov]->value;
-            $this->newIndicators[$iteration]['targets']['nov']['updated_at'] = $nov === false ? null : Carbon::parse($item->targets[$nov]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['nov']['value'] = $nov === false ? null : $item->targets[$nov]->value;
+            $this->indicators[$iteration]['targets']['nov']['updated_at'] = $nov === false ? null : Carbon::parse($item->targets[$nov]->updated_at)->format('d/m/Y H:i:s');
 
             $dec = $item->targets->search(function ($value) {
                 return $value->month === 'dec';
             });
-            $this->newIndicators[$iteration]['targets']['dec']['value'] = $dec === false ? null : $item->targets[$dec]->value;
-            $this->newIndicators[$iteration]['targets']['dec']['updated_at'] = $dec === false ? null : Carbon::parse($item->targets[$dec]->updated_at)->format('d/m/Y H:i:s');
+            $this->indicators[$iteration]['targets']['dec']['value'] = $dec === false ? null : $item->targets[$dec]->value;
+            $this->indicators[$iteration]['targets']['dec']['updated_at'] = $dec === false ? null : Carbon::parse($item->targets[$dec]->updated_at)->format('d/m/Y H:i:s');
 
-            $this->newIndicators[$iteration]['id'] = $item->id;
-            $this->newIndicators[$iteration]['indicator'] = $prefix.'.'.$item->indicator;
-            $this->newIndicators[$iteration]['formula'] = $item->formula;
-            $this->newIndicators[$iteration]['measure'] = $item->measure;
-            $this->newIndicators[$iteration]['weight'] = $item->weight;//
-            $this->newIndicators[$iteration]['validity'] = $item->validity;//
-            $this->newIndicators[$iteration]['polarity'] = $item->polarity;
-            $this->newIndicators[$iteration]['order'] = $iteration;
-            $this->newIndicators[$iteration]['bg_color'] = $bg_color;
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = $prefix.'.'.$item->indicator;
+            $this->indicators[$iteration]['formula'] = $item->formula;
+            $this->indicators[$iteration]['measure'] = $item->measure;
+            $this->indicators[$iteration]['weight'] = $item->weight;//
+            $this->indicators[$iteration]['validity'] = $item->validity;//
+            $this->indicators[$iteration]['polarity'] = $item->polarity;
+            $this->indicators[$iteration]['order'] = $iteration;
+            $this->indicators[$iteration]['bg_color'] = $bg_color;
 
             $this->iter++;
 
             if (!empty($item->childsHorizontalRecursive)) {
-                $this->editMapping($item->childsHorizontalRecursive, ['r' => $bg_color['r']-15, 'g' => $bg_color['g']-15, 'b' => $bg_color['b']-15], $prefix, false);
+                $this->mapping__edit__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r']-15, 'g' => $bg_color['g']-15, 'b' => $bg_color['b']-15], $prefix, false);
             }
         });
     }

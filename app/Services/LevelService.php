@@ -17,12 +17,16 @@ use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Collection;
 
 class LevelService
 {
     private ?LevelRepository $levelRepository;
     private ?UserRepository $userRepository;
     private ?UnitRepository $unitRepository;
+
+    private mixed $levels = null;
+    private int $iter = 0;
 
     public function __construct(ConstructRequest $constructRequest)
     {
@@ -135,7 +139,25 @@ class LevelService
             $levels = $this->levelRepository->find__all__with__childs__by__id($user->unit->level->id);
         }
 
-        return $levels;
+        $this->mapping__levels_of_user($levels);
+
+        return $this->levels;
+    }
+
+    private function mapping__levels_of_user(Collection $levels, bool $first = true)
+    {
+        $levels->each(function ($item, $key) use ($first) {
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+
+            $this->levels[$iteration]['slug'] = $item->slug;
+            $this->levels[$iteration]['name'] = $item->name;
+
+            $this->iter++;
+
+            if (!empty($item->childsRecursive)) {
+                $this->mapping__levels_of_user($item->childsRecursive, false);
+            }
+        });
     }
 
     //use repo LevelRepository, UnitRepository
