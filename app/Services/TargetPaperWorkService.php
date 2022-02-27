@@ -53,8 +53,6 @@ class TargetPaperWorkService
 
         $this->mapping__edit__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-        //dd($this->indicators);
-
         $response->indicators = $this->indicators;
 
         return $response;
@@ -65,8 +63,17 @@ class TargetPaperWorkService
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key+1) : (string) $prefix.'.'.($key+1);
             $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+            $indicator = $item->indicator;
 
-            //dump($iteration.'->'.$prefix.'.'.$item->indicator);
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['formula'] = $item->formula;
+            $this->indicators[$iteration]['measure'] = $item->measure;
+            $this->indicators[$iteration]['weight'] = $item->weight;
+            $this->indicators[$iteration]['validity'] = $item->validity;
+            $this->indicators[$iteration]['polarity'] = $item->polarity;
+            $this->indicators[$iteration]['order'] = $iteration;
+            $this->indicators[$iteration]['bg_color'] = $bg_color;
 
             $jan = $item->targets->search(function ($value) {
                 return $value->month === 'jan';
@@ -139,16 +146,6 @@ class TargetPaperWorkService
             });
             $this->indicators[$iteration]['targets']['dec']['value'] = $dec === false ? null : $item->targets[$dec]->value;
             $this->indicators[$iteration]['targets']['dec']['updated_at'] = $dec === false ? null : Carbon::parse($item->targets[$dec]->updated_at)->format('d/m/Y H:i:s');
-
-            $this->indicators[$iteration]['id'] = $item->id;
-            $this->indicators[$iteration]['indicator'] = $prefix.'.'.$item->indicator;
-            $this->indicators[$iteration]['formula'] = $item->formula;
-            $this->indicators[$iteration]['measure'] = $item->measure;
-            $this->indicators[$iteration]['weight'] = $item->weight;//
-            $this->indicators[$iteration]['validity'] = $item->validity;//
-            $this->indicators[$iteration]['polarity'] = $item->polarity;
-            $this->indicators[$iteration]['order'] = $iteration;
-            $this->indicators[$iteration]['bg_color'] = $bg_color;
 
             $this->iter++;
 

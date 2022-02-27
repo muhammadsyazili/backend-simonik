@@ -109,9 +109,8 @@ class PaperWorkRealizationController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja Realisasi - Edit",
+            "Kertas Kerja Realisasi",
             [
-                'levels' => $response->levels,
                 'indicators' => $response->indicators,
             ],
             null,
