@@ -12,12 +12,16 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 
 class IndicatorReferenceService
 {
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
+
+    private mixed $indicators = null;
+    private int $iter = 0;
 
     public function __construct(ConstructRequest $constructRequest)
     {
@@ -35,6 +39,10 @@ class IndicatorReferenceService
         $response->preferences = $this->indicatorRepository->find__all__with__childs__by__superMasterLabel();
 
         return $response;
+    }
+
+    private function mapping__create__indicators(Collection $indicators, Collection $preferences, array $bg_color, string $prefix = null, bool $first = true): void
+    {
     }
 
     //use repo IndicatorRepository

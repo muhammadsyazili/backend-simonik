@@ -37,7 +37,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI Referensi - Create",
+            "Kertas Kerja KPI Referensi",
             [
                 'indicators' => $response->indicators,
                 'preferences' => $response->preferences,
