@@ -56,6 +56,7 @@ class RealizationPaperWorkService
 
         $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
 
+        $this->iter = 0; //reset iterator
         $this->mapping__edit__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
         $response->indicators = $this->indicators;

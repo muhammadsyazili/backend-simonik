@@ -38,6 +38,7 @@ class IndicatorPaperWorkService
     private ?RealizationRepository $realizationRepository;
 
     private mixed $indicators = null;
+    private mixed $levels = null;
     private int $iter = 0;
 
     public function __construct(ConstructRequest $constructRequest)
@@ -103,7 +104,7 @@ class IndicatorPaperWorkService
         return $response;
     }
 
-    private function mapping__index__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true)
+    private function mapping__index__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
     {
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
@@ -139,10 +140,64 @@ class IndicatorPaperWorkService
 
         $parentId = $user->role->name === 'super-admin' ? $this->levelRepository->find__allId__by__root() : $this->levelRepository->find__allId__by__id($user->unit->level->id);
 
-        $response->levels = $this->levelRepository->find__all__with__childs__by__parentIdList(Arr::flatten($parentId));
-        $response->indicators = $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null);
+        //levels
+        $levels = $this->levelRepository->find__all__with__childs__by__parentIdList(Arr::flatten($parentId));
+
+        $this->iter = 0; //reset iterator
+        $this->mapping__create__levels($levels);
+
+        $response->levels = $this->levels;
+
+        //indicators
+        $indicators = $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null);
+
+        $this->iter = 0; //reset iterator
+        $this->mapping__create__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
+
+        $response->indicators = $this->indicators;
 
         return $response;
+    }
+
+    private function mapping__create__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
+    {
+        $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+            $indicator = $item->indicator;
+
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['formula'] = $item->formula;
+            $this->indicators[$iteration]['measure'] = $item->measure;
+            $this->indicators[$iteration]['weight'] = $item->weight;
+            $this->indicators[$iteration]['validity'] = $item->validity;
+            $this->indicators[$iteration]['polarity'] = $item->polarity;
+            $this->indicators[$iteration]['order'] = $iteration;
+            $this->indicators[$iteration]['bg_color'] = $bg_color;
+
+            $this->iter++;
+
+            if (!empty($item->childsHorizontalRecursive)) {
+                $this->mapping__create__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
+            }
+        });
+    }
+
+    private function mapping__create__levels(Collection $levels, bool $first = true): void
+    {
+        $levels->each(function ($item) use ($first) {
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+
+            $this->levels[$iteration]['slug'] = $item->slug;
+            $this->levels[$iteration]['name'] = $item->name;
+
+            $this->iter++;
+
+            if (!empty($item->childsRecursive)) {
+                $this->mapping__create__levels($item->childsRecursive, false);
+            }
+        });
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository

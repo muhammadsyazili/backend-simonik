@@ -139,14 +139,15 @@ class LevelService
             $levels = $this->levelRepository->find__all__with__childs__by__id($user->unit->level->id);
         }
 
+        $this->iter = 0; //reset iterator
         $this->mapping__levels_of_user($levels);
 
         return $this->levels;
     }
 
-    private function mapping__levels_of_user(Collection $levels, bool $first = true)
+    private function mapping__levels_of_user(Collection $levels, bool $first = true): void
     {
-        $levels->each(function ($item, $key) use ($first) {
+        $levels->each(function ($item) use ($first) {
             $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
 
             $this->levels[$iteration]['slug'] = $item->slug;
