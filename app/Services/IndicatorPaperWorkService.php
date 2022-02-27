@@ -26,6 +26,7 @@ use App\Repositories\UserRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 
 class IndicatorPaperWorkService
 {
@@ -35,6 +36,9 @@ class IndicatorPaperWorkService
     private ?UserRepository $userRepository;
     private ?TargetRepository $targetRepository;
     private ?RealizationRepository $realizationRepository;
+
+    private mixed $indicators = null;
+    private int $iter = 0;
 
     public function __construct(ConstructRequest $constructRequest)
     {
@@ -72,16 +76,11 @@ class IndicatorPaperWorkService
         // 'permissions paper work indicator (create, edit, delete)' handler
         $numberOfChildLevel = $isSuperAdmin ? count($this->levelRepository->find__allSlug__with__childs__by__root()) : count($this->levelRepository->find__allFlattenSlug__with__this_childs__by__id($user->unit->level->id));
 
-        $constructRequest = new ConstructRequest();
+        $indicators = $level === 'super-master' ? $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
 
-        $constructRequest->userRepository = $this->userRepository;
-        $constructRequest->levelRepository = $this->levelRepository;
+        $this->mapping__index__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-        $levelService = new LevelService($constructRequest);
-
-        $response->levels = $levelService->levels_of_user($userId, true);
-
-        $response->indicators = $level === 'super-master' ? $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
+        $response->indicators = $this->indicators;
 
         $response->permissions = [
             'indicator' => [
@@ -102,6 +101,31 @@ class IndicatorPaperWorkService
         ];
 
         return $response;
+    }
+
+    private function mapping__index__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true)
+    {
+        $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+            $indicator = $item->indicator;
+
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['formula'] = $item->formula;
+            $this->indicators[$iteration]['measure'] = $item->measure;
+            $this->indicators[$iteration]['weight'] = $item->weight;
+            $this->indicators[$iteration]['validity'] = $item->validity;
+            $this->indicators[$iteration]['polarity'] = $item->polarity;
+            $this->indicators[$iteration]['order'] = $iteration;
+            $this->indicators[$iteration]['bg_color'] = $bg_color;
+
+            $this->iter++;
+
+            if (!empty($item->childsHorizontalRecursive)) {
+                $this->mapping__index__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
+            }
+        });
     }
 
     //use repo IndicatorRepository, LevelRepository, UserRepository

@@ -74,7 +74,6 @@ class PaperWorkIndicatorController extends ApiController
             Response::HTTP_OK,
             sprintf("Kertas Kerja KPI (Level: %s) (Unit: %s) (Tahun: %s)", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             [
-                'levels' => $response->levels,
                 'indicators' => $response->indicators,
                 'permissions' => $response->permissions,
             ],

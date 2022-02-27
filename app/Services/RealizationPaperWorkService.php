@@ -63,10 +63,10 @@ class RealizationPaperWorkService
         return $response;
     }
 
-    private function mapping__edit__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true)
+    private function mapping__edit__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
     {
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
-            $prefix = is_null($prefix) ? (string) ($key+1) : (string) $prefix.'.'.($key+1);
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
             $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
             $indicator = $item->indicator;
 
@@ -242,7 +242,7 @@ class RealizationPaperWorkService
             $this->iter++;
 
             if (!empty($item->childsHorizontalRecursive)) {
-                $this->mapping__edit__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r']-15, 'g' => $bg_color['g']-15, 'b' => $bg_color['b']-15], $prefix, false);
+                $this->mapping__edit__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
             }
         });
     }
