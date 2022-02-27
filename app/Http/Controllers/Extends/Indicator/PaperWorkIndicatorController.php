@@ -110,7 +110,7 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI - Create",
+            "Kertas Kerja KPI",
             [
                 'indicators' => $response->indicators,
                 'levels' => $response->levels,
@@ -224,9 +224,8 @@ class PaperWorkIndicatorController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI - Edit",
+            "Kertas Kerja KPI",
             [
-                'super_master_indicators' => $response->super_master_indicators,
                 'indicators' => $response->indicators,
             ],
             null,

@@ -427,13 +427,49 @@ class IndicatorPaperWorkService
         $unit = $indicatorPaperWorkRequest->unit;
         $year = $indicatorPaperWorkRequest->year;
 
-        $response->super_master_indicators = $this->indicatorRepository->find__all__with__childs_referenced__by__superMasterLabel();
+        $super_master_indicators = $this->indicatorRepository->find__all__with__childs_referenced__by__superMasterLabel();
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
 
-        $response->indicators = $unit === 'master' ? $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, null, $year) : $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+        $current_indicators = $unit === 'master' ? $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, null, $year) : $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+
+        $this->iter = 0; //reset iterator
+        $this->mapping__edit__indicators($super_master_indicators, $current_indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
+
+        $response->indicators = $this->indicators;
 
         return $response;
+    }
+
+    private function mapping__edit__indicators(Collection $super_master_indicators, Collection $current_indicators, array $bg_color, string $prefix = null, bool $first = true): void
+    {
+        $super_master_indicators->each(function ($item, $key) use ($prefix, $first, $bg_color, $current_indicators) {
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+
+            $result = $current_indicators->search(function ($value) use ($item) {
+                return $value->code === $item->id;
+            });
+
+            $indicator = $result === false ? $item->indicator : $current_indicators[$result]->indicator;
+
+            $this->indicators[$iteration]['id'] = $result === false ? $item->id : $current_indicators[$result]->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['formula'] = $result === false ? $item->formula : $current_indicators[$result]->formula;
+            $this->indicators[$iteration]['measure'] = $result === false ? $item->measure : $current_indicators[$result]->measure;
+            $this->indicators[$iteration]['weight'] = $result === false ? $item->weight : $current_indicators[$result]->weight;
+            $this->indicators[$iteration]['validity'] = $result === false ? $item->validity : $current_indicators[$result]->validity;
+            $this->indicators[$iteration]['polarity'] = $result === false ? $item->polarity : $current_indicators[$result]->polarity;
+            $this->indicators[$iteration]['order'] = $iteration;
+            $this->indicators[$iteration]['bg_color'] = $bg_color;
+            $this->indicators[$iteration]['selected'] = $result === false ? false : true;
+
+            $this->iter++;
+
+            if (!empty($item->childsHorizontalRecursive)) {
+                $this->mapping__edit__indicators($item->childsHorizontalRecursive, $current_indicators, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
+            }
+        });
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository, RealizationRepository, UserRepository
