@@ -25,6 +25,8 @@ class IndicatorService
     private ?TargetRepository $targetRepository;
     private ?RealizationRepository $realizationRepository;
 
+    private mixed $indicator = null;
+
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->indicatorRepository = $constructRequest->indicatorRepository;
@@ -90,7 +92,89 @@ class IndicatorService
         $indicator = $this->indicatorRepository->find__with__level__by__id($indicatorRequest->id);
         $indicator->original_polarity = $indicator->getRawOriginal('polarity');
 
-        $response->indicator = $indicator;
+        $new = [
+            'id' => $indicator->id,
+            'indicator' => $indicator->indicator,
+            'dummy' => $indicator->dummy,
+            'reducing_factor' => $indicator->reducing_factor,
+            'original_polarity' => $indicator->original_polarity,
+            'formula' => $indicator->formula,
+            'measure' => $indicator->measure,
+            'label' => $indicator->label,
+            'level_name' => $indicator->level->name,
+            'validity' => [
+                'jan' => ['checked' => array_key_exists('jan', (array) $indicator->validity) ? true : false],
+                'feb' => ['checked' => array_key_exists('feb', (array) $indicator->validity) ? true : false],
+                'mar' => ['checked' => array_key_exists('mar', (array) $indicator->validity) ? true : false],
+                'apr' => ['checked' => array_key_exists('apr', (array) $indicator->validity) ? true : false],
+                'may' => ['checked' => array_key_exists('may', (array) $indicator->validity) ? true : false],
+                'jun' => ['checked' => array_key_exists('jun', (array) $indicator->validity) ? true : false],
+                'jul' => ['checked' => array_key_exists('jul', (array) $indicator->validity) ? true : false],
+                'aug' => ['checked' => array_key_exists('aug', (array) $indicator->validity) ? true : false],
+                'sep' => ['checked' => array_key_exists('sep', (array) $indicator->validity) ? true : false],
+                'oct' => ['checked' => array_key_exists('oct', (array) $indicator->validity) ? true : false],
+                'nov' => ['checked' => array_key_exists('nov', (array) $indicator->validity) ? true : false],
+                'dec' => ['checked' => array_key_exists('dec', (array) $indicator->validity) ? true : false],
+            ],
+            'weight' => [
+                'jan' => ['value' => array_key_exists('jan', (array) $indicator->weight) ? $indicator->weight['jan'] : 0],
+                'feb' => ['value' => array_key_exists('feb', (array) $indicator->weight) ? $indicator->weight['feb'] : 0],
+                'mar' => ['value' => array_key_exists('mar', (array) $indicator->weight) ? $indicator->weight['mar'] : 0],
+                'apr' => ['value' => array_key_exists('apr', (array) $indicator->weight) ? $indicator->weight['apr'] : 0],
+                'may' => ['value' => array_key_exists('may', (array) $indicator->weight) ? $indicator->weight['may'] : 0],
+                'jun' => ['value' => array_key_exists('jun', (array) $indicator->weight) ? $indicator->weight['jun'] : 0],
+                'jul' => ['value' => array_key_exists('jul', (array) $indicator->weight) ? $indicator->weight['jul'] : 0],
+                'aug' => ['value' => array_key_exists('aug', (array) $indicator->weight) ? $indicator->weight['aug'] : 0],
+                'sep' => ['value' => array_key_exists('sep', (array) $indicator->weight) ? $indicator->weight['sep'] : 0],
+                'oct' => ['value' => array_key_exists('oct', (array) $indicator->weight) ? $indicator->weight['oct'] : 0],
+                'nov' => ['value' => array_key_exists('nov', (array) $indicator->weight) ? $indicator->weight['nov'] : 0],
+                'dec' => ['value' => array_key_exists('dec', (array) $indicator->weight) ? $indicator->weight['dec'] : 0],
+            ],
+        ];
+
+        // $indicator->each(function ($item, $key) {
+        //     $this->indicator = [
+        //         'id' => $item->id,
+        //         'indicator' => $item->indicator,
+        //         'dummy' => $item->dummy,
+        //         'reducing_factor' => $item->reducing_factor,
+        //         'original_polarity' => $item->original_polarity,
+        //         'formula' => $item->formula,
+        //         'measure' => $item->measure,
+        //         'label' => $item->label,
+        //         'level_name' => $item->level->name,
+        //         'validity' => [
+        //             'jan' => ['checked' => array_key_exists('jan', (array) $item->validity) ? true : false],
+        //             'feb' => ['checked' => array_key_exists('feb', (array) $item->validity) ? true : false],
+        //             'mar' => ['checked' => array_key_exists('mar', (array) $item->validity) ? true : false],
+        //             'apr' => ['checked' => array_key_exists('apr', (array) $item->validity) ? true : false],
+        //             'may' => ['checked' => array_key_exists('may', (array) $item->validity) ? true : false],
+        //             'jun' => ['checked' => array_key_exists('jun', (array) $item->validity) ? true : false],
+        //             'jul' => ['checked' => array_key_exists('jul', (array) $item->validity) ? true : false],
+        //             'aug' => ['checked' => array_key_exists('aug', (array) $item->validity) ? true : false],
+        //             'sep' => ['checked' => array_key_exists('sep', (array) $item->validity) ? true : false],
+        //             'oct' => ['checked' => array_key_exists('oct', (array) $item->validity) ? true : false],
+        //             'nov' => ['checked' => array_key_exists('nov', (array) $item->validity) ? true : false],
+        //             'dec' => ['checked' => array_key_exists('dec', (array) $item->validity) ? true : false],
+        //         ],
+        //         'weight' => [
+        //             'jan' => ['exist' => array_key_exists('jan', (array) $item->weight) ? true : false, 'value' => $item->weight->jan],
+        //             'feb' => ['exist' => array_key_exists('feb', (array) $item->weight) ? true : false, 'value' => $item->weight->feb],
+        //             'mar' => ['exist' => array_key_exists('mar', (array) $item->weight) ? true : false, 'value' => $item->weight->mar],
+        //             'apr' => ['exist' => array_key_exists('apr', (array) $item->weight) ? true : false, 'value' => $item->weight->apr],
+        //             'may' => ['exist' => array_key_exists('may', (array) $item->weight) ? true : false, 'value' => $item->weight->may],
+        //             'jun' => ['exist' => array_key_exists('jun', (array) $item->weight) ? true : false, 'value' => $item->weight->jun],
+        //             'jul' => ['exist' => array_key_exists('jul', (array) $item->weight) ? true : false, 'value' => $item->weight->jul],
+        //             'aug' => ['exist' => array_key_exists('aug', (array) $item->weight) ? true : false, 'value' => $item->weight->aug],
+        //             'sep' => ['exist' => array_key_exists('sep', (array) $item->weight) ? true : false, 'value' => $item->weight->sep],
+        //             'oct' => ['exist' => array_key_exists('oct', (array) $item->weight) ? true : false, 'value' => $item->weight->oct],
+        //             'nov' => ['exist' => array_key_exists('nov', (array) $item->weight) ? true : false, 'value' => $item->weight->nov],
+        //             'dec' => ['exist' => array_key_exists('dec', (array) $item->weight) ? true : false, 'value' => $item->weight->dec],
+        //         ],
+        //     ];
+        // });
+
+        $response->indicator = $new;
 
         return $response;
     }
