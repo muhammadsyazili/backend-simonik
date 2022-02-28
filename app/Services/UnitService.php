@@ -49,7 +49,19 @@ class UnitService
     {
         $response = new UnitIndexResponse();
 
-        $response->units = $this->unitRepository->find__all__with__level_parent();
+        $units = $this->unitRepository->find__all__with__level_parent();
+
+        $newUnits = $units->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'slug' => $item->slug,
+                'parent_name' => is_null($item->parent) ? '-' : $item->parent->name,
+                'level_name' => $item->level->name,
+            ];
+        });
+
+        $response->units = $newUnits;
 
         return $response;
     }

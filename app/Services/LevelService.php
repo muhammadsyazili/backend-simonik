@@ -205,6 +205,15 @@ class LevelService
     {
         $level = $this->levelRepository->find__with__parent__by__slug($slug);
 
-        return $this->unitRepository->find__all__by__levelId($level->parent->id);
+        $units = $this->unitRepository->find__all__by__levelId($level->parent->id);
+
+        $newUnits = $units->map(function ($item) {
+            return [
+                'name' => $item->name,
+                'slug' => $item->slug,
+            ];
+        });
+
+        return $newUnits;
     }
 }
