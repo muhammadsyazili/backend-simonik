@@ -40,7 +40,19 @@ class LevelService
     {
         $response = new LevelIndexResponse();
 
-        $response->levels = $this->levelRepository->find__all__with__parent();
+        $levels = $this->levelRepository->find__all__with__parent();
+
+        $newLevels = $levels->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'slug' => $item->slug,
+                'name' => $item->name,
+                'parent_name' => is_null($item->parent) ? '-' : $item->parent->name,
+                'modificable' => is_null($item->parent) ? false : true,
+            ];
+        });
+
+        $response->levels = $newLevels;
 
         return $response;
     }
@@ -50,7 +62,16 @@ class LevelService
     {
         $response = new LevelCreateResponse();
 
-        $response->levels = $this->levelRepository->find__all();
+        $levels = $this->levelRepository->find__all();
+
+        $newLevels = $levels->map(function ($item) {
+            return [
+                'slug' => $item->slug,
+                'name' => $item->name,
+            ];
+        });
+
+        $response->levels = $newLevels;
 
         return $response;
     }
@@ -77,8 +98,26 @@ class LevelService
     {
         $response = new LevelEditResponse();
 
-        $response->levels = $this->levelRepository->find__all();
-        $response->level = $this->levelRepository->find__by__id($levelRequest->id);
+        $level = $this->levelRepository->find__by__id($levelRequest->id);
+
+        $newLevel = [
+            'id' => $level->id,
+            'name' => $level->name,
+        ];
+
+        $response->level = $newLevel;
+
+        $levels = $this->levelRepository->find__all();
+
+        $newLevels = $levels->map(function ($item) use ($level) {
+            return [
+                'slug' => $item->slug,
+                'name' => $item->name,
+                'selected' => $item->id === $level->parent_id ? true : false,
+            ];
+        });
+
+        $response->levels = $newLevels;
 
         return $response;
     }
