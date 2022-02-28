@@ -40,7 +40,6 @@ class IndicatorReferenceController extends ApiController
             "Kertas Kerja KPI Referensi",
             [
                 'indicators' => $response->indicators,
-                'preferences' => $response->preferences,
             ],
             null,
         );
@@ -138,10 +137,9 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI Referensi - Edit",
+            "Kertas Kerja KPI Referensi",
             [
                 'indicators' => $response->indicators,
-                'preferences' => $response->preferences,
             ],
             null,
         );

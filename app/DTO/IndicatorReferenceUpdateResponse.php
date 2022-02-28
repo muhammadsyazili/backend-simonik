@@ -5,5 +5,4 @@ namespace App\DTO;
 class IndicatorReferenceUpdateResponse
 {
     public mixed $indicators;
-    public mixed $preferences;
 }
