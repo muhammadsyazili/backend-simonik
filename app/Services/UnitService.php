@@ -130,6 +130,17 @@ class UnitService
     {
         $response = new UnitEditResponse();
 
+        $unit = $this->unitRepository->find__by__id($unitRequest->id);
+
+        $unit = [
+            'id' => $unit->id,
+            'name' => $unit->name,
+            'parent_id' => $unit->parent_id,
+            'level_id' => $unit->level_id,
+        ];
+
+        $response->unit = $unit;
+
         $constructRequest = new ConstructRequest();
 
         $constructRequest->userRepository = $this->userRepository;
@@ -138,7 +149,6 @@ class UnitService
         $levelService = new LevelService($constructRequest);
 
         $response->levels = $levelService->levels_of_user($unitRequest->userId, false);
-        $response->unit = $this->unitRepository->find__by__id($unitRequest->id);
 
         return $response;
     }

@@ -189,6 +189,7 @@ class LevelService
         $levels->each(function ($item) use ($first) {
             $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
 
+            $this->levels[$iteration]['id'] = $item->id;
             $this->levels[$iteration]['slug'] = $item->slug;
             $this->levels[$iteration]['name'] = $item->name;
 
