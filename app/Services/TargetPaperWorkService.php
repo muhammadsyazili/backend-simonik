@@ -68,6 +68,7 @@ class TargetPaperWorkService
 
             $this->indicators[$iteration]['id'] = $item->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['type'] = $item->type;
             $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;

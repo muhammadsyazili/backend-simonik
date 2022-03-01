@@ -113,6 +113,7 @@ class IndicatorPaperWorkService
 
             $this->indicators[$iteration]['id'] = $item->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['type'] = $item->type;
             $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
@@ -168,6 +169,7 @@ class IndicatorPaperWorkService
 
             $this->indicators[$iteration]['id'] = $item->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['type'] = $item->type;
             $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
@@ -455,6 +457,7 @@ class IndicatorPaperWorkService
 
             $this->indicators[$iteration]['id'] = $result === false ? $item->id : $current_indicators[$result]->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['type'] = $result === false ? $item->type : $current_indicators[$result]->type;
             $this->indicators[$iteration]['formula'] = $result === false ? $item->formula : $current_indicators[$result]->formula;
             $this->indicators[$iteration]['measure'] = $result === false ? $item->measure : $current_indicators[$result]->measure;
             $this->indicators[$iteration]['weight'] = $result === false ? $item->weight : $current_indicators[$result]->weight;

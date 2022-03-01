@@ -93,6 +93,7 @@ class IndicatorService
         $indicator = [
             'id' => $indicator->id,
             'indicator' => $indicator->indicator,
+            'type' => $indicator->type,
             'dummy' => $indicator->dummy,
             'reducing_factor' => $indicator->reducing_factor,
             'original_polarity' => $indicator->original_polarity,
