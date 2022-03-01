@@ -41,7 +41,25 @@ class UserService
     {
         $response = new UserIndexResponse();
 
-        $response->users = $this->userRepository->find__all__with__role_unit_level();
+        $users = $this->userRepository->find__all__with__role_unit_level();
+
+        $newUsers = $users->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'nip' => is_null($item->nip) ? '-' : $item->nip,
+                'username' => $item->username,
+                'email' => $item->email,
+                'bg_color_actived' => $item->actived ? 'bg-success' : 'bg-secondary',
+                'actived' => $item->actived ? 'active' : 'default',
+                'unit_name' => is_null($item->unit) ? '-' : $item->unit->name,
+                'role_name' => $item->role->name,
+                'edit_modificable' => in_array($item->role->name, ['super-admin', 'admin', 'data-entry']) ? false : true,
+                'delete_modificable' => in_array($item->role->name, ['super-admin', 'admin', 'data-entry']) ? false : true,
+            ];
+        });
+
+        $response->users = $newUsers;
 
         return $response;
     }
@@ -51,7 +69,16 @@ class UserService
     {
         $response = new UserCreateResponse();
 
-        $response->units = $this->unitRepository->find__all();
+        $units = $this->unitRepository->find__all();
+
+        $newUnits = $units->map(function ($item) {
+            return [
+                'slug' => $item->slug,
+                'name' => $item->name,
+            ];
+        });
+
+        $response->units = $newUnits;
 
         return $response;
     }
@@ -81,8 +108,30 @@ class UserService
     {
         $response = new UserEditResponse();
 
-        $response->user = $this->userRepository->find__by__id($userRequest->id);
-        $response->units = $this->unitRepository->find__all();
+        $user = $this->userRepository->find__by__id($userRequest->id);
+
+        $user = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'nip' => $user->nip,
+            'username' => $user->username,
+            'email' => $user->email,
+            'unit_id' => $user->unit_id,
+        ];
+
+        $response->user = $user;
+
+        $units = $this->unitRepository->find__all();
+
+        $newUnits = $units->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'slug' => $item->slug,
+                'name' => $item->name,
+            ];
+        });
+
+        $response->units = $newUnits;
 
         return $response;
     }
