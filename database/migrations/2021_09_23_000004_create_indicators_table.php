@@ -21,13 +21,15 @@ class CreateIndicatorsTable extends Migration
             $table->string('formula', 255)->nullable()->default(null);
             $table->string('measure', 100)->nullable()->default(null);
             $table->json('weight')->nullable()->default(null);
-            $table->enum('polarity', [1, -1])->nullable()->default(null);
+            $table->enum('polarity', ['1', '0', '-1'])->nullable()->default(null);
             $table->year('year')->nullable()->default(null); //if 'super-master' than 'null' else 'valueable'
             $table->boolean('reducing_factor')->nullable()->default(0);
             $table->json('validity')->nullable()->default(null);
             $table->boolean('reviewed')->default(0);
             $table->boolean('referenced')->default(0);
             $table->boolean('dummy')->default(0);
+            $table->string('type', 255)->default('KPI');
+            $table->json('fdx')->nullable()->default(null);
             //support
             $table->enum('label', ['super-master', 'master', 'child']); //if 'super-master' than 'null' else 'valueable'
             $table->foreignUuid('unit_id')->nullable()->default(null)->constrained()->onUpdate('cascade')->onDelete('restrict'); //if 'super-master & master' than 'null' else 'valueable'
