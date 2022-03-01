@@ -48,7 +48,8 @@ class LevelService
                 'slug' => $item->slug,
                 'name' => $item->name,
                 'parent_name' => is_null($item->parent) ? '-' : $item->parent->name,
-                'modificable' => is_null($item->parent) ? false : true,
+                'edit_modificable' => is_null($item->parent) ? false : true,
+                'delete_modificable' => is_null($item->parent) ? false : true,
             ];
         });
 
@@ -103,6 +104,7 @@ class LevelService
         $newLevel = [
             'id' => $level->id,
             'name' => $level->name,
+            'parent_id' => $level->parent_id,
         ];
 
         $response->level = $newLevel;
@@ -111,9 +113,9 @@ class LevelService
 
         $newLevels = $levels->map(function ($item) use ($level) {
             return [
+                'id' => $item->id,
                 'slug' => $item->slug,
                 'name' => $item->name,
-                'selected' => $item->id === $level->parent_id ? true : false,
             ];
         });
 
