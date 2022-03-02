@@ -29,6 +29,8 @@ class Indicator extends Model
         'year',
         'reducing_factor',
         'dummy',
+        'type',
+        'fdx',
         'validity',
         'reviewed',
         'referenced',

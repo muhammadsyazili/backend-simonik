@@ -39,6 +39,8 @@ class IndicatorOnlyCode extends Model
         'reviewed',
         'referenced',
         'dummy',
+        'type',
+        'fdx',
 
         'label',
         'unit_id',
@@ -71,6 +73,8 @@ class IndicatorOnlyCode extends Model
         'reviewed',
         'referenced',
         'dummy',
+        'type',
+        'fdx',
 
         'label',
         'unit_id',

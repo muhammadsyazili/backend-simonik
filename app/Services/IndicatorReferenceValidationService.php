@@ -68,6 +68,16 @@ class IndicatorReferenceValidationService
             }
         }
 
+        //memastikan semua KPI yang akan di-store tidak sama dengan preferensi KPI bersesuaian (menghindari loop self)
+        for ($i = 0; $i < count($request->post('indicators')); $i++) {
+            if ($request->post('indicators')[$i] === $request->post('preferences')[$i]) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('indicators', "(#3.5) : Akses Ilegal !");
+                });
+                break;
+            }
+        }
+
         return $validator;
     }
 

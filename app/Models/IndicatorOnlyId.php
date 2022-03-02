@@ -38,6 +38,8 @@ class IndicatorOnlyId extends Model
         'reviewed',
         'referenced',
         'dummy',
+        'type',
+        'fdx',
 
         'label',
         'unit_id',
@@ -71,6 +73,8 @@ class IndicatorOnlyId extends Model
         'reviewed',
         'referenced',
         'dummy',
+        'type',
+        'fdx',
 
         'label',
         'unit_id',
