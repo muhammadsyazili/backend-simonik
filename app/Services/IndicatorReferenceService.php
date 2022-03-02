@@ -102,6 +102,7 @@ class IndicatorReferenceService
 
             $this->indicators[$indicatorsIteration]['id'] = $indicatorsItem->id;
             $this->indicators[$indicatorsIteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$indicatorsIteration]['type'] = $indicatorsItem->type;
             $this->indicators[$indicatorsIteration]['formula'] = $indicatorsItem->formula;
             $this->indicators[$indicatorsIteration]['measure'] = $indicatorsItem->measure;
             $this->indicators[$indicatorsIteration]['weight'] = $indicatorsItem->weight;
@@ -172,7 +173,6 @@ class IndicatorReferenceService
 
             $this->preferences[$iteration]['id'] = $item->id;
             $this->preferences[$iteration]['indicator'] = "$prefix. $indicator";
-            $this->preferences[$iteration]['type'] = $item->type;
             $this->preferences[$iteration]['referenced'] = $item->referenced;
             $this->preferences[$iteration]['order'] = $iteration;
 
@@ -192,7 +192,6 @@ class IndicatorReferenceService
 
             $this->indicators[$indicatorsIteration]['preferences'][0]['id'] = 'root';
             $this->indicators[$indicatorsIteration]['preferences'][0]['indicator'] = '-- INDUK --';
-            $this->indicators[$indicatorsIteration]['preferences'][0]['type'] = null;
             $this->indicators[$indicatorsIteration]['preferences'][0]['referenced'] = null;
             $this->indicators[$indicatorsIteration]['preferences'][0]['order'] = null;
             $this->indicators[$indicatorsIteration]['preferences'][0]['showed'] = true;
@@ -200,7 +199,6 @@ class IndicatorReferenceService
 
             $preferences->each(function ($preferencesItem, $preferencesKey) use ($indicatorsIteration, $indicatorsItem) {
                 $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['id'] = $preferencesItem['id'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['type'] = $preferencesItem['type'];
                 $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['indicator'] = $preferencesItem['indicator'];
                 $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['referenced'] = $preferencesItem['referenced'];
                 $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['order'] = $preferencesItem['order'];
