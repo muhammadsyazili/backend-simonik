@@ -63,6 +63,7 @@ class IndicatorService
 
             $indicatorDomain->id = (string) Str::orderedUuid();
             $indicatorDomain->indicator = $indicator->indicator;
+            $indicatorDomain->type = $indicator->type;
             $indicatorDomain->formula = $indicator->formula;
             $indicatorDomain->measure = $indicator->measure;
             $indicatorDomain->year = null;
@@ -172,6 +173,7 @@ class IndicatorService
 
                 $indicatorDomain->id = $indicatorOld->id;
                 $indicatorDomain->indicator = $indicatorNew->indicator;
+                $indicatorDomain->type = $indicatorNew->type;
                 $indicatorDomain->formula = $indicatorNew->formula;
                 $indicatorDomain->measure = $indicatorNew->measure;
                 $indicatorDomain->year = $indicatorOld->year;
@@ -215,6 +217,7 @@ class IndicatorService
 
                 $indicatorDomain->id = $indicatorOld->id;
                 $indicatorDomain->indicator = $indicatorNew->indicator;
+                $indicatorDomain->type = $indicatorNew->type;
                 $indicatorDomain->formula = $indicatorNew->formula;
                 $indicatorDomain->measure = $indicatorNew->measure;
                 $indicatorDomain->year = $indicatorOld->year;
@@ -343,6 +346,7 @@ class IndicatorService
 
                         $indicatorDomain->id = $familyIndicatorOld->id;
                         $indicatorDomain->indicator = $indicatorNew->indicator;
+                        $indicatorDomain->type = $indicatorNew->type;
                         $indicatorDomain->formula = $indicatorNew->formula;
                         $indicatorDomain->measure = $indicatorNew->measure;
                         $indicatorDomain->year = $familyIndicatorOld->year;
@@ -464,6 +468,7 @@ class IndicatorService
 
                 $indicatorDomain->id = $indicatorOld->id;
                 $indicatorDomain->indicator = $indicatorNew->indicator;
+                $indicatorDomain->type = $indicatorNew->type;
                 $indicatorDomain->formula = $indicatorNew->formula;
                 $indicatorDomain->measure = $indicatorNew->measure;
                 $indicatorDomain->year = $indicatorOld->year;

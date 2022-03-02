@@ -53,6 +53,7 @@ class IndicatorController extends ApiController
         $requestDTO->validity = $request->post('validity');
         $requestDTO->weight = $request->post('weight');
         $requestDTO->dummy = $request->post('dummy');
+        $requestDTO->type = $request->post('type');
         $requestDTO->reducing_factor = $request->post('reducing_factor');
         $requestDTO->polarity = $request->post('polarity');
         $requestDTO->indicator = $request->post('indicator');
@@ -144,6 +145,7 @@ class IndicatorController extends ApiController
         $requestDTO->id = $id;
         $requestDTO->indicator = $request->post('indicator');
         $requestDTO->dummy = $request->post('dummy');
+        $requestDTO->type = $request->post('type');
         $requestDTO->reducing_factor = $request->post('reducing_factor');
         $requestDTO->polarity = $request->post('polarity');
         $requestDTO->formula = $request->post('formula');

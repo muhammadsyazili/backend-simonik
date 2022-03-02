@@ -7,6 +7,7 @@ class IndicatorStoreRequest
     public ?array $validity = null;
     public ?array $weight = null;
     public string $dummy;
+    public string $type;
     public ?string $reducing_factor = null;
     public ?string $polarity = null;
     public string $indicator;

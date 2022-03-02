@@ -25,6 +25,7 @@ class IndicatorRepository
         $data['reviewed'] = $indicator->reviewed;
         $data['referenced'] = $indicator->referenced;
         $data['dummy'] = $indicator->dummy;
+        $data['type'] = $indicator->type;
         $data['label'] = $indicator->label;
         $data['unit_id'] = $indicator->unit_id;
         $data['level_id'] = $indicator->level_id;
@@ -53,6 +54,7 @@ class IndicatorRepository
         $data['reviewed'] = $indicator->reviewed;
         $data['referenced'] = $indicator->referenced;
         $data['dummy'] = $indicator->dummy;
+        $data['type'] = $indicator->type;
         $data['label'] = $indicator->label;
         $data['unit_id'] = $indicator->unit_id;
         $data['level_id'] = $indicator->level_id;
@@ -174,8 +176,8 @@ class IndicatorRepository
     public function find__id_parentHorizontalId__by__label_levelId_unitId_year(string $label, string|int|null $levelId = null, string|int|null $unitId = null, string|int|null $year = null): array
     {
         return $label === 'super-master' ?
-            ModelsIndicator::where(['label' => 'super-master'])->orderBy('order', 'asc')->get(['id', 'parent_horizontal_id'])->toArray() :
-            ModelsIndicator::where(['label' => $label, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get(['id', 'parent_horizontal_id'])->toArray();
+            ModelsIndicator::where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get(['id', 'parent_horizontal_id'])->toArray() :
+            ModelsIndicator::where(['label' => $label, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get(['id', 'parent_horizontal_id'])->toArray();
     }
 
     public function find__id__by__parentVerticalId_levelId_unitId_year(string|int $parentVerticalId, string|int $levelId, string|int $unitId, string|int $year): string|int
@@ -185,90 +187,90 @@ class IndicatorRepository
 
     public function find__allNotReferenced__by__superMasterLabel()
     {
-        return ModelsIndicator::notReferenced()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get();
+        return ModelsIndicator::notReferenced()->where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__all__with__childs__by__superMasterLabel()
     {
-        return ModelsIndicator::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get();
+        return ModelsIndicator::with('childsHorizontalRecursive')->rootHorizontal()->where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year(string $label, string|int|null $levelId = null, string|int|null $unitId = null, string|int|null $year = null)
     {
         return $label === 'super-master' ?
-            ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get() :
-            ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => $label, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get();
+            ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get() :
+            ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => $label, 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__all__with__childs_referenced__by__superMasterLabel()
     {
-        return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get();
+        return ModelsIndicator::with('childsHorizontalRecursive')->referenced()->rootHorizontal()->where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__all__with__targets_realizations__by__levelId_unitId_year(string|int $levelId, string|int|null $unitId = null, string|int $year)
     {
         return is_null($unitId) ?
-            ModelsIndicator::with(['targets', 'realizations'])->where(['level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get() :
-            ModelsIndicator::with(['targets', 'realizations'])->where(['level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get();
+            ModelsIndicator::with(['targets', 'realizations'])->where(['level_id' => $levelId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get() :
+            ModelsIndicator::with(['targets', 'realizations'])->where(['level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__all__with__childs_targets_realizations__by__levelId_unitId_year(string|int $levelId, string|int|null $unitId = null, string|int $year)
     {
         return is_null($unitId) ?
-            ModelsIndicator::with(['targets', 'realizations', 'childsHorizontalRecursive'])->referenced()->rootHorizontal()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get() :
-            ModelsIndicator::with(['targets', 'realizations', 'childsHorizontalRecursive'])->referenced()->rootHorizontal()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get();
+            ModelsIndicator::with(['targets', 'realizations', 'childsHorizontalRecursive'])->referenced()->rootHorizontal()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get() :
+            ModelsIndicator::with(['targets', 'realizations', 'childsHorizontalRecursive'])->referenced()->rootHorizontal()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__allId__by_SuperMasterLabel(): array
     {
-        return ModelsIndicator::where(['label' => 'super-master'])->orderBy('order', 'asc')->get(['id'])->toArray();
+        return ModelsIndicator::where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get(['id'])->toArray();
     }
 
     public function find__allId_referenced__by__superMasterLabel(): array
     {
-        return ModelsIndicator::referenced()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get(['id'])->toArray();
+        return ModelsIndicator::referenced()->where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get(['id'])->toArray();
     }
 
     public function find__all__with__parents__by__id(string|int $id): array
     {
-        $result = ModelsIndicatorOnlyId::with('parentHorizontalRecursive')->where(['id' => $id])->orderBy('order', 'asc')->get()->toArray();
+        $result = ModelsIndicatorOnlyId::with('parentHorizontalRecursive')->where(['id' => $id])->orderBy('type', 'asc')->orderBy('order', 'asc')->get()->toArray();
         return Arr::flatten($result);
     }
 
     public function find__all__by__idList(array $idList)
     {
-        return ModelsIndicator::whereIn('id', $idList)->orderBy('order', 'asc')->get();
+        return ModelsIndicator::whereIn('id', $idList)->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__all__by__idList_levelId_unitId_year(array $idList, string|int $levelId, string|int|null $unitId = null, string|int $year)
     {
         return is_null($unitId) ?
-            ModelsIndicator::where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->whereIn('id', $idList)->orderBy('order', 'asc')->get() :
-            ModelsIndicator::where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->whereIn('id', $idList)->orderBy('order', 'asc')->get();
+            ModelsIndicator::where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->whereIn('id', $idList)->orderBy('type', 'asc')->orderBy('order', 'asc')->get() :
+            ModelsIndicator::where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->whereIn('id', $idList)->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function findAllByParentVerticalId(string|int $parentVerticalId)
     {
-        return ModelsIndicator::where(['parent_vertical_id' => $parentVerticalId])->orderBy('order', 'asc')->get();
+        return ModelsIndicator::where(['parent_vertical_id' => $parentVerticalId])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__all__by__levelId_unitId_year(string|int $levelId, string|int|null $unitId = null, string|int $year)
     {
         return is_null($unitId) ?
-            ModelsIndicator::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get() :
-            ModelsIndicator::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get();
+            ModelsIndicator::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get() :
+            ModelsIndicator::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
     }
 
     public function find__allId__by__levelId_unitId_year(string|int|null $levelId = null, string|int|null $unitId = null, string|int|null $year = null): array
     {
         $result = null;
         if (is_null($levelId)) {
-            $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'super-master'])->orderBy('order', 'asc')->get()->toArray();
+            $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'super-master'])->orderBy('type', 'asc')->orderBy('order', 'asc')->get()->toArray();
         } else {
             if (is_null($unitId)) {
-                $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
+                $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get()->toArray();
             } else {
-                $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
+                $result = ModelsIndicatorOnlyId::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get()->toArray();
             }
         }
 
@@ -278,8 +280,8 @@ class IndicatorRepository
     public function find__allCode__by__levelId_unitId_year(string|int $levelId, string|int|null $unitId = null, string|int $year): array
     {
         $result = is_null($unitId) ?
-            ModelsIndicatorOnlyCode::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray() :
-            ModelsIndicatorOnlyCode::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('order', 'asc')->get()->toArray();
+            ModelsIndicatorOnlyCode::referenced()->where(['label' => 'master', 'level_id' => $levelId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get()->toArray() :
+            ModelsIndicatorOnlyCode::referenced()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get()->toArray();
 
         return Arr::flatten($result);
     }

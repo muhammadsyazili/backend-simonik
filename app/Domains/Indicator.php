@@ -6,6 +6,7 @@ class Indicator
 {
     public string|int $id;
     public string $indicator;
+    public string $type;
     public ?string $formula;
     public ?string $measure;
     public ?string $weight;
