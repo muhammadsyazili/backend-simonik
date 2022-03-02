@@ -28,7 +28,7 @@ class CreateIndicatorsTable extends Migration
             $table->boolean('reviewed')->default(0);
             $table->boolean('referenced')->default(0);
             $table->boolean('dummy')->default(0);
-            $table->string('type', 255)->default('KPI');
+            $table->string('type', 255);
             $table->json('fdx')->nullable()->default(null);
             //support
             $table->enum('label', ['super-master', 'master', 'child']); //if 'super-master' than 'null' else 'valueable'

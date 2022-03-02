@@ -238,6 +238,7 @@ class IndicatorPaperWorkService
             foreach ($superMasterIndicators as $superMasterIndicator) {
                 $indicatorDomain->id = $idListMaster[$superMasterIndicator->id];
                 $indicatorDomain->indicator = $superMasterIndicator->indicator;
+                $indicatorDomain->type = $superMasterIndicator->type;
                 $indicatorDomain->formula = $superMasterIndicator->formula;
                 $indicatorDomain->measure = $superMasterIndicator->measure;
                 $indicatorDomain->weight = $superMasterIndicator->getRawOriginal('weight');
@@ -293,6 +294,7 @@ class IndicatorPaperWorkService
                 foreach ($masterIndicators as $masterIndicator) {
                     $indicatorDomain->id = $idListChild[$masterIndicator->id];
                     $indicatorDomain->indicator = $masterIndicator->indicator;
+                    $indicatorDomain->type = $masterIndicator->type;
                     $indicatorDomain->formula = $masterIndicator->formula;
                     $indicatorDomain->measure = $masterIndicator->measure;
                     $indicatorDomain->weight = $masterIndicator->getRawOriginal('weight');
@@ -370,6 +372,7 @@ class IndicatorPaperWorkService
             foreach ($masterIndicators as $masterIndicator) {
                 $indicatorDomain->id = $idListChild[$masterIndicator->id];
                 $indicatorDomain->indicator = $masterIndicator->indicator;
+                $indicatorDomain->type = $masterIndicator->type;
                 $indicatorDomain->formula = $masterIndicator->formula;
                 $indicatorDomain->measure = $masterIndicator->measure;
                 $indicatorDomain->weight = $masterIndicator->getRawOriginal('weight');
@@ -586,6 +589,7 @@ class IndicatorPaperWorkService
 
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -637,6 +641,7 @@ class IndicatorPaperWorkService
                             if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -702,6 +707,7 @@ class IndicatorPaperWorkService
                                             if (($sum > 0) && !in_array($indicatorSuperMaster->id, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
                                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -862,6 +868,7 @@ class IndicatorPaperWorkService
 
                                         $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                         $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                        $indicatorDomain->type = $indicatorSuperMaster->type;
                                         $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                         $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                         $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -922,6 +929,7 @@ class IndicatorPaperWorkService
                                     if ($indicatorSuperMaster->parent_horizontal_id === null) {
                                         $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                         $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                        $indicatorDomain->type = $indicatorSuperMaster->type;
                                         $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                         $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                         $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -997,6 +1005,7 @@ class IndicatorPaperWorkService
                                                     if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
                                                         $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                                         $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                        $indicatorDomain->type = $indicatorSuperMaster->type;
                                                         $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                                         $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                                         $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1176,6 +1185,7 @@ class IndicatorPaperWorkService
 
                                             $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                             $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                            $indicatorDomain->type = $indicatorSuperMaster->type;
                                             $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                             $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                             $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1236,6 +1246,7 @@ class IndicatorPaperWorkService
                                         if ($indicatorSuperMaster->parent_horizontal_id === null) {
                                             $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                             $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                            $indicatorDomain->type = $indicatorSuperMaster->type;
                                             $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                             $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                             $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1311,6 +1322,7 @@ class IndicatorPaperWorkService
                                                         if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
                                                             $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                                             $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                            $indicatorDomain->type = $indicatorSuperMaster->type;
                                                             $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                                             $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                                             $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1486,6 +1498,7 @@ class IndicatorPaperWorkService
 
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1537,6 +1550,7 @@ class IndicatorPaperWorkService
                             if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1602,6 +1616,7 @@ class IndicatorPaperWorkService
                                             if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
                                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1735,6 +1750,7 @@ class IndicatorPaperWorkService
 
                                 $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1795,6 +1811,7 @@ class IndicatorPaperWorkService
                             if ($indicatorSuperMaster->parent_horizontal_id === null) {
                                 $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
@@ -1870,6 +1887,7 @@ class IndicatorPaperWorkService
                                             if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsChildOnlyCode)) { //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'child', tapi baru belum terdaftar di 'child'
                                                 $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
+                                                $indicatorDomain->type = $indicatorSuperMaster->type;
                                                 $indicatorDomain->formula = $indicatorSuperMaster->formula;
                                                 $indicatorDomain->measure = $indicatorSuperMaster->measure;
                                                 $indicatorDomain->weight = $indicatorSuperMaster->getRawOriginal('weight');
