@@ -273,14 +273,16 @@ class RealizationPaperWorkService
                     $realization = $this->realizationRepository->find__by__indicatorId_month($indicator->id, $month);
 
                     if (in_array($user->role->name, ['super-admin', 'admin'])) {
-                        if ($realization->value != $realizations[$indicator->id][$month]) {
+
+                        //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                        if ($realization->value != $realizations[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $realizations[$indicator->id][$month] == 0 && $realization->default === true)) {
                             $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
                         }
                     } else {
+
+                        //update hanya jika sama dengan bulan sekarang atau sudah di un-lock
                         if ($this->monthName__to__monthNumber($month) === now()->month || !$this->realizationRepository->find__by__indicatorId_month($indicator->id, $month)->locked) {
-                            if ($realization->value != $realizations[$indicator->id][$month]) {
-                                $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
-                            }
+                            $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
                         }
                     }
                 }

@@ -178,7 +178,8 @@ class TargetPaperWorkService
                 foreach ($indicator->validity as $month => $value) {
                     $target = $this->targetRepository->find__by__indicatorId_month($indicator->id, $month);
 
-                    if ($target->value != $targets[$indicator->id][$month]) {
+                    //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                    if ($target->value != $targets[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $targets[$indicator->id][$month] == 0 && $target->default === true)) {
                         $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $targets[$indicator->id][$month]);
                     }
                 }
@@ -194,7 +195,8 @@ class TargetPaperWorkService
                                 if (in_array($month, array_keys($targets[$indicator->id]))) {
                                     $target = $this->targetRepository->find__by__indicatorId_month($indicatorChild->id, $month);
 
-                                    if ($target->value != $targets[$indicator->id][$month]) {
+                                    //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                                    if ($target->value != $targets[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $targets[$indicator->id][$month] == 0 && $target->default === true)) {
                                         $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
                                     }
                                 }
@@ -211,7 +213,8 @@ class TargetPaperWorkService
                                     if (in_array($month, array_keys($targets[$indicator->id]))) {
                                         $target = $this->targetRepository->find__by__indicatorId_month($indicatorChild->id, $month);
 
-                                        if ($target->value != $targets[$indicator->id][$month]) {
+                                        //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                                        if ($target->value != $targets[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $targets[$indicator->id][$month] == 0 && $target->default === true)) {
                                             $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
                                         }
                                     }
@@ -223,5 +226,51 @@ class TargetPaperWorkService
                 }
             }
         });
+    }
+
+    private function monthName__to__monthNumber(string $monthName): int
+    {
+        $monthNumber = 1;
+
+        switch ($monthName) {
+            case "jan":
+                $monthNumber = 1;
+                break;
+            case "feb":
+                $monthNumber = 2;
+                break;
+            case "mar":
+                $monthNumber = 3;
+                break;
+            case "apr":
+                $monthNumber = 4;
+                break;
+            case "may":
+                $monthNumber = 5;
+                break;
+            case "jun":
+                $monthNumber = 6;
+                break;
+            case "jul":
+                $monthNumber = 7;
+                break;
+            case "aug":
+                $monthNumber = 8;
+                break;
+            case "sep":
+                $monthNumber = 9;
+                break;
+            case "oct":
+                $monthNumber = 10;
+                break;
+            case "nov":
+                $monthNumber = 11;
+                break;
+            case "dec":
+                $monthNumber = 12;
+                break;
+        }
+
+        return $monthNumber;
     }
 }
