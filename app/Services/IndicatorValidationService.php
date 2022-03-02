@@ -51,7 +51,27 @@ class IndicatorValidationService
 
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        return Validator::make($input, $attributes, $messages);
+        $validator = Validator::make($input, $attributes, $messages);
+
+        foreach ($request->post('validity') as $key => $value) {
+            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('validity', "(#7.1) : Akses Ilegal !");
+                });
+                break;
+            }
+        }
+
+        foreach ($request->post('weight') as $key => $value) {
+            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('validity', "(#7.2) : Akses Ilegal !");
+                });
+                break;
+            }
+        }
+
+        return $validator;
     }
 
     public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
@@ -95,7 +115,27 @@ class IndicatorValidationService
 
         $input = Arr::only($request->post(), array_keys($attributes));
 
-        return Validator::make($input, $attributes, $messages);
+        $validator = Validator::make($input, $attributes, $messages);
+
+        foreach ($request->post('validity') as $key => $value) {
+            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('validity', "(#7.3) : Akses Ilegal !");
+                });
+                break;
+            }
+        }
+
+        foreach ($request->post('weight') as $key => $value) {
+            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('validity', "(#7.4) : Akses Ilegal !");
+                });
+                break;
+            }
+        }
+
+        return $validator;
     }
 
     public function destroyValidation(string|int $id): \Illuminate\Contracts\Validation\Validator

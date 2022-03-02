@@ -146,11 +146,11 @@ class IndicatorPaperWorkValidationService
         $res = $this->indicatorRepository->count__all__by__idList_superMasterLabel($new);
 
         //memastikan jumlah KPI yang akan di-update sama dengan di DB
-        $validator->after(function ($validator) use ($new, $res) {
-            if (count($new) !== $res) {
+        if (count($new) !== $res) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('indicators', "(#2.1) : Akses Ilegal !");
-            }
-        });
+            });
+        }
 
         return $validator;
     }

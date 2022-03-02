@@ -92,6 +92,21 @@ class TargetPaperWorkValidationService
         $targets = $request->post('targets');
         $indicatorsId = array_keys($request->post('targets')); //list KPI dari target
 
+        //memastikan target yang akan di-update merupakan bulan jan-dec
+        foreach ($targets as $months) {
+            $isError = false;
+            foreach ($months as $monthK => $monthV) {
+                if (!in_array($monthK, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+                    $validator->after(function ($validator) {
+                        $validator->errors()->add('validity', "(#5.4) : Akses Ilegal !");
+                    });
+                    $isError = true;
+                    break;
+                }
+            }
+            if ($isError) {break;}
+        }
+
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
@@ -133,9 +148,7 @@ class TargetPaperWorkValidationService
                 }
             }
 
-            if ($isError) {
-                break;
-            }
+            if ($isError) {break;}
         }
 
         return $validator;
