@@ -178,7 +178,8 @@ class IndicatorPaperWorkValidationService
 
         $input = ['level' => $level, 'unit' => $unit, 'year' => $year];
 
-        return Validator::make($input, $attributes, $messages);
+        $validator = Validator::make($input, $attributes, $messages);
+        return $validator;
     }
 
     //use repo IndicatorRepository, LevelRepository, UnitRepository
