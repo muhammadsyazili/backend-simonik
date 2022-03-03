@@ -32,12 +32,13 @@ class AnalyticValidationService
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
             'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)],
-            'tahun' => ['required', 'string', 'date_format:Y'],
-            'bulan' => ['required', 'string', 'in:1,2,3,4,5,6,7,8,9,10,11,12'],
+            'tahun' => ['required', 'integer', 'date_format:Y'],
+            'bulan' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
+            'integer' => ':attribute harus bulangan bulat.',
             'date_format' => ':attribute harus berformat yyyy.',
             'not_in' => ':attribute yang dipilih tidak sah.',
             'in' => ':attribute yang dipilih tidak sah.',

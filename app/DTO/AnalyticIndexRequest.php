@@ -8,5 +8,5 @@ class AnalyticIndexRequest
     public string $level;
     public string $unit;
     public int $year;
-    public int $month;
+    public string $month;
 }

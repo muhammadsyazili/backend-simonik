@@ -79,6 +79,7 @@ class IndicatorPaperWorkService
 
         $indicators = $level === 'super-master' ? $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
 
+        $this->iter = 0; //reset iterator
         $this->mapping__index__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
         $response->indicators = $this->indicators;

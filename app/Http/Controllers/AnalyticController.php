@@ -53,8 +53,8 @@ class AnalyticController extends ApiController
 
         $requestDTO->level = $request->query('level');
         $requestDTO->unit = $request->query('unit');
-        $requestDTO->year = (int) $request->query('tahun');
-        $requestDTO->month = (int) $request->query('bulan');
+        $requestDTO->year = $request->query('tahun');
+        $requestDTO->month = $request->query('bulan');
         $requestDTO->userId = $request->header('X-User-Id');
 
         $analyticService = new AnalyticService($constructRequest);
@@ -66,7 +66,6 @@ class AnalyticController extends ApiController
             Response::HTTP_OK,
             "Analytic",
             [
-                'levels' => $response->levels,
                 'indicators' => $response->indicators,
             ],
             null,
