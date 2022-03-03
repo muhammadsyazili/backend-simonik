@@ -87,18 +87,18 @@ class IndicatorPaperWorkService
         $response->permissions = [
             'indicator' => [
                 'create' => $isSuperAdmin ? true : false,
-                'edit' => $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
+                'edit' => $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false, //hanya bisa dilakukan tahun saat ini atau setelahnya
                 'delete' => $isSuperAdmin && $isSuperMaster ? true : false,
-                'changes_order' => $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false
+                'changes_order' => $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false //hanya bisa dilakukan tahun saat ini atau setelahnya
             ],
             'reference' => [
                 'create' => $isSuperAdmin ? true : false,
-                'edit' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
+                'edit' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false, //hanya bisa dilakukan tahun saat ini atau setelahnya
             ],
             'paper_work' => ['indicator' => [
                 'create' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin ? true : false,
-                'edit' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
-                'delete' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false,
+                'edit' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false, //hanya bisa dilakukan tahun saat ini atau setelahnya
+                'delete' => ($numberOfChildLevel > 1) && $isSuperAdminOrAdmin && $currentLevelNotSameWithUserLevel ? true : false, //hanya bisa dilakukan tahun saat ini atau setelahnya
             ]],
         ];
 
