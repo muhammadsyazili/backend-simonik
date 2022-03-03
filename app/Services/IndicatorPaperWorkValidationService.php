@@ -46,7 +46,7 @@ class IndicatorPaperWorkValidationService
 
         $attributes = [
             'level' => ['required', 'string', new Level__IsThisAndChildFromUser($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildUser($user)], //new Unit__MatchWith__Level($request->query('level'))
+            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildUser($user)],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
@@ -155,14 +155,17 @@ class IndicatorPaperWorkValidationService
         return $validator;
     }
 
-    public function destroyValidation(string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
+    //use repo UserRepository
+    public function destroyValidation(string|int $userId, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan semua target & realisasi masih default
         //memastikan kertas kerja KPI yang akan di-destroy sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
+        $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
+
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new AllTarget_And_AllRealization__IsDefault($level, $unit, $year), new IndicatorPaperWork__Available($level, $unit, $year)],
+            'level' => ['required', 'string', 'not_in:super-master', new AllTarget_And_AllRealization__IsDefault($user, $level, $unit, $year), new IndicatorPaperWork__Available($level, $unit, $year)],
             'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];

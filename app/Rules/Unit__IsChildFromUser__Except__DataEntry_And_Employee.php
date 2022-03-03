@@ -3,13 +3,13 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Support\Arr;
 use App\Repositories\UnitRepository;
+use App\Models\User;
 
 class Unit__IsChildFromUser__Except__DataEntry_And_Employee implements Rule
 {
     private UnitRepository $unitRepository;
-    private $user;
+    private User $user;
 
     /**
      * Create a new rule instance.
@@ -17,7 +17,7 @@ class Unit__IsChildFromUser__Except__DataEntry_And_Employee implements Rule
      * @param mixed $user
      * @return void
      */
-    public function __construct($user)
+    public function __construct(User $user)
     {
         $this->user = $user;
 

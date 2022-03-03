@@ -302,8 +302,9 @@ class PaperWorkIndicatorController extends ApiController
      * @param  string  $year
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($level, $unit, $year)
+    public function destroy(Request $request, $level, $unit, $year)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
@@ -312,15 +313,18 @@ class PaperWorkIndicatorController extends ApiController
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
         $constructRequest->targetRepository = $targetRepository;
         $constructRequest->realizationRepository = $realizationRepository;
 
-        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService();
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 
-        $validation = $indicatorPaperWorkValidationService->destroyValidation($level, $unit, $year);
+        $userId = $request->header('X-User-Id');
+
+        $validation = $indicatorPaperWorkValidationService->destroyValidation($userId, $level, $unit, $year);
 
         if ($validation->fails()) {
             return $this->APIResponse(

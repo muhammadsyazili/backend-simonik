@@ -96,7 +96,7 @@ class TargetPaperWorkValidationService
         foreach ($targets as $months) {
             $isError = false;
             foreach ($months as $monthK => $monthV) {
-                if (!in_array($monthK, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+                if (!in_array($monthK, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                     $validator->after(function ($validator) {
                         $validator->errors()->add('validity', "(#5.4) : Akses Ilegal !");
                     });
@@ -104,7 +104,9 @@ class TargetPaperWorkValidationService
                     break;
                 }
             }
-            if ($isError) {break;}
+            if ($isError) {
+                break;
+            }
         }
 
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
@@ -148,7 +150,9 @@ class TargetPaperWorkValidationService
                 }
             }
 
-            if ($isError) {break;}
+            if ($isError) {
+                break;
+            }
         }
 
         return $validator;

@@ -8,7 +8,7 @@ use App\Repositories\UnitRepository;
 class Unit__MatchWith__Level implements Rule
 {
     private UnitRepository $unitRepository;
-    private $level;
+    private string $level;
 
     /**
      * Create a new rule instance.
@@ -16,7 +16,7 @@ class Unit__MatchWith__Level implements Rule
      * @param mixed $level
      * @return void
      */
-    public function __construct($level)
+    public function __construct(string $level)
     {
         $this->level = $level;
 
