@@ -17,7 +17,7 @@ class AnalyticService
     private ?IndicatorRepository $indicatorRepository;
     private ?UnitRepository $unitRepository;
 
-    private mixed $indicators = null;
+    private array $indicators = [];
     private int $iter = 0;
 
     public function __construct(ConstructRequest $constructRequest)
@@ -47,9 +47,135 @@ class AnalyticService
         $this->iter = 0; //reset iterator
         $this->mapping__index__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-        $response->indicators = $this->indicators;
+        $indicators = $this->calc(collect($this->indicators), $month);
+
+        $response->indicators = $indicators;
+        die;
 
         return $response;
+    }
+
+    private function calc(\Illuminate\Support\Collection $indicators, string $month): \Illuminate\Support\Collection
+    {
+        $newIndicators = $indicators->map(function ($item) use ($month) {
+
+            $achievement = 0;
+            if (!$item['dummy']) {
+                if ($item['targets'][$month]['value'] === 0 && $item['realizations'][$month]['value'] === 0) {
+                    $achievement = 100;
+                } else if ($item['targets'][$month]['value'] === 0 && $item['realizations'][$month]['value'] !== 0) {
+                    $achievement = 0;
+                } else if ($item['original_polarity'] === '1') {
+                    //dump($item['indicator'], $item['realizations'][$month]['value'], $item['targets'][$month]['value']);
+                    $achievement = (($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100);
+                } else if ($item['original_polarity'] === '-1') {
+                    //dump($item['indicator'], $item['realizations'][$month]['value'], $item['targets'][$month]['value']);
+                    $achievement = (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100;
+                } else {
+                    $achievement = null;
+                }
+            } else {
+                $achievement = null;
+            }
+
+            return [
+                'id' => $item['id'],
+                'indicator' => $item['indicator'],
+                'type' => $item['type'],
+                'formula' => $item['formula'],
+                'measure' => $item['measure'],
+                'weight' => $item['weight'],
+                'validity' => $item['validity'],
+                'polarity' => $item['polarity'],
+                'order' => $item['order'],
+                'bg_color' => $item['bg_color'],
+
+                'achievement' => $achievement,
+                'capping_value_110' => null,
+                'capping_value_100' => null,
+                'status' => null,
+
+                'targets' => [
+                    'jan' => [
+                        'value' => $item['targets']['jan']['value'],
+                    ],
+                    'feb' => [
+                        'value' => $item['targets']['feb']['value'],
+                    ],
+                    'mar' => [
+                        'value' => $item['targets']['mar']['value'],
+                    ],
+                    'apr' => [
+                        'value' => $item['targets']['apr']['value'],
+                    ],
+                    'may' => [
+                        'value' => $item['targets']['may']['value'],
+                    ],
+                    'jun' => [
+                        'value' => $item['targets']['jun']['value'],
+                    ],
+                    'jul' => [
+                        'value' => $item['targets']['jul']['value'],
+                    ],
+                    'aug' => [
+                        'value' => $item['targets']['aug']['value'],
+                    ],
+                    'sep' => [
+                        'value' => $item['targets']['sep']['value'],
+                    ],
+                    'oct' => [
+                        'value' => $item['targets']['oct']['value'],
+                    ],
+                    'nov' => [
+                        'value' => $item['targets']['nov']['value'],
+                    ],
+                    'dec' => [
+                        'value' => $item['targets']['dec']['value'],
+                    ],
+                ],
+
+                'realizations' => [
+                    'jan' => [
+                        'value' => $item['realizations']['jan']['value'],
+                    ],
+                    'feb' => [
+                        'value' => $item['realizations']['feb']['value'],
+                    ],
+                    'mar' => [
+                        'value' => $item['realizations']['mar']['value'],
+                    ],
+                    'apr' => [
+                        'value' => $item['realizations']['apr']['value'],
+                    ],
+                    'may' => [
+                        'value' => $item['realizations']['may']['value'],
+                    ],
+                    'jun' => [
+                        'value' => $item['realizations']['jun']['value'],
+                    ],
+                    'jul' => [
+                        'value' => $item['realizations']['jul']['value'],
+                    ],
+                    'aug' => [
+                        'value' => $item['realizations']['aug']['value'],
+                    ],
+                    'sep' => [
+                        'value' => $item['realizations']['sep']['value'],
+                    ],
+                    'oct' => [
+                        'value' => $item['realizations']['oct']['value'],
+                    ],
+                    'nov' => [
+                        'value' => $item['realizations']['nov']['value'],
+                    ],
+                    'dec' => [
+                        'value' => $item['realizations']['dec']['value'],
+                    ],
+                ],
+            ];
+        });
+
+        return $newIndicators;
     }
 
     private function mapping__index__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
@@ -69,6 +195,8 @@ class AnalyticService
             $this->indicators[$iteration]['polarity'] = $item->polarity;
             $this->indicators[$iteration]['order'] = $iteration;
             $this->indicators[$iteration]['bg_color'] = $bg_color;
+            $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
+            $this->indicators[$iteration]['dummy'] = $item->dummy;
 
             //target
             $jan = $item->targets->search(function ($value) {

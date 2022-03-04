@@ -2,6 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\DTO\ConstructRequest;
+use App\DTO\IndicatorPaperWorkStoreRequest;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\LevelRepository;
+use App\Repositories\RealizationRepository;
+use App\Repositories\TargetRepository;
+use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
+use App\Services\IndicatorPaperWorkService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -2002,5 +2011,32 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => Carbon::now(),
             ]);
         }
+
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $userRepository = new UserRepository();
+        $targetRepository = new TargetRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->targetRepository = $targetRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
+
+        $requestDTO = new IndicatorPaperWorkStoreRequest();
+
+        $requestDTO->indicators = $uuid_indicators;
+        $requestDTO->level = 'uiw';
+        $requestDTO->year = '2021';
+        $requestDTO->userId = '95b7d541-4b60-4079-b722-1d7020e5816c';
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+
+        $indicatorPaperWorkService->store($requestDTO);
     }
 }
