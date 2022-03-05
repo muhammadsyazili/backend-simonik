@@ -51,6 +51,6 @@ class Level__IsThisAndChildFromUser implements Rule
      */
     public function message()
     {
-        return "(#2) : Anda Tidak Memiliki Hak Akses !";
+        return "(#2.4) : Anda Tidak Memiliki Hak Akses !";
     }
 }

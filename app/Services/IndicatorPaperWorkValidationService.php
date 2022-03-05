@@ -9,10 +9,12 @@ use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
 use App\Rules\Indicator__MatchWith__SuperMater_Indicator;
 use App\Rules\AllTarget_And_AllRealization__IsDefault;
-use App\Rules\Level__IsChildFromUser;
+use App\Rules\GreaterThanOrSameCurrentYear;
+use App\Rules\Level__IsChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Level__IsThisAndChildFromUser;
 use App\Rules\IndicatorPaperWork__NotAvailable;
 use App\Rules\IndicatorPaperWork__Available;
+use App\Rules\Unit__IsChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Unit__MatchWith__Level;
 use App\Rules\Unit__IsThisAndChildUser;
 use Illuminate\Http\Request;
@@ -72,7 +74,7 @@ class IndicatorPaperWorkValidationService
 
         $attributes = [
             'indicators' => ['required', new Indicator__MatchWith__SuperMater_Indicator($request->post('indicators'))],
-            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser($user), new IndicatorPaperWork__NotAvailable($request->post('level'), $request->post('year'))],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user), new IndicatorPaperWork__NotAvailable($request->post('level'), $request->post('year'))],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -87,14 +89,17 @@ class IndicatorPaperWorkValidationService
         return Validator::make($input, $attributes, $messages);
     }
 
-    public function editValidation(string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
+    //use repo UserRepository
+    public function editValidation(string|int $userId, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan kertas kerja KPI yang akan di-edit sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
+        $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
+
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year)],
-            'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year), new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
+            'unit' => ['required', 'string', new Unit__MatchWith__Level($level), new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -115,9 +120,11 @@ class IndicatorPaperWorkValidationService
         //memastikan kertas kerja KPI yang akan di-update sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year)],
-            'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
+            'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year), new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
+            'unit' => ['required', 'string', new Unit__MatchWith__Level($level), new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)],
             'year' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -165,9 +172,9 @@ class IndicatorPaperWorkValidationService
         $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new AllTarget_And_AllRealization__IsDefault($user, $level, $unit, $year), new IndicatorPaperWork__Available($level, $unit, $year)],
-            'unit' => ['required', 'string', new Unit__MatchWith__Level($level)],
-            'year' => ['required', 'string', 'date_format:Y'],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user), new AllTarget_And_AllRealization__IsDefault($user, $level, $unit, $year), new IndicatorPaperWork__Available($level, $unit, $year)],
+            'unit' => ['required', 'string', new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user), new Unit__MatchWith__Level($level)],
+            'year' => ['required', 'string', 'date_format:Y', new GreaterThanOrSameCurrentYear($user)],
         ];
 
         $messages = [

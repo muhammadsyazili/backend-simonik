@@ -185,21 +185,25 @@ class PaperWorkIndicatorController extends ApiController
      * @param  string  $year
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($level, $unit, $year)
+    public function edit(Request $request, $level, $unit, $year)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
-        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService();
+        $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 
-        $validation = $indicatorPaperWorkValidationService->editValidation($level, $unit, $year);
+        $userId = $request->header('X-User-Id');
+
+        $validation = $indicatorPaperWorkValidationService->editValidation($userId, $level, $unit, $year);
 
         if ($validation->fails()) {
             return $this->APIResponse(
