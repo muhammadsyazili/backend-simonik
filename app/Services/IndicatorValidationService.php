@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\DTO\ConstructRequest;
+use App\Repositories\IndicatorRepository;
+use App\Repositories\UserRepository;
+use App\Rules\GreaterThanOrSameCurrentYear;
 use App\Rules\Indicator__NotHave__Childs;
 use App\Rules\Indicator__IsSuperMaster;
 use Illuminate\Support\Facades\Validator;
@@ -10,6 +14,17 @@ use Illuminate\Support\Arr;
 
 class IndicatorValidationService
 {
+    private ?UserRepository $userRepository;
+    private ?IndicatorRepository $indicatorRepository;
+
+    public function __construct(?ConstructRequest $constructRequest = null)
+    {
+        if (!is_null($constructRequest)) {
+            $this->userRepository = $constructRequest->userRepository;
+            $this->indicatorRepository = $constructRequest->indicatorRepository;
+        }
+    }
+
     public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
@@ -54,7 +69,7 @@ class IndicatorValidationService
         $validator = Validator::make($input, $attributes, $messages);
 
         foreach ($request->post('validity') as $key => $value) {
-            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('validity', "(#7.1) : Akses Ilegal !");
                 });
@@ -63,7 +78,7 @@ class IndicatorValidationService
         }
 
         foreach ($request->post('weight') as $key => $value) {
-            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('validity', "(#7.2) : Akses Ilegal !");
                 });
@@ -74,10 +89,35 @@ class IndicatorValidationService
         return $validator;
     }
 
-    public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    //use repo UserRepository, IndicatorRepository
+    public function editValidation(string|int $userId, string|int $id): \Illuminate\Contracts\Validation\Validator
     {
+        $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
+        $year = $this->indicatorRepository->find__year__by__id($id);
+
         $attributes = [
-            'indicator' => ['required', 'string', 'max:100'],
+            'id' => ['required', new GreaterThanOrSameCurrentYear($user, $year)],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+        ];
+
+        $input = ['id' => $id];
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        return $validator;
+    }
+
+    //use repo UserRepository, IndicatorRepository
+    public function updateValidation(Request $request, string|int $id): \Illuminate\Contracts\Validation\Validator
+    {
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+        $year = $this->indicatorRepository->find__year__by__id($id);
+
+        $attributes = [
+            'indicator' => ['required', 'string', 'max:100', new GreaterThanOrSameCurrentYear($user, $year)],
             'dummy' => ['required', 'boolean'],
             'reducing_factor' => ['nullable', 'required_if:dummy,0', 'boolean'],
             'polarity' => ['nullable', 'required_if:reducing_factor,0', 'in:1,-1'],
@@ -118,7 +158,7 @@ class IndicatorValidationService
         $validator = Validator::make($input, $attributes, $messages);
 
         foreach ($request->post('validity') as $key => $value) {
-            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('validity', "(#7.3) : Akses Ilegal !");
                 });
@@ -127,7 +167,7 @@ class IndicatorValidationService
         }
 
         foreach ($request->post('weight') as $key => $value) {
-            if (!in_array($key, ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'])) {
+            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('validity', "(#7.4) : Akses Ilegal !");
                 });

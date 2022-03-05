@@ -100,7 +100,7 @@ class IndicatorPaperWorkValidationService
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year), new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
             'unit' => ['required', 'string', new Unit__MatchWith__Level($level), new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)],
-            'year' => ['required', 'string', 'date_format:Y'],
+            'year' => ['required', 'string', 'date_format:Y', new GreaterThanOrSameCurrentYear($user)],
         ];
 
         $messages = [
@@ -114,7 +114,7 @@ class IndicatorPaperWorkValidationService
         return Validator::make($input, $attributes, $messages);
     }
 
-    //use repo IndicatorRepository, LevelRepository, UnitRepository
+    //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan kertas kerja KPI yang akan di-update sudah tersedia di DB
@@ -125,7 +125,7 @@ class IndicatorPaperWorkValidationService
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new IndicatorPaperWork__Available($level, $unit, $year), new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
             'unit' => ['required', 'string', new Unit__MatchWith__Level($level), new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)],
-            'year' => ['required', 'string', 'date_format:Y'],
+            'year' => ['required', 'string', 'date_format:Y', new GreaterThanOrSameCurrentYear($user)],
         ];
 
         $messages = [
@@ -189,13 +189,15 @@ class IndicatorPaperWorkValidationService
         return $validator;
     }
 
-    //use repo IndicatorRepository, LevelRepository, UnitRepository
+    //use repo IndicatorRepository, LevelRepository, UnitRepository, UserRepository
     public function reorderValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+
         $attributes = [
             'level' => ['required', 'string'],
             'unit' => ['required_unless:level,super-master', 'string'],
-            'year' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
+            'year' => ['required_unless:level,super-master', 'string', 'date_format:Y', new GreaterThanOrSameCurrentYear($user)],
         ];
 
         $messages = [

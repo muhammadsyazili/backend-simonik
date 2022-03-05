@@ -12,6 +12,7 @@ use App\DTO\IndicatorReferenceStoreRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
 use App\Services\IndicatorReferenceService;
 use App\Services\IndicatorReferenceValidationService;
 
@@ -100,17 +101,19 @@ class IndicatorReferenceController extends ApiController
      */
     public function edit(Request $request)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
-        $indicatorReferenceValidationService = new IndicatorReferenceValidationService();
+        $indicatorReferenceValidationService = new IndicatorReferenceValidationService($constructRequest);
 
         $validation = $indicatorReferenceValidationService->editValidation($request);
 
@@ -153,12 +156,14 @@ class IndicatorReferenceController extends ApiController
      */
     public function update(Request $request)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;

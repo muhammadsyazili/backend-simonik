@@ -13,6 +13,7 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
 use App\Repositories\TargetRepository;
+use App\Repositories\UserRepository;
 use App\Services\IndicatorService;
 use App\Services\IndicatorValidationService;
 
@@ -80,13 +81,31 @@ class IndicatorController extends ApiController
      * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
+
+        $indicatorValidationService = new IndicatorValidationService($constructRequest);
+
+        $userId = $request->header('X-User-Id');
+
+        $validation = $indicatorValidationService->editValidation($userId, $id);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
 
         $requestDTO = new IndicatorEditRequest();
 
@@ -116,19 +135,21 @@ class IndicatorController extends ApiController
      */
     public function update(Request $request, $id)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $targetRepository = new TargetRepository();
         $realizationRepository = new RealizationRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->targetRepository = $targetRepository;
         $constructRequest->realizationRepository = $realizationRepository;
 
-        $indicatorValidationService = new IndicatorValidationService();
+        $indicatorValidationService = new IndicatorValidationService($constructRequest);
 
-        $validation = $indicatorValidationService->updateValidation($request);
+        $validation = $indicatorValidationService->updateValidation($request, $id);
 
         if ($validation->fails()) {
             return $this->APIResponse(

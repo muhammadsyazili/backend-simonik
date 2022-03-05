@@ -8,15 +8,17 @@ use App\Models\User;
 class GreaterThanOrSameCurrentYear implements Rule
 {
     private User $user;
+    private string|int|null $year;
 
     /**
      * Create a new rule instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, string|int|null $year = null)
     {
         $this->user = $user;
+        $this->year = $year;
     }
 
     /**
@@ -32,7 +34,8 @@ class GreaterThanOrSameCurrentYear implements Rule
             return true;
         } else {
             if ($this->user->role->name === 'admin') {
-                if ($value >= (string) now()->year) {
+                $year = is_null($this->year) ? $value : $this->year;
+                if ((int) $year >= (int) now()->year) {
                     return true;
                 } else {
                     return false;
@@ -50,6 +53,6 @@ class GreaterThanOrSameCurrentYear implements Rule
      */
     public function message()
     {
-        return 'Tahun Yang Dipilih Tidak Boleh Kurang Dari Tahun Sekarang, Jika Ingin Tetap Menghapus Kurang Dari Tahun Sekarang Silakkan Hubungi Super Admin !';
+        return 'Tahun Yang Dipilih Tidak Boleh Kurang Dari Tahun Sekarang, Jika Ingin Tetap Melakukan Aksi Tersebut Silakkan Hubungi Super Admin !';
     }
 }

@@ -6,6 +6,8 @@ use App\DTO\ConstructRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
+use App\Repositories\UserRepository;
+use App\Rules\GreaterThanOrSameCurrentYear;
 use App\Rules\IndicatorPaperWork__Available;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -14,6 +16,7 @@ use App\Rules\Unit__MatchWith__Level;
 
 class IndicatorReferenceValidationService
 {
+    private ?UserRepository $userRepository;
     private ?IndicatorRepository $indicatorRepository;
     private ?LevelRepository $levelRepository;
     private ?UnitRepository $unitRepository;
@@ -21,6 +24,7 @@ class IndicatorReferenceValidationService
     public function __construct(?ConstructRequest $constructRequest = null)
     {
         if (!is_null($constructRequest)) {
+            $this->userRepository = $constructRequest->userRepository;
             $this->indicatorRepository = $constructRequest->indicatorRepository;
             $this->levelRepository = $constructRequest->levelRepository;
             $this->unitRepository = $constructRequest->unitRepository;
@@ -81,15 +85,18 @@ class IndicatorReferenceValidationService
         return $validator;
     }
 
+    //use repo UserRepository
     public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan kertas kerja KPI yang akan di-edit sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+
         $attributes = [
             'level' => ['required', 'string', new IndicatorPaperWork__Available($request->query('level'), $request->query('unit'), $request->query('tahun'))],
             'unit' => ['required_unless:level,super-master', 'string', 'in:master', new Unit__MatchWith__Level($request->query('level'))],
-            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
+            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y', new GreaterThanOrSameCurrentYear($user)],
         ];
 
         $messages = [
@@ -104,15 +111,17 @@ class IndicatorReferenceValidationService
         return Validator::make($input, $attributes, $messages);
     }
 
-    //use repo IndicatorRepository, LevelRepository, UnitRepository
+    //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+        
         $attributes = [
             'indicators.*' => ['required', 'uuid'],
             'preferences.*' => ['required'],
             'level' => ['required', 'string'],
             'unit' => ['required_unless:level,super-master', 'string', 'in:master', new Unit__MatchWith__Level($request->post('level'))],
-            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
+            'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y', new GreaterThanOrSameCurrentYear($user)],
         ];
 
         $messages = [

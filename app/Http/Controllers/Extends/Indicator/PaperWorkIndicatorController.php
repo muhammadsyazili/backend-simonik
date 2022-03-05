@@ -127,19 +127,19 @@ class PaperWorkIndicatorController extends ApiController
      */
     public function store(Request $request)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
-        $userRepository = new UserRepository();
         $targetRepository = new TargetRepository();
         $realizationRepository = new RealizationRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
-        $constructRequest->userRepository = $userRepository;
         $constructRequest->targetRepository = $targetRepository;
         $constructRequest->realizationRepository = $realizationRepository;
 
@@ -247,21 +247,21 @@ class PaperWorkIndicatorController extends ApiController
      */
     public function update(Request $request, $level, $unit, $year)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
         $targetRepository = new TargetRepository();
         $realizationRepository = new RealizationRepository();
-        $userRepository = new UserRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
         $constructRequest->targetRepository = $targetRepository;
         $constructRequest->realizationRepository = $realizationRepository;
-        $constructRequest->userRepository = $userRepository;
 
         $indicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService($constructRequest);
 
@@ -367,12 +367,14 @@ class PaperWorkIndicatorController extends ApiController
      */
     public function reorder(Request $request)
     {
+        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
 
         $constructRequest = new ConstructRequest();
 
+        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
