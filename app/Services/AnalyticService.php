@@ -50,7 +50,6 @@ class AnalyticService
         $indicators = $this->calc(collect($this->indicators), $month);
 
         $response->indicators = $indicators;
-        die;
 
         return $response;
     }
@@ -61,16 +60,18 @@ class AnalyticService
 
             $achievement = 0;
             if (!$item['dummy']) {
-                if ($item['targets'][$month]['value'] === 0 && $item['realizations'][$month]['value'] === 0) {
-                    $achievement = 100;
-                } else if ($item['targets'][$month]['value'] === 0 && $item['realizations'][$month]['value'] !== 0) {
-                    $achievement = 0;
-                } else if ($item['original_polarity'] === '1') {
-                    //dump($item['indicator'], $item['realizations'][$month]['value'], $item['targets'][$month]['value']);
-                    $achievement = (($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100);
-                } else if ($item['original_polarity'] === '-1') {
-                    //dump($item['indicator'], $item['realizations'][$month]['value'], $item['targets'][$month]['value']);
-                    $achievement = (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100;
+                if (!$item['reducing_factor']) {
+                    if ($item['targets'][$month]['value'] === (float) 0 && $item['realizations'][$month]['value'] === (float) 0) {
+                        $achievement = round(100, 2);
+                    } else if ($item['targets'][$month]['value'] === (float) 0 && $item['realizations'][$month]['value'] !== (float) 0) {
+                        $achievement = round(0, 2);
+                    } else if ($item['original_polarity'] === '1') {
+                        $achievement = round($item['realizations'][$month]['value'] === (float) 0 ? 0 : ($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100, 2);
+                    } else if ($item['original_polarity'] === '-1') {
+                        $achievement = round($item['realizations'][$month]['value'] === (float) 0 ? 0 : (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100, 2);
+                    } else {
+                        $achievement = null;
+                    }
                 } else {
                     $achievement = null;
                 }
@@ -195,8 +196,10 @@ class AnalyticService
             $this->indicators[$iteration]['polarity'] = $item->polarity;
             $this->indicators[$iteration]['order'] = $iteration;
             $this->indicators[$iteration]['bg_color'] = $bg_color;
+
             $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
             $this->indicators[$iteration]['dummy'] = $item->dummy;
+            $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
 
             //target
             $jan = $item->targets->search(function ($value) {
