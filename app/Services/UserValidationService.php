@@ -58,7 +58,7 @@ class UserValidationService
         //memastikan username yang akan di-store tidak mengandung keyword
         if (Str::containsAll($username__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('username', "Username Sudah Tersedia.");
+                $validator->errors()->add('username', "(#1.1) : Username Sudah Tersedia.");
             });
         }
 
@@ -67,7 +67,7 @@ class UserValidationService
         foreach ($users as $user) {
             if (strtolower($user->username) === $username__lowercase) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('username', "Username Sudah Tersedia.");
+                    $validator->errors()->add('username', "(#1.2) : Username Sudah Tersedia.");
                 });
                 break;
             }
@@ -77,7 +77,7 @@ class UserValidationService
         $result = $this->unitRepository->count__all__by__slug($unit);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('unit', "Unit Kerja Belum Tersedia.");
+                $validator->errors()->add('unit', "(#1.1) : Unit Kerja Belum Tersedia.");
             });
         }
 
@@ -117,14 +117,14 @@ class UserValidationService
         //memastikan user yang akan di-update role-nya 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
-                $validator->errors()->add('username', "User Tidak Diizinkan Diubah.");
+                $validator->errors()->add('username', "(#1.1) : User Tidak Diizinkan Diubah.");
             });
         }
 
         //memastikan username yang akan di-update tidak mengandung keyword
         if (Str::containsAll($username__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('username', "Username Sudah Tersedia.");
+                $validator->errors()->add('username', "(#1.3) : Username Sudah Tersedia.");
             });
         }
 
@@ -135,7 +135,7 @@ class UserValidationService
             foreach ($users as $user) {
                 if (strtolower($user->username) === $username__lowercase) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('username', "Username Sudah Tersedia.");
+                        $validator->errors()->add('username', "(#1.4) : Username Sudah Tersedia.");
                     });
                     break;
                 }
@@ -146,7 +146,7 @@ class UserValidationService
         $result = $this->unitRepository->count__all__by__slug($unit);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('unit', "Unit Kerja Belum Tersedia.");
+                $validator->errors()->add('unit', "(#1.2) : Unit Kerja Belum Tersedia.");
             });
         }
 
@@ -172,7 +172,7 @@ class UserValidationService
         //memastikan user yang akan di-destroy role-nya 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "User Tidak Diizinkan Dihapus.");
+                $validator->errors()->add('id', "(#1.1) : User Tidak Diizinkan Dihapus.");
             });
         }
 

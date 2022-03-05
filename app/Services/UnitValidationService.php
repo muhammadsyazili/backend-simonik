@@ -58,7 +58,7 @@ class UnitValidationService
         //memastikan nama yang akan di-store tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
+                $validator->errors()->add('name', "(#1.1) : Nama Unit Kerja Sudah Tersedia.");
             });
         }
 
@@ -67,7 +67,7 @@ class UnitValidationService
         foreach ($units as $unit) {
             if ($unit->slug === Str::slug("$level__lowercase-$name__lowercase")) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
+                    $validator->errors()->add('name', "(#1.2) : Nama Unit Kerja Sudah Tersedia.");
                 });
                 break;
             }
@@ -77,7 +77,7 @@ class UnitValidationService
         $result = $this->levelRepository->count__all__by__slug($level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('level', "Level Belum Tersedia.");
+                $validator->errors()->add('level', "(#1.1) : Level Belum Tersedia.");
             });
         }
 
@@ -89,7 +89,7 @@ class UnitValidationService
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
+                    $validator->errors()->add('parent_unit', "(#1.1) : Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
                 });
             }
 
@@ -143,7 +143,7 @@ class UnitValidationService
         //memastikan nama yang akan di-update tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
+                $validator->errors()->add('name', "(#1.3) : Nama Unit Kerja Sudah Tersedia.");
             });
         }
 
@@ -154,7 +154,7 @@ class UnitValidationService
             foreach ($units as $unit) {
                 if ($unit->slug === Str::slug("$level__lowercase-$name__lowercase")) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('name', "Nama Unit Kerja Sudah Tersedia.");
+                        $validator->errors()->add('name', "(#1.4) : Nama Unit Kerja Sudah Tersedia.");
                     });
                     break;
                 }
@@ -165,7 +165,7 @@ class UnitValidationService
         $result = $this->levelRepository->count__all__by__slug($level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('level', "Level Belum Tersedia.");
+                $validator->errors()->add('level', "(#1.2) : Level Belum Tersedia.");
             });
         }
 
@@ -176,7 +176,7 @@ class UnitValidationService
             //memastikan parent unit yang akan di-update bukan merupakan unit yang saat ini di-update
             if ($unit->slug === $parent_unit) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "Pada Turunan Dari Unit Kerja, Tidak Diizinkan Memilih Unit Kerja Yang Sama.");
+                    $validator->errors()->add('parent_unit', "(#1.1) : Pada Turunan Dari Unit Kerja, Tidak Diizinkan Memilih Unit Kerja Yang Sama.");
                 });
             }
 
@@ -184,7 +184,7 @@ class UnitValidationService
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
+                    $validator->errors()->add('parent_unit', "(#1.2) : Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
                 });
             }
 
@@ -225,7 +225,7 @@ class UnitValidationService
         $result = $this->indicatorRepository->count__all__by__unitId($id);
         if ($result !== 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "Unit Kerja Tidak Bisa Dihapus, Karena Sudah Memiliki Kertas Kerja KPI.");
+                $validator->errors()->add('id', "(#1.1) : Unit Kerja Tidak Bisa Dihapus, Karena Sudah Memiliki Kertas Kerja KPI.");
             });
         }
 

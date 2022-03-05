@@ -53,7 +53,7 @@ class LevelValidationService
         //memastikan nama yang akan di-store tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
+                $validator->errors()->add('name', "(#1.1) : Nama Level Sudah Tersedia.");
             });
         }
 
@@ -62,7 +62,7 @@ class LevelValidationService
         foreach ($levels as $level) {
             if ($level->slug === Str::slug($name__lowercase)) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
+                    $validator->errors()->add('name', "(#1.2) : Nama Level Sudah Tersedia.");
                 });
                 break;
             }
@@ -72,7 +72,7 @@ class LevelValidationService
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "Pada Turunan Dari Level, Level Belum Tersedia.");
+                $validator->errors()->add('parent_level', "(#1.1) : Pada Turunan Dari Level, Level Belum Tersedia.");
             });
         }
 
@@ -107,7 +107,7 @@ class LevelValidationService
         //memastikan nama yang akan di-update tidak mengandung keyword
         if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
+                $validator->errors()->add('name', "(#1.3) : Nama Level Sudah Tersedia.");
             });
         }
 
@@ -118,7 +118,7 @@ class LevelValidationService
             foreach ($levels as $level) {
                 if ($level->slug === Str::slug($name__lowercase)) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('name', "Nama Level Sudah Tersedia.");
+                        $validator->errors()->add('name', "(#1.4) : Nama Level Sudah Tersedia.");
                     });
                     break;
                 }
@@ -128,7 +128,7 @@ class LevelValidationService
         //memastikan parent level yang akan di-update bukan merupakan level yang saat ini di-update
         if ($level->slug === $parent_level) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "Pada Turunan Dari Level, Tidak Diizinkan Memilih Level Yang Sama.");
+                $validator->errors()->add('parent_level', "(#1.1) : Pada Turunan Dari Level, Tidak Diizinkan Memilih Level Yang Sama.");
             });
         }
 
@@ -136,7 +136,7 @@ class LevelValidationService
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "Pada Turunan Dari Level, Level Belum Tersedia.");
+                $validator->errors()->add('parent_level', "(#1.2) : Pada Turunan Dari Level, Level Belum Tersedia.");
             });
         }
 
@@ -161,7 +161,7 @@ class LevelValidationService
         $result = $this->unitRepository->count__all__by__levelId($id);
         if ($result !== 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "Level Tidak Bisa Dihapus, Karena Sudah Memiliki Unit Kerja.");
+                $validator->errors()->add('id', "(#1.1) : Level Tidak Bisa Dihapus, Karena Sudah Memiliki Unit Kerja.");
             });
         }
 
