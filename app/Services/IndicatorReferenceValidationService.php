@@ -115,7 +115,7 @@ class IndicatorReferenceValidationService
     public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
-        
+
         $attributes = [
             'indicators.*' => ['required', 'uuid'],
             'preferences.*' => ['required'],
@@ -155,6 +155,16 @@ class IndicatorReferenceValidationService
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
                     $validator->errors()->add('preferences', "(#3.4) : Akses Ilegal !");
+                });
+                break;
+            }
+        }
+
+        //memastikan semua KPI yang akan di-store tidak sama dengan preferensi KPI bersesuaian (menghindari loop self)
+        for ($i = 0; $i < count($request->post('indicators')); $i++) {
+            if ($request->post('indicators')[$i] === $request->post('preferences')[$i]) {
+                $validator->after(function ($validator) {
+                    $validator->errors()->add('indicators', "(#3.6) : Akses Ilegal !");
                 });
                 break;
             }
