@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use App\Repositories\UnitRepository;
 use App\Models\User;
 
-class Unit__IsThisAndChildUser implements Rule
+class Unit__IsChildFromUser__Except__Employee implements Rule
 {
     private UnitRepository $unitRepository;
     private User $user;
@@ -36,8 +36,8 @@ class Unit__IsThisAndChildUser implements Rule
         if ($this->user->role->name === 'super-admin') {
             return true;
         } else if ($this->user->role->name === 'admin') {
-            return $value === 'master' || in_array($value, $this->unitRepository->find__allFlattenSlug__with__this_childs__by__id($this->user->unit->id)) ? true : false;
-        } else if ($this->user->role->name === 'data-entry' || $this->user->role->name === 'employee') {
+            return $value === 'master' || in_array($value, $this->unitRepository->find__allFlattenSlug__with__childs__by__id($this->user->unit->id)) ? true : false;
+        } else if ($this->user->role->name === 'data-entry') {
             return $value === $this->user->unit->slug ? true : false;
         } else {
             return false;
@@ -51,6 +51,6 @@ class Unit__IsThisAndChildUser implements Rule
      */
     public function message()
     {
-        return "(#4.4) : Anda Tidak Memiliki Hak Akses !";
+        return "(#3.1) : Anda Tidak Memiliki Hak Akses !";
     }
 }
