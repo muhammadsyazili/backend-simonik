@@ -29,7 +29,7 @@ class AnalyticService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository
-    public function index(AnalyticIndexRequest $analyticRequest): AnalyticIndexResponse
+    public function analytic(AnalyticIndexRequest $analyticRequest): AnalyticIndexResponse
     {
         $response = new AnalyticIndexResponse();
 
@@ -58,20 +58,28 @@ class AnalyticService
     {
         $newIndicators = $indicators->map(function ($item) use ($month) {
 
+            $monthNumber = $this->monthName__to__monthNumber($month);
+
+            $targets = [];
+            $realizations = [];
+            for ($i = $monthNumber; $i > 0; $i--) {
+                $monthName = $this->monthNumber__to__monthName($i);
+
+                $targets[$monthName]['value'] = $item['targets'][$monthName]['value'];
+                $realizations[$monthName]['value'] = $item['realizations'][$monthName]['value'];
+            }
+
+            //perhitungan pencapaian
             $achievement = 0;
-            if (!$item['dummy']) {
-                if (!$item['reducing_factor']) {
-                    if ($item['targets'][$month]['value'] === (float) 0 && $item['realizations'][$month]['value'] === (float) 0) {
-                        $achievement = round(100, 2);
-                    } else if ($item['targets'][$month]['value'] === (float) 0 && $item['realizations'][$month]['value'] !== (float) 0) {
-                        $achievement = round(0, 2);
-                    } else if ($item['original_polarity'] === '1') {
-                        $achievement = round($item['realizations'][$month]['value'] === (float) 0 ? 0 : ($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100, 2);
-                    } else if ($item['original_polarity'] === '-1') {
-                        $achievement = round($item['realizations'][$month]['value'] === (float) 0 ? 0 : (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100, 2);
-                    } else {
-                        $achievement = null;
-                    }
+            if (!$item['dummy'] && !$item['reducing_factor']) {
+                if ($item['targets'][$month]['value'] === (float) 0 && $item['realizations'][$month]['value'] === (float) 0) {
+                    $achievement = 100;
+                } else if ($item['targets'][$month]['value'] === (float) 0 && $item['realizations'][$month]['value'] !== (float) 0) {
+                    $achievement = 0;
+                } else if ($item['original_polarity'] === '1') {
+                    $achievement = $item['realizations'][$month]['value'] === (float) 0 ? 0 : ($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100;
+                } else if ($item['original_polarity'] === '-1') {
+                    $achievement = $item['realizations'][$month]['value'] === (float) 0 ? 0 : (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100;
                 } else {
                     $achievement = null;
                 }
@@ -79,100 +87,154 @@ class AnalyticService
                 $achievement = null;
             }
 
+            //perhitungan nilai capping 100%
+            $capping_value_100 = null;
+            if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if ($item['targets'][$month]['value'] === (float) 0) {
+                    $capping_value_100 = 'BELUM DINILAI';
+                } else if ($achievement <= (float) 0) {
+                    $capping_value_100 = 0;
+                } else if ($achievement > (float) 0 && $achievement <= (float) 100) {
+                    $res = $achievement * $item['weight'][$month];
+                    $capping_value_100 = $res === (float) 0 ? 0 : round($res / 100, 2);
+                } else {
+                    $capping_value_100 = round($item['weight'][$month], 2);
+                }
+            }
+
+            //perhitungan nilai capping 110%
+            $capping_value_110 = null;
+            if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if ($item['targets'][$month]['value'] === (float) 0) {
+                    $capping_value_110 = 'BELUM DINILAI';
+                } else if ($achievement <= (float) 0) {
+                    $capping_value_110 = 0;
+                } else if ($achievement > (float) 0 && $achievement <= (float) 110) {
+                    $res = $achievement * $item['weight'][$month];
+                    $capping_value_110 = $res === (float) 0 ? 0 : round($res / 100, 2);
+                } else {
+                    $res = $item['weight'][$month] * 110;
+                    $capping_value_110 = $res === (float) 0 ? 0 : round($res / 100, 2);
+                }
+            }
+
+            //perhitungan status
+            $status = null;
+            $status_color = null;
+            if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if ($item['targets'][$month]['value'] === (float) 0) {
+                    $status = 'BELUM DINILAI';
+                    $status_color = 'info';
+                } else if ($achievement >= (float) 100) {
+                    $status = 'BAIK';
+                    $status_color = 'success';
+                } else if ($achievement >= (float) 95 && $achievement < (float) 100) {
+                    $status = 'HATI-HATI';
+                    $status_color = 'warning';
+                } else if ($achievement < (float) 95) {
+                    $status = 'MASALAH';
+                    $status_color = 'danger';
+                }
+            }
+
             return [
                 'id' => $item['id'],
                 'indicator' => $item['indicator'],
                 'type' => $item['type'],
-                'formula' => $item['formula'],
-                'measure' => $item['measure'],
+                'formula' => is_null($item['formula']) ? '-' : $item['formula'],
+                'measure' => is_null($item['measure']) ? '-' : $item['measure'],
                 'weight' => $item['weight'],
                 'validity' => $item['validity'],
                 'polarity' => $item['polarity'],
                 'order' => $item['order'],
                 'bg_color' => $item['bg_color'],
 
-                'achievement' => $achievement,
-                'capping_value_110' => null,
-                'capping_value_100' => null,
-                'status' => null,
+                'achievement' => $achievement === null ? null : round($achievement, 2),
+                'capping_value_110' => $capping_value_110,
+                'capping_value_100' => $capping_value_100,
+                'status' => $status,
+                'status_color' => $status_color,
 
-                'targets' => [
-                    'jan' => [
-                        'value' => $item['targets']['jan']['value'],
-                    ],
-                    'feb' => [
-                        'value' => $item['targets']['feb']['value'],
-                    ],
-                    'mar' => [
-                        'value' => $item['targets']['mar']['value'],
-                    ],
-                    'apr' => [
-                        'value' => $item['targets']['apr']['value'],
-                    ],
-                    'may' => [
-                        'value' => $item['targets']['may']['value'],
-                    ],
-                    'jun' => [
-                        'value' => $item['targets']['jun']['value'],
-                    ],
-                    'jul' => [
-                        'value' => $item['targets']['jul']['value'],
-                    ],
-                    'aug' => [
-                        'value' => $item['targets']['aug']['value'],
-                    ],
-                    'sep' => [
-                        'value' => $item['targets']['sep']['value'],
-                    ],
-                    'oct' => [
-                        'value' => $item['targets']['oct']['value'],
-                    ],
-                    'nov' => [
-                        'value' => $item['targets']['nov']['value'],
-                    ],
-                    'dec' => [
-                        'value' => $item['targets']['dec']['value'],
-                    ],
-                ],
+                'targets' => $targets,
+                'realizations' => $realizations,
 
-                'realizations' => [
-                    'jan' => [
-                        'value' => $item['realizations']['jan']['value'],
-                    ],
-                    'feb' => [
-                        'value' => $item['realizations']['feb']['value'],
-                    ],
-                    'mar' => [
-                        'value' => $item['realizations']['mar']['value'],
-                    ],
-                    'apr' => [
-                        'value' => $item['realizations']['apr']['value'],
-                    ],
-                    'may' => [
-                        'value' => $item['realizations']['may']['value'],
-                    ],
-                    'jun' => [
-                        'value' => $item['realizations']['jun']['value'],
-                    ],
-                    'jul' => [
-                        'value' => $item['realizations']['jul']['value'],
-                    ],
-                    'aug' => [
-                        'value' => $item['realizations']['aug']['value'],
-                    ],
-                    'sep' => [
-                        'value' => $item['realizations']['sep']['value'],
-                    ],
-                    'oct' => [
-                        'value' => $item['realizations']['oct']['value'],
-                    ],
-                    'nov' => [
-                        'value' => $item['realizations']['nov']['value'],
-                    ],
-                    'dec' => [
-                        'value' => $item['realizations']['dec']['value'],
-                    ],
-                ],
+                // 'targets' => [
+                //     'jan' => [
+                //         'value' => $item['targets']['jan']['value'],
+                //     ],
+                //     'feb' => [
+                //         'value' => $item['targets']['feb']['value'],
+                //     ],
+                //     'mar' => [
+                //         'value' => $item['targets']['mar']['value'],
+                //     ],
+                //     'apr' => [
+                //         'value' => $item['targets']['apr']['value'],
+                //     ],
+                //     'may' => [
+                //         'value' => $item['targets']['may']['value'],
+                //     ],
+                //     'jun' => [
+                //         'value' => $item['targets']['jun']['value'],
+                //     ],
+                //     'jul' => [
+                //         'value' => $item['targets']['jul']['value'],
+                //     ],
+                //     'aug' => [
+                //         'value' => $item['targets']['aug']['value'],
+                //     ],
+                //     'sep' => [
+                //         'value' => $item['targets']['sep']['value'],
+                //     ],
+                //     'oct' => [
+                //         'value' => $item['targets']['oct']['value'],
+                //     ],
+                //     'nov' => [
+                //         'value' => $item['targets']['nov']['value'],
+                //     ],
+                //     'dec' => [
+                //         'value' => $item['targets']['dec']['value'],
+                //     ],
+                // ],
+
+                // 'realizations' => [
+                //     'jan' => [
+                //         'value' => $item['realizations']['jan']['value'],
+                //     ],
+                //     'feb' => [
+                //         'value' => $item['realizations']['feb']['value'],
+                //     ],
+                //     'mar' => [
+                //         'value' => $item['realizations']['mar']['value'],
+                //     ],
+                //     'apr' => [
+                //         'value' => $item['realizations']['apr']['value'],
+                //     ],
+                //     'may' => [
+                //         'value' => $item['realizations']['may']['value'],
+                //     ],
+                //     'jun' => [
+                //         'value' => $item['realizations']['jun']['value'],
+                //     ],
+                //     'jul' => [
+                //         'value' => $item['realizations']['jul']['value'],
+                //     ],
+                //     'aug' => [
+                //         'value' => $item['realizations']['aug']['value'],
+                //     ],
+                //     'sep' => [
+                //         'value' => $item['realizations']['sep']['value'],
+                //     ],
+                //     'oct' => [
+                //         'value' => $item['realizations']['oct']['value'],
+                //     ],
+                //     'nov' => [
+                //         'value' => $item['realizations']['nov']['value'],
+                //     ],
+                //     'dec' => [
+                //         'value' => $item['realizations']['dec']['value'],
+                //     ],
+                // ],
             ];
         });
 
@@ -329,5 +391,97 @@ class AnalyticService
                 $this->mapping__index__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
             }
         });
+    }
+
+    private function monthName__to__monthNumber(string $monthName): int
+    {
+        $monthNumber = 1;
+
+        switch ($monthName) {
+            case "jan":
+                $monthNumber = 1;
+                break;
+            case "feb":
+                $monthNumber = 2;
+                break;
+            case "mar":
+                $monthNumber = 3;
+                break;
+            case "apr":
+                $monthNumber = 4;
+                break;
+            case "may":
+                $monthNumber = 5;
+                break;
+            case "jun":
+                $monthNumber = 6;
+                break;
+            case "jul":
+                $monthNumber = 7;
+                break;
+            case "aug":
+                $monthNumber = 8;
+                break;
+            case "sep":
+                $monthNumber = 9;
+                break;
+            case "oct":
+                $monthNumber = 10;
+                break;
+            case "nov":
+                $monthNumber = 11;
+                break;
+            case "dec":
+                $monthNumber = 12;
+                break;
+        }
+
+        return $monthNumber;
+    }
+
+    private function monthNumber__to__monthName(int $monthNumber): string
+    {
+        $monthName = '';
+
+        switch ($monthNumber) {
+            case 1:
+                $monthName = "jan";
+                break;
+            case 2:
+                $monthName = "feb";
+                break;
+            case 3:
+                $monthName = "mar";
+                break;
+            case 4:
+                $monthName = "apr";
+                break;
+            case 5:
+                $monthName = "may";
+                break;
+            case 6:
+                $monthName = "jun";
+                break;
+            case 7:
+                $monthName = "jul";
+                break;
+            case 8:
+                $monthName = "aug";
+                break;
+            case 9:
+                $monthName = "sep";
+                break;
+            case 10:
+                $monthName = "oct";
+                break;
+            case 11:
+                $monthName = "nov";
+                break;
+            case 12:
+                $monthName = "dec";
+                break;
+        }
+
+        return $monthName;
     }
 }

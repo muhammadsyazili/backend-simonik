@@ -22,7 +22,7 @@ class AnalyticValidationService
     }
 
     //use repo UserRepository
-    public function indexValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    public function analyticValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang akan di-edit sesuai dengan level user login saat ini atau level turunan yang diizinkan
         //memastikan unit yang akan di-edit sesuai dengan unit user login saat ini atau unit turunan yang diizinkan

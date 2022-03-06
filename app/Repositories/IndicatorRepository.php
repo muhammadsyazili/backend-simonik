@@ -154,7 +154,7 @@ class IndicatorRepository
         return ModelsIndicator::firstWhere(['id' => $id])->label;
     }
 
-    public function find__year__by__id(string|int $id): string
+    public function find__year__by__id(string|int $id): ?string
     {
         return ModelsIndicator::firstWhere(['id' => $id])->year;
     }

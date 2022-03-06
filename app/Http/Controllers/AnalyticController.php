@@ -15,13 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AnalyticController extends ApiController
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index(Request $request)
+    public function analytic(Request $request)
     {
         $userRepository = new UserRepository();
         $levelRepository = new LevelRepository();
@@ -37,7 +31,7 @@ class AnalyticController extends ApiController
 
         $analyticValidationService = new AnalyticValidationService($constructRequest);
 
-        $validation = $analyticValidationService->indexValidation($request);
+        $validation = $analyticValidationService->analyticValidation($request);
 
         if ($validation->fails()) {
             return $this->APIResponse(
@@ -59,7 +53,7 @@ class AnalyticController extends ApiController
 
         $analyticService = new AnalyticService($constructRequest);
 
-        $response = $analyticService->index($requestDTO);
+        $response = $analyticService->analytic($requestDTO);
 
         return $this->APIResponse(
             true,
@@ -70,71 +64,5 @@ class AnalyticController extends ApiController
             ],
             null,
         );
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy($id)
-    {
-        //
     }
 }
