@@ -33,8 +33,8 @@ class AnalyticValidationService
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)],
+            'level' => ['required', 'string', 'not_in:super-master'], //new Level__IsThisAndChildFromUser__Except__Employee($user)
+            'unit' => ['required', 'string', 'not_in:master'], //new Unit__IsThisAndChildUser__Except__Employee($user)
             'tahun' => ['required', 'integer', 'date_format:Y'],
             'bulan' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
@@ -73,19 +73,20 @@ class AnalyticValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
+        //bukan merupakan KPI super-master
         if (is_null($unit)) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('id', "(#7.1) : Akses Ilegal !");
             });
         }
 
-        if (!is_null($user->unit)) {
-            if ($user->unit->slug !== $unit) {
-                $validator->after(function ($validator) {
-                    $validator->errors()->add('id', "(#7.2) : Akses Ilegal !");
-                });
-            }
-        }
+        // if (!is_null($user->unit)) {
+        //     if ($user->unit->slug !== $unit) {
+        //         $validator->after(function ($validator) {
+        //             $validator->errors()->add('id', "(#7.2) : Akses Ilegal !");
+        //         });
+        //     }
+        // }
 
         return $validator;
     }
