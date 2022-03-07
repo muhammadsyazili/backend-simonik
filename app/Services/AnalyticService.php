@@ -80,9 +80,12 @@ class AnalyticService
             $realizations[$i] = $res === false ? 0 : $indicator->realizations[$res]->value;
         }
 
+        $temp = $indicator->indicator;
+
         $newIndicator = [
-            'indicator' => $prefix . '. ' . $indicator->indicator,
+            'indicator' => "$prefix. $temp",
             'measure' => $indicator->measure,
+            'type' => $indicator->type,
             'targets' => array_reverse($targets),
             'realizations' => array_reverse($realizations),
             'months' => array_reverse($months),
@@ -185,6 +188,7 @@ class AnalyticService
                 'order' => $item['order'],
                 'bg_color' => $item['bg_color'],
                 'prefix' => $item['prefix'],
+                'month_selected' => $month,
 
                 'achievement' => $achievement === null ? null : round($achievement, 2),
                 'capping_value_110' => $capping_value_110,
