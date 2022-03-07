@@ -178,6 +178,17 @@ class IndicatorRepository
         return ModelsIndicator::with('level')->findOrFail($id);
     }
 
+    public function find__with__level_unit__by__id(string|int $id)
+    {
+        return ModelsIndicator::with(['level', 'unit'])->findOrFail($id);
+
+    }
+
+    public function find__with__targets_realizations__by__id(string|int $id)
+    {
+        return ModelsIndicator::with(['targets', 'realizations'])->findOrFail($id);
+    }
+
     public function find__id_parentHorizontalId__by__label_levelId_unitId_year(string $label, string|int|null $levelId = null, string|int|null $unitId = null, string|int|null $year = null): array
     {
         return $label === 'super-master' ?

@@ -54,6 +54,43 @@ class AnalyticService
         return $response;
     }
 
+    //use repo IndicatorRepository
+    public function analytic_by_id(string|int $id, string $month, string $prefix): array
+    {
+        $indicator = $this->indicatorRepository->find__with__targets_realizations__by__id($id);
+
+        $monthNumber = $this->monthName__to__monthNumber($month);
+
+        $targets = [];
+        $realizations = [];
+        $months = [];
+        for ($i = $monthNumber; $i > 0; $i--) {
+            $monthName = $this->monthNumber__to__monthName($i);
+
+            $months[$i] = $monthName;
+
+            $res = $indicator->targets->search(function ($value) use ($monthName) {
+                return $value->month === $monthName;
+            });
+            $targets[$i] = $res === false ? 0 : $indicator->targets[$res]->value;
+
+            $res = $indicator->realizations->search(function ($value) use ($monthName) {
+                return $value->month === $monthName;
+            });
+            $realizations[$i] = $res === false ? 0 : $indicator->realizations[$res]->value;
+        }
+
+        $newIndicator = [
+            'indicator' => $prefix . '. ' . $indicator->indicator,
+            'measure' => $indicator->measure,
+            'targets' => array_reverse($targets),
+            'realizations' => array_reverse($realizations),
+            'months' => array_reverse($months),
+        ];
+
+        return $newIndicator;
+    }
+
     private function calc(\Illuminate\Support\Collection $indicators, string $month): \Illuminate\Support\Collection
     {
         $newIndicators = $indicators->map(function ($item) use ($month) {
@@ -64,7 +101,6 @@ class AnalyticService
             $realizations = [];
             for ($i = $monthNumber; $i > 0; $i--) {
                 $monthName = $this->monthNumber__to__monthName($i);
-
                 $targets[$monthName]['value'] = $item['targets'][$monthName]['value'];
                 $realizations[$monthName]['value'] = $item['realizations'][$monthName]['value'];
             }
@@ -148,6 +184,7 @@ class AnalyticService
                 'polarity' => $item['polarity'],
                 'order' => $item['order'],
                 'bg_color' => $item['bg_color'],
+                'prefix' => $item['prefix'],
 
                 'achievement' => $achievement === null ? null : round($achievement, 2),
                 'capping_value_110' => $capping_value_110,
@@ -258,6 +295,7 @@ class AnalyticService
             $this->indicators[$iteration]['polarity'] = $item->polarity;
             $this->indicators[$iteration]['order'] = $iteration;
             $this->indicators[$iteration]['bg_color'] = $bg_color;
+            $this->indicators[$iteration]['prefix'] = $prefix;
 
             $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
             $this->indicators[$iteration]['dummy'] = $item->dummy;

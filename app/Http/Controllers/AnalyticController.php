@@ -18,16 +18,16 @@ class AnalyticController extends ApiController
     public function analytic(Request $request)
     {
         $userRepository = new UserRepository();
+        $indicatorRepository = new IndicatorRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
-        $indicatorRepository = new IndicatorRepository();
 
         $constructRequest = new ConstructRequest();
 
         $constructRequest->userRepository = $userRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
-        $constructRequest->indicatorRepository = $indicatorRepository;
 
         $analyticValidationService = new AnalyticValidationService($constructRequest);
 
@@ -61,6 +61,45 @@ class AnalyticController extends ApiController
             "Analytic",
             [
                 'indicators' => $response->indicators,
+            ],
+            null,
+        );
+    }
+
+    public function analytic_by_id(Request $request, $id, $prefix, $month)
+    {
+        $userRepository = new UserRepository();
+        $indicatorRepository = new IndicatorRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+
+        $analyticValidationService = new AnalyticValidationService($constructRequest);
+
+        $validation = $analyticValidationService->analyticByIdValidation($request, $id);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $analyticService = new AnalyticService($constructRequest);
+
+        $indicator = $analyticService->analytic_by_id($id, $month, $prefix);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Analytic",
+            [
+                'indicator' => $indicator,
             ],
             null,
         );
