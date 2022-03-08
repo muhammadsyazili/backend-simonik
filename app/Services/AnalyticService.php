@@ -259,6 +259,8 @@ class AnalyticService
             $newIndicators['total']['PK_100'] = $total_KPI_100 + $total_PI_100;
             $newIndicators['total']['PK_110'] = $total_KPI_110 + $total_PI_110;
 
+            $newIndicators['total']['bobot'] = $total_weight_KPI + $total_weight_PI;
+
             $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] == (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_KPI + $total_weight_PI)) * 100;
             $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_KPI + $total_weight_PI)) * 100;
         }
