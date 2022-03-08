@@ -103,6 +103,9 @@ class AnalyticService
             $total_PI_100 = 0;
             $total_PI_110 = 0;
 
+            $total_weight_counted_KPI = 0;
+            $total_weight_counted_PI = 0;
+
             $total_weight_KPI = 0;
             $total_weight_PI = 0;
 
@@ -185,6 +188,7 @@ class AnalyticService
 
                         if (array_key_exists($month, $item['weight'])) {
                             $total_weight_KPI += $item['weight'][$month];
+                            $total_weight_counted_KPI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -198,6 +202,7 @@ class AnalyticService
 
                         if (array_key_exists($month, $item['weight'])) {
                             $total_weight_PI += $item['weight'][$month];
+                            $total_weight_counted_PI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -256,13 +261,13 @@ class AnalyticService
             $newIndicators['total']['PI_100'] = $total_PI_100;
             $newIndicators['total']['PI_110'] = $total_PI_110;
 
+            $newIndicators['total']['bobot'] = $total_weight_counted_KPI + $total_weight_counted_PI;
+
             $newIndicators['total']['PK_100'] = $total_KPI_100 + $total_PI_100;
             $newIndicators['total']['PK_110'] = $total_KPI_110 + $total_PI_110;
 
-            $newIndicators['total']['bobot'] = $total_weight_KPI + $total_weight_PI;
-
-            $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] == (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_KPI + $total_weight_PI)) * 100;
-            $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_KPI + $total_weight_PI)) * 100;
+            $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] == (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
+            $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
         }
 
         return $newIndicators;
