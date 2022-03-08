@@ -225,7 +225,6 @@ class AnalyticService
                 $newIndicators['partials'][$i]['status_color'] = $status_color;
 
                 $newIndicators['partials'][$i]['prefix'] = $item['prefix'];
-                $newIndicators['partials'][$i]['month_selected'] = $month;
 
                 $newIndicators['partials'][$i]['targets']['jan']['value'] = $item['targets']['jan']['value'];
                 $newIndicators['partials'][$i]['targets']['feb']['value'] = $item['targets']['feb']['value'];
