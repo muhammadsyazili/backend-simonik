@@ -102,6 +102,9 @@ class AnalyticService
         $total_PI_100 = 0;
         $total_PI_110 = 0;
 
+        $total_weight_KPI = 0;
+        $total_weight_PI = 0;
+
         $i = 0;
         foreach ($indicators as $item) {
             //perhitungan pencapaian
@@ -178,6 +181,10 @@ class AnalyticService
                 } else {
                     $total_KPI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
                     $total_KPI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+
+                    if (array_key_exists($month, $item['weight'])) {
+                        $total_weight_KPI += $item['weight'][$month];
+                    }
                 }
             }
 
@@ -187,6 +194,10 @@ class AnalyticService
                 } else {
                     $total_PI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
                     $total_PI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+
+                    if (array_key_exists($month, $item['weight'])) {
+                        $total_weight_PI += $item['weight'][$month];
+                    }
                 }
             }
 
@@ -243,6 +254,12 @@ class AnalyticService
         $newIndicators['total']['KPI_110'] = $total_KPI_110;
         $newIndicators['total']['PI_100'] = $total_PI_100;
         $newIndicators['total']['PI_110'] = $total_PI_110;
+
+        $newIndicators['total']['PK_100'] = $total_KPI_100 + $total_PI_100;
+        $newIndicators['total']['PK_110'] = $total_KPI_110 + $total_PI_110;
+
+        $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] === (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_KPI + $total_weight_PI)) * 100;
+        $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] === (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_KPI + $total_weight_PI)) * 100;
 
         return $newIndicators;
     }
