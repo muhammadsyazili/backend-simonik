@@ -51,7 +51,6 @@ class AnalyticController extends ApiController
         $requestDTO->unit = $request->query('unit');
         $requestDTO->year = $request->query('tahun');
         $requestDTO->month = $request->query('bulan');
-        $requestDTO->userId = $request->header('X-User-Id');
 
         $analyticService = new AnalyticService($constructRequest);
 

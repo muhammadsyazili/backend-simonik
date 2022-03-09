@@ -36,7 +36,6 @@ class AnalyticService
         $unit = $analyticRequest->unit;
         $year = $analyticRequest->year;
         $month = $analyticRequest->month;
-        $userId = $analyticRequest->userId;
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
         $unitId = $this->unitRepository->find__id__by__slug($unit);
