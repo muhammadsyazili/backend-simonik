@@ -66,19 +66,17 @@ class AnalyticController extends ApiController
         );
     }
 
-    public function analytic_by_id(Request $request, $id, $prefix, $month)
+    public function analytic_by_id($id, $prefix, $month)
     {
-        $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
 
         $constructRequest = new ConstructRequest();
 
-        $constructRequest->userRepository = $userRepository;
         $constructRequest->indicatorRepository = $indicatorRepository;
 
         $analyticValidationService = new AnalyticValidationService($constructRequest);
 
-        $validation = $analyticValidationService->analyticByIdValidation($request, $id);
+        $validation = $analyticValidationService->analyticByIdValidation($id);
 
         if ($validation->fails()) {
             return $this->APIResponse(

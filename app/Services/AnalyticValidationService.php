@@ -52,11 +52,9 @@ class AnalyticValidationService
         return Validator::make($input, $attributes, $messages);
     }
 
-    //use repo UserRepository, IndicatorRepository
-    public function analyticByIdValidation(Request $request, string|int $id): \Illuminate\Contracts\Validation\Validator
+    //use repo IndicatorRepository
+    public function analyticByIdValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
     {
-        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
-
         $indicator = $this->indicatorRepository->find__with__level_unit__by__id($id);
 
         $unit = is_null($indicator->unit) ? null : $indicator->unit->slug;
@@ -79,14 +77,6 @@ class AnalyticValidationService
                 $validator->errors()->add('id', "(#7.1) : Akses Ilegal !");
             });
         }
-
-        // if (!is_null($user->unit)) {
-        //     if ($user->unit->slug !== $unit) {
-        //         $validator->after(function ($validator) {
-        //             $validator->errors()->add('id', "(#7.2) : Akses Ilegal !");
-        //         });
-        //     }
-        // }
 
         return $validator;
     }

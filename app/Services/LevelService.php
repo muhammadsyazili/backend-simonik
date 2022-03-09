@@ -186,6 +186,21 @@ class LevelService
         return $this->levels;
     }
 
+    //use repo LevelRepository
+    public function open_levels()
+    {
+        $levels = $this->levelRepository->find__all__not__superMaster();
+
+        $newLevels = $levels->map(function ($item) {
+            return [
+                'name' => $item->name,
+                'slug' => $item->slug,
+            ];
+        });
+
+        return $newLevels;
+    }
+
     private function mapping__levels_of_user(Collection $levels, bool $first = true): void
     {
         $levels->each(function ($item) use ($first) {
