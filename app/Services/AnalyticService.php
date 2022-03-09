@@ -267,6 +267,26 @@ class AnalyticService
 
             $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] == (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
             $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
+
+            $PPK_100_status = '';
+            if ($newIndicators['total']['PPK_100'] < 95) {
+                $PPK_100_status = 'MASALAH';
+            } else if ($newIndicators['total']['PPK_100'] >= 95 && $newIndicators['total']['PPK_100'] < 100) {
+                $PPK_100_status = 'HATI-HATI';
+            } else if ($newIndicators['total']['PPK_100'] >= 100) {
+                $PPK_100_status = 'BAIK';
+            }
+            $newIndicators['total']['PPK_100_status'] = $PPK_100_status;
+
+            $PPK_110_status = '';
+            if ($newIndicators['total']['PPK_110'] < 95) {
+                $PPK_110_status = 'MASALAH';
+            } else if ($newIndicators['total']['PPK_110'] >= 95 && $newIndicators['total']['PPK_110'] < 100) {
+                $PPK_110_status = 'HATI-HATI';
+            } else if ($newIndicators['total']['PPK_110'] >= 100) {
+                $PPK_110_status = 'BAIK';
+            }
+            $newIndicators['total']['PPK_110_status'] = $PPK_110_status;
         }
 
         return $newIndicators;
