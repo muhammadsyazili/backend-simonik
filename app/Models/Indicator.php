@@ -187,6 +187,6 @@ class Indicator extends Model
 
     public function level()
     {
-        return $this->belongsTo(level::class);
+        return $this->belongsTo(Level::class);
     }
 }
