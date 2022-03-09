@@ -122,4 +122,9 @@ class LevelRepository
     {
         return ModelsLevel::orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
     }
+
+    public function find__all__not__superMaster()
+    {
+        return ModelsLevel::whereNotIn('slug', ['super-master'])->orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
+    }
 }
