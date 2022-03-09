@@ -29,18 +29,20 @@ class AnalyticController extends ApiController
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
-        $analyticValidationService = new AnalyticValidationService($constructRequest);
+        if ($request->query('auth') === '1') {
+            $analyticValidationService = new AnalyticValidationService($constructRequest);
 
-        $validation = $analyticValidationService->analyticValidation($request);
+            $validation = $analyticValidationService->analyticValidation($request);
 
-        if ($validation->fails()) {
-            return $this->APIResponse(
-                false,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
-                null,
-                $validation->errors(),
-            );
+            if ($validation->fails()) {
+                return $this->APIResponse(
+                    false,
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                    Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                    null,
+                    $validation->errors(),
+                );
+            }
         }
 
         $requestDTO = new AnalyticIndexRequest();
