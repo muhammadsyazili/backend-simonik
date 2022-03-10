@@ -157,6 +157,111 @@ class TargetPaperWorkService
         });
     }
 
+    //use repo LevelRepository, UnitRepository, IndicatorRepository
+    public function export(TargetPaperWorkEditRequest $targetPaperWorkRequest): TargetPaperWorkCreateOrEditResponse
+    {
+        $response = new TargetPaperWorkCreateOrEditResponse();
+
+        $level = $targetPaperWorkRequest->level;
+        $unit = $targetPaperWorkRequest->unit;
+        $year = $targetPaperWorkRequest->year;
+        $userId = $targetPaperWorkRequest->userId;
+
+        $levelId = $this->levelRepository->find__id__by__slug($level);
+
+        $indicators = $unit === 'master' ?
+            $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
+            $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+
+        $this->iter = 0; //reset iterator
+        $this->mapping__export__indicators($indicators);
+
+        $response->indicators = $this->indicators;
+
+        return $response;
+    }
+
+    private function mapping__export__indicators(Collection $indicators, string $prefix = null, bool $first = true): void
+    {
+        $indicators->each(function ($item, $key) use ($prefix, $first) {
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+
+            $indicator = $item->indicator;
+            $type = $item->type;
+
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator ($type)";
+            $this->indicators[$iteration]['measure'] = is_null($item->measure) ? '-' : $item->measure;
+
+            $jan = $item->targets->search(function ($value) {
+                return $value->month === 'jan';
+            });
+            $this->indicators[$iteration]['target_jan'] = $jan === false ? '-' : $item->targets[$jan]->value;
+
+            $feb = $item->targets->search(function ($value) {
+                return $value->month === 'feb';
+            });
+            $this->indicators[$iteration]['target_feb'] = $feb === false ? '-' : $item->targets[$feb]->value;
+
+            $mar = $item->targets->search(function ($value) {
+                return $value->month === 'mar';
+            });
+            $this->indicators[$iteration]['target_mar'] = $mar === false ? '-' : $item->targets[$mar]->value;
+
+            $apr = $item->targets->search(function ($value) {
+                return $value->month === 'apr';
+            });
+            $this->indicators[$iteration]['target_apr'] = $apr === false ? '-' : $item->targets[$apr]->value;
+
+            $may = $item->targets->search(function ($value) {
+                return $value->month === 'may';
+            });
+            $this->indicators[$iteration]['target_may'] = $may === false ? '-' : $item->targets[$may]->value;
+
+            $jun = $item->targets->search(function ($value) {
+                return $value->month === 'jun';
+            });
+            $this->indicators[$iteration]['target_jun'] = $jun === false ? '-' : $item->targets[$jun]->value;
+
+            $jul = $item->targets->search(function ($value) {
+                return $value->month === 'jul';
+            });
+            $this->indicators[$iteration]['target_jul'] = $jul === false ? '-' : $item->targets[$jul]->value;
+
+            $aug = $item->targets->search(function ($value) {
+                return $value->month === 'aug';
+            });
+            $this->indicators[$iteration]['target_aug'] = $aug === false ? '-' : $item->targets[$aug]->value;
+
+            $sep = $item->targets->search(function ($value) {
+                return $value->month === 'sep';
+            });
+            $this->indicators[$iteration]['target_sep'] = $sep === false ? '-' : $item->targets[$sep]->value;
+
+            $oct = $item->targets->search(function ($value) {
+                return $value->month === 'oct';
+            });
+            $this->indicators[$iteration]['target_oct'] = $oct === false ? '-' : $item->targets[$oct]->value;
+
+            $nov = $item->targets->search(function ($value) {
+                return $value->month === 'nov';
+            });
+            $this->indicators[$iteration]['target_nov'] = $nov === false ? '-' : $item->targets[$nov]->value;
+
+            $dec = $item->targets->search(function ($value) {
+                return $value->month === 'dec';
+            });
+            $this->indicators[$iteration]['target_dec'] = $dec === false ? '-' : $item->targets[$dec]->value;
+
+            $this->iter++;
+
+            if (!empty($item->childsHorizontalRecursive)) {
+                $this->mapping__export__indicators($item->childsHorizontalRecursive, $prefix, false);
+            }
+        });
+    }
+
     //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository
     public function update(TargetPaperWorkUpdateRequest $targetPaperWorkRequest): void
     {

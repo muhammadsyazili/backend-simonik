@@ -74,12 +74,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/targets/paper-work/edit', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'edit'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
 
+    Route::get('/targets/paper-work/export', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'export'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
+
     Route::put('/targets/paper-work', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'update'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
     //End Route : paper work - target
 
     //Route : paper work - realization
     Route::get('/realizations/paper-work/edit', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'edit'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
+
+    Route::get('/realizations/paper-work/export', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'export'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
 
     Route::put('/realizations/paper-work', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'update'])

@@ -20,48 +20,6 @@ use App\Services\RealizationPaperWorkValidationService;
 class PaperWorkRealizationController extends ApiController
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -110,6 +68,62 @@ class PaperWorkRealizationController extends ApiController
             true,
             Response::HTTP_OK,
             "Kertas Kerja Realisasi",
+            [
+                'indicators' => $response->indicators,
+            ],
+            null,
+        );
+    }
+
+    /**
+     * Export.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function export(Request $request)
+    {
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+
+        $realizationPaperWorkValidationService = new RealizationPaperWorkValidationService($constructRequest);
+
+        $validation = $realizationPaperWorkValidationService->exportValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $requestDTO = new RealizationPaperWorkEditRequest();
+
+        $requestDTO->level = $request->query('level');
+        $requestDTO->unit = $request->query('unit');
+        $requestDTO->year = $request->query('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
+        $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
+
+        $response = $realizationPaperWorkService->export($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Kertas Kerja Realisasi - Ekspor",
             [
                 'indicators' => $response->indicators,
             ],
@@ -178,17 +192,6 @@ class PaperWorkRealizationController extends ApiController
             null,
             null,
         );
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  string|int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy($id)
-    {
-        //
     }
 
     /**

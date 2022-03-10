@@ -56,6 +56,31 @@ class TargetPaperWorkValidationService
         return Validator::make($input, $attributes, $messages);
     }
 
+    //use repo UserRepository
+    public function exportValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    {
+        //memastikan level yang akan di-edit sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-edit sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
+
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+
+        $attributes = [
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsChildFromUser__Except__DataEntry_And_Employee($user)],
+            'unit' => ['required', 'string', new Unit__IsChildFromUser__Except__DataEntry_And_Employee($user)],
+            'tahun' => ['required', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
+        ];
+
+        $input = Arr::only($request->query(), array_keys($attributes));
+
+        return Validator::make($input, $attributes, $messages);
+    }
+
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
