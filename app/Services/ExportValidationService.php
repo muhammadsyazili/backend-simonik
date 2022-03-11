@@ -33,7 +33,6 @@ class ExportValidationService
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Custom($user)],
             'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Custom($user)],
             'tahun' => ['required', 'integer', 'date_format:Y'],
-            'bulan' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
         $messages = [

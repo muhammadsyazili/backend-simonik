@@ -167,6 +167,6 @@ Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class
 Route::get('/user/{id}/levels', [App\Http\Controllers\LevelController::class, 'levels_of_user']);
 Route::get('/open/levels', [App\Http\Controllers\LevelController::class, 'open_levels']);
 Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
-Route::get('/analytic', [App\Http\Controllers\AnalyticController::class, 'analytic']);
-Route::get('/analytic/{id}/{prefix}/{month}', [App\Http\Controllers\AnalyticController::class, 'analytic_by_id']);
+Route::get('/monitoring', [App\Http\Controllers\MonitoringController::class, 'monitoring']);
+Route::get('/monitoring/{id}/{prefix}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
 Route::get('/export', [App\Http\Controllers\ExportController::class, 'export']);

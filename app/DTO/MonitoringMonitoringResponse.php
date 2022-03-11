@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class AnalyticIndexResponse
+class MonitoringMonitoringResponse
 {
     public array $indicators;
 }

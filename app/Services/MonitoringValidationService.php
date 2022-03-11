@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class AnalyticValidationService
+class MonitoringValidationService
 {
     private ?UserRepository $userRepository;
     private ?IndicatorRepository $indicatorRepository;
@@ -25,7 +25,7 @@ class AnalyticValidationService
     }
 
     //use repo UserRepository
-    public function analyticValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    public function monitoringValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang akan di-edit sesuai dengan level user login saat ini atau level turunan yang diizinkan
         //memastikan unit yang akan di-edit sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
@@ -53,7 +53,7 @@ class AnalyticValidationService
     }
 
     //use repo IndicatorRepository
-    public function analyticByIdValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
+    public function monitoringByIdValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         $indicator = $this->indicatorRepository->find__with__level_unit__by__id($id);
 

@@ -57,134 +57,141 @@ class ExportService
             $indicator = $item->indicator;
 
             //indikator packaging
-            $this->indicators[$iteration]['id'] = $item->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
             $this->indicators[$iteration]['type'] = $item->type;
-            $this->indicators[$iteration]['formula'] = $item->formula;
-            $this->indicators[$iteration]['measure'] = $item->measure;
-            $this->indicators[$iteration]['polarity'] = $item->getRawOriginal('polarity') == '1' ? 'Positif' : 'Nagatif';
+            $this->indicators[$iteration]['formula'] = is_null($item->formula) ? '-' : $item->formula;
+            $this->indicators[$iteration]['measure'] = is_null($item->measure) ? '-' : $item->measure;
+
+            $polarity = '-';
+            if (is_null($item->getRawOriginal('polarity'))) {
+                $polarity = '-';
+            } else {
+                $polarity = $item->getRawOriginal('polarity') == '1' ? 'Positif' : 'Nagatif';
+            }
+
+            $this->indicators[$iteration]['polarity'] = $polarity;
 
             //target packaging
             $jan = $item->targets->search(function ($value) {
                 return $value->month === 'jan';
             });
-            $this->indicators[$iteration]['targets_jan'] = $jan === false ? '-' : $item->targets[$jan]->value;
+            $this->indicators[$iteration]['targets_jan'] = $jan === false ? '-' : (string) $item->targets[$jan]->value;
 
             $feb = $item->targets->search(function ($value) {
                 return $value->month === 'feb';
             });
-            $this->indicators[$iteration]['targets_feb'] = $feb === false ? '-' : $item->targets[$feb]->value;
+            $this->indicators[$iteration]['targets_feb'] = $feb === false ? '-' : (string) $item->targets[$feb]->value;
 
             $mar = $item->targets->search(function ($value) {
                 return $value->month === 'mar';
             });
-            $this->indicators[$iteration]['targets_mar'] = $mar === false ? '-' : $item->targets[$mar]->value;
+            $this->indicators[$iteration]['targets_mar'] = $mar === false ? '-' : (string) $item->targets[$mar]->value;
 
             $apr = $item->targets->search(function ($value) {
                 return $value->month === 'apr';
             });
-            $this->indicators[$iteration]['targets_apr'] = $apr === false ? '-' : $item->targets[$apr]->value;
+            $this->indicators[$iteration]['targets_apr'] = $apr === false ? '-' : (string) $item->targets[$apr]->value;
 
             $may = $item->targets->search(function ($value) {
                 return $value->month === 'may';
             });
-            $this->indicators[$iteration]['targets_may'] = $may === false ? '-' : $item->targets[$may]->value;
+            $this->indicators[$iteration]['targets_may'] = $may === false ? '-' : (string) $item->targets[$may]->value;
 
             $jun = $item->targets->search(function ($value) {
                 return $value->month === 'jun';
             });
-            $this->indicators[$iteration]['targets_jun'] = $jun === false ? '-' : $item->targets[$jun]->value;
+            $this->indicators[$iteration]['targets_jun'] = $jun === false ? '-' : (string) $item->targets[$jun]->value;
 
             $jul = $item->targets->search(function ($value) {
                 return $value->month === 'jul';
             });
-            $this->indicators[$iteration]['targets_jul'] = $jul === false ? '-' : $item->targets[$jul]->value;
+            $this->indicators[$iteration]['targets_jul'] = $jul === false ? '-' : (string) $item->targets[$jul]->value;
 
             $aug = $item->targets->search(function ($value) {
                 return $value->month === 'aug';
             });
-            $this->indicators[$iteration]['targets_aug'] = $aug === false ? '-' : $item->targets[$aug]->value;
+            $this->indicators[$iteration]['targets_aug'] = $aug === false ? '-' : (string) $item->targets[$aug]->value;
 
             $sep = $item->targets->search(function ($value) {
                 return $value->month === 'sep';
             });
-            $this->indicators[$iteration]['targets_sep'] = $sep === false ? '-' : $item->targets[$sep]->value;
+            $this->indicators[$iteration]['targets_sep'] = $sep === false ? '-' : (string) $item->targets[$sep]->value;
 
             $oct = $item->targets->search(function ($value) {
                 return $value->month === 'oct';
             });
-            $this->indicators[$iteration]['targets_oct'] = $oct === false ? '-' : $item->targets[$oct]->value;
+            $this->indicators[$iteration]['targets_oct'] = $oct === false ? '-' : (string) $item->targets[$oct]->value;
 
             $nov = $item->targets->search(function ($value) {
                 return $value->month === 'nov';
             });
-            $this->indicators[$iteration]['targets_nov'] = $nov === false ? '-' : $item->targets[$nov]->value;
+            $this->indicators[$iteration]['targets_nov'] = $nov === false ? '-' : (string) $item->targets[$nov]->value;
 
             $dec = $item->targets->search(function ($value) {
                 return $value->month === 'dec';
             });
-            $this->indicators[$iteration]['targets_dec'] = $dec === false ? '-' : $item->targets[$dec]->value;
+            $this->indicators[$iteration]['targets_dec'] = $dec === false ? '-' : (string) $item->targets[$dec]->value;
 
             //realisasi packaging
             $jan = $item->realizations->search(function ($value) {
                 return $value->month === 'jan';
             });
-            $this->indicators[$iteration]['realizations_jan'] = $jan === false ? '-' : $item->realizations[$jan]->value;
+            $this->indicators[$iteration]['realizations_jan'] = $jan === false ? '-' : (string) $item->realizations[$jan]->value;
 
             $feb = $item->realizations->search(function ($value) {
                 return $value->month === 'feb';
             });
-            $this->indicators[$iteration]['realizations_feb'] = $feb === false ? '-' : $item->realizations[$feb]->value;
+            $this->indicators[$iteration]['realizations_feb'] = $feb === false ? '-' : (string) $item->realizations[$feb]->value;
 
             $mar = $item->realizations->search(function ($value) {
                 return $value->month === 'mar';
             });
-            $this->indicators[$iteration]['realizations_mar'] = $mar === false ? '-' : $item->realizations[$mar]->value;
+            $this->indicators[$iteration]['realizations_mar'] = $mar === false ? '-' : (string) $item->realizations[$mar]->value;
 
             $apr = $item->realizations->search(function ($value) {
                 return $value->month === 'apr';
             });
-            $this->indicators[$iteration]['realizations_apr'] = $apr === false ? '-' : $item->realizations[$apr]->value;
+            $this->indicators[$iteration]['realizations_apr'] = $apr === false ? '-' : (string) $item->realizations[$apr]->value;
 
             $may = $item->realizations->search(function ($value) {
                 return $value->month === 'may';
             });
-            $this->indicators[$iteration]['realizations_may'] = $may === false ? '-' : $item->realizations[$may]->value;
+            $this->indicators[$iteration]['realizations_may'] = $may === false ? '-' : (string) $item->realizations[$may]->value;
 
             $jun = $item->realizations->search(function ($value) {
                 return $value->month === 'jun';
             });
-            $this->indicators[$iteration]['realizations_jun'] = $jun === false ? '-' : $item->realizations[$jun]->value;
+            $this->indicators[$iteration]['realizations_jun'] = $jun === false ? '-' : (string) $item->realizations[$jun]->value;
 
             $jul = $item->realizations->search(function ($value) {
                 return $value->month === 'jul';
             });
-            $this->indicators[$iteration]['realizations_jul'] = $jul === false ? '-' : $item->realizations[$jul]->value;
+            $this->indicators[$iteration]['realizations_jul'] = $jul === false ? '-' : (string) $item->realizations[$jul]->value;
 
             $aug = $item->realizations->search(function ($value) {
                 return $value->month === 'aug';
             });
-            $this->indicators[$iteration]['realizations_aug'] = $aug === false ? '-' : $item->realizations[$aug]->value;
+            $this->indicators[$iteration]['realizations_aug'] = $aug === false ? '-' : (string) $item->realizations[$aug]->value;
 
             $sep = $item->realizations->search(function ($value) {
                 return $value->month === 'sep';
             });
-            $this->indicators[$iteration]['realizations_sep'] = $sep === false ? '-' : $item->realizations[$sep]->value;
+            $this->indicators[$iteration]['realizations_sep'] = $sep === false ? '-' : (string) $item->realizations[$sep]->value;
 
             $oct = $item->realizations->search(function ($value) {
                 return $value->month === 'oct';
             });
-            $this->indicators[$iteration]['realizations_oct'] = $oct === false ? '-' : $item->realizations[$oct]->value;
+            $this->indicators[$iteration]['realizations_oct'] = $oct === false ? '-' : (string) $item->realizations[$oct]->value;
 
             $nov = $item->realizations->search(function ($value) {
                 return $value->month === 'nov';
             });
-            $this->indicators[$iteration]['realizations_nov'] = $nov === false ? '-' : $item->realizations[$nov]->value;
+            $this->indicators[$iteration]['realizations_nov'] = $nov === false ? '-' : (string) $item->realizations[$nov]->value;
 
             $dec = $item->realizations->search(function ($value) {
                 return $value->month === 'dec';
             });
-            $this->indicators[$iteration]['realizations_dec'] = $dec === false ? '-' : $item->realizations[$dec]->value;
+            $this->indicators[$iteration]['realizations_dec'] = $dec === false ? '-' : (string) $item->realizations[$dec]->value;
 
             $this->iter++;
 

@@ -287,68 +287,68 @@ class RealizationPaperWorkService
 
             $this->indicators[$iteration]['id'] = $item->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator ($type)";
-            $this->indicators[$iteration]['measure'] = $item->measure;
+            $this->indicators[$iteration]['measure'] = is_null($item->measure) ? '-' : $item->measure;
 
             //realisasi
             $jan = $item->realizations->search(function ($value) {
                 return $value->month === 'jan';
             });
-            $this->indicators[$iteration]['realizations_jan'] = $jan === false ? '-' : $item->realizations[$jan]->value;
+            $this->indicators[$iteration]['realizations_jan'] = $jan === false ? '-' : (string) $item->realizations[$jan]->value;
 
             $feb = $item->realizations->search(function ($value) {
                 return $value->month === 'feb';
             });
-            $this->indicators[$iteration]['realizations_feb'] = $feb === false ? '-' : $item->realizations[$feb]->value;
+            $this->indicators[$iteration]['realizations_feb'] = $feb === false ? '-' : (string) $item->realizations[$feb]->value;
 
             $mar = $item->realizations->search(function ($value) {
                 return $value->month === 'mar';
             });
-            $this->indicators[$iteration]['realizations_mar'] = $mar === false ? '-' : $item->realizations[$mar]->value;
+            $this->indicators[$iteration]['realizations_mar'] = $mar === false ? '-' : (string) $item->realizations[$mar]->value;
 
             $apr = $item->realizations->search(function ($value) {
                 return $value->month === 'apr';
             });
-            $this->indicators[$iteration]['realizations_apr'] = $apr === false ? '-' : $item->realizations[$apr]->value;
+            $this->indicators[$iteration]['realizations_apr'] = $apr === false ? '-' : (string) $item->realizations[$apr]->value;
 
             $may = $item->realizations->search(function ($value) {
                 return $value->month === 'may';
             });
-            $this->indicators[$iteration]['realizations_may'] = $may === false ? '-' : $item->realizations[$may]->value;
+            $this->indicators[$iteration]['realizations_may'] = $may === false ? '-' : (string) $item->realizations[$may]->value;
 
             $jun = $item->realizations->search(function ($value) {
                 return $value->month === 'jun';
             });
-            $this->indicators[$iteration]['realizations_jun'] = $jun === false ? '-' : $item->realizations[$jun]->value;
+            $this->indicators[$iteration]['realizations_jun'] = $jun === false ? '-' : (string) $item->realizations[$jun]->value;
 
             $jul = $item->realizations->search(function ($value) {
                 return $value->month === 'jul';
             });
-            $this->indicators[$iteration]['realizations_jul'] = $jul === false ? '-' : $item->realizations[$jul]->value;
+            $this->indicators[$iteration]['realizations_jul'] = $jul === false ? '-' : (string) $item->realizations[$jul]->value;
 
             $aug = $item->realizations->search(function ($value) {
                 return $value->month === 'aug';
             });
-            $this->indicators[$iteration]['realizations_aug'] = $aug === false ? '-' : $item->realizations[$aug]->value;
+            $this->indicators[$iteration]['realizations_aug'] = $aug === false ? '-' : (string) $item->realizations[$aug]->value;
 
             $sep = $item->realizations->search(function ($value) {
                 return $value->month === 'sep';
             });
-            $this->indicators[$iteration]['realizations_sep'] = $sep === false ? '-' : $item->realizations[$sep]->value;
+            $this->indicators[$iteration]['realizations_sep'] = $sep === false ? '-' : (string) $item->realizations[$sep]->value;
 
             $oct = $item->realizations->search(function ($value) {
                 return $value->month === 'oct';
             });
-            $this->indicators[$iteration]['realizations_oct'] = $oct === false ? '-' : $item->realizations[$oct]->value;
+            $this->indicators[$iteration]['realizations_oct'] = $oct === false ? '-' : (string) $item->realizations[$oct]->value;
 
             $nov = $item->realizations->search(function ($value) {
                 return $value->month === 'nov';
             });
-            $this->indicators[$iteration]['realizations_nov'] = $nov === false ? '-' : $item->realizations[$nov]->value;
+            $this->indicators[$iteration]['realizations_nov'] = $nov === false ? '-' : (string) $item->realizations[$nov]->value;
 
             $dec = $item->realizations->search(function ($value) {
                 return $value->month === 'dec';
             });
-            $this->indicators[$iteration]['realizations_dec'] = $dec === false ? '-' : $item->realizations[$dec]->value;
+            $this->indicators[$iteration]['realizations_dec'] = $dec === false ? '-' : (string) $item->realizations[$dec]->value;
 
             $this->iter++;
 

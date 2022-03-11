@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\AnalyticIndexRequest;
 use App\DTO\ConstructRequest;
+use App\DTO\MonitoringMonitoringRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
-use App\Services\AnalyticService;
-use App\Services\AnalyticValidationService;
+use App\Services\MonitoringService;
+use App\Services\MonitoringValidationService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AnalyticController extends ApiController
+class MonitoringController extends ApiController
 {
-    public function analytic(Request $request)
+    public function monitoring(Request $request)
     {
         $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
@@ -30,9 +30,9 @@ class AnalyticController extends ApiController
         $constructRequest->unitRepository = $unitRepository;
 
         if ($request->query('auth') === '1') {
-            $analyticValidationService = new AnalyticValidationService($constructRequest);
+            $monitoringValidationService = new MonitoringValidationService($constructRequest);
 
-            $validation = $analyticValidationService->analyticValidation($request);
+            $validation = $monitoringValidationService->monitoringValidation($request);
 
             if ($validation->fails()) {
                 return $this->APIResponse(
@@ -45,21 +45,21 @@ class AnalyticController extends ApiController
             }
         }
 
-        $requestDTO = new AnalyticIndexRequest();
+        $requestDTO = new MonitoringMonitoringRequest();
 
         $requestDTO->level = $request->query('level');
         $requestDTO->unit = $request->query('unit');
         $requestDTO->year = $request->query('tahun');
         $requestDTO->month = $request->query('bulan');
 
-        $analyticService = new AnalyticService($constructRequest);
+        $monitoringService = new MonitoringService($constructRequest);
 
-        $response = $analyticService->analytic($requestDTO);
+        $response = $monitoringService->monitoring($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Analytic",
+            "Monitoring",
             [
                 'indicators' => $response->indicators,
             ],
@@ -67,7 +67,7 @@ class AnalyticController extends ApiController
         );
     }
 
-    public function analytic_by_id($id, $prefix, $month)
+    public function monitoring_by_id($id, $prefix, $month)
     {
         $indicatorRepository = new IndicatorRepository();
 
@@ -75,9 +75,9 @@ class AnalyticController extends ApiController
 
         $constructRequest->indicatorRepository = $indicatorRepository;
 
-        $analyticValidationService = new AnalyticValidationService($constructRequest);
+        $monitoringValidationService = new MonitoringValidationService($constructRequest);
 
-        $validation = $analyticValidationService->analyticByIdValidation($id);
+        $validation = $monitoringValidationService->monitoringByIdValidation($id);
 
         if ($validation->fails()) {
             return $this->APIResponse(
@@ -89,14 +89,14 @@ class AnalyticController extends ApiController
             );
         }
 
-        $analyticService = new AnalyticService($constructRequest);
+        $monitoringService = new MonitoringService($constructRequest);
 
-        $indicator = $analyticService->analytic_by_id($id, $month, $prefix);
+        $indicator = $monitoringService->monitoring_by_id($id, $month, $prefix);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Analytic",
+            "Monitoring",
             [
                 'indicator' => $indicator,
             ],

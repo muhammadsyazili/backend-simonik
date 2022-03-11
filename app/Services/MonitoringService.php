@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\DTO\AnalyticIndexRequest;
-use App\DTO\AnalyticIndexResponse;
 use App\DTO\ConstructRequest;
+use App\DTO\MonitoringMonitoringRequest;
+use App\DTO\MonitoringMonitoringResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Database\Eloquent\Collection;
 
-class AnalyticService
+class MonitoringService
 {
     private ?LevelRepository $levelRepository;
     private ?IndicatorRepository $indicatorRepository;
@@ -28,14 +28,14 @@ class AnalyticService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository
-    public function analytic(AnalyticIndexRequest $analyticRequest): AnalyticIndexResponse
+    public function monitoring(MonitoringMonitoringRequest $monitoringRequest): MonitoringMonitoringResponse
     {
-        $response = new AnalyticIndexResponse();
+        $response = new MonitoringMonitoringResponse();
 
-        $level = $analyticRequest->level;
-        $unit = $analyticRequest->unit;
-        $year = $analyticRequest->year;
-        $month = $analyticRequest->month;
+        $level = $monitoringRequest->level;
+        $unit = $monitoringRequest->unit;
+        $year = $monitoringRequest->year;
+        $month = $monitoringRequest->month;
 
         $levelId = $this->levelRepository->find__id__by__slug($level);
         $unitId = $this->unitRepository->find__id__by__slug($unit);
@@ -43,7 +43,7 @@ class AnalyticService
         $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
 
         $this->iter = 0; //reset iterator
-        $this->mapping__analytic__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
+        $this->mapping__monitoring__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
         $indicators = $this->calc($this->indicators, $month);
 
@@ -53,7 +53,7 @@ class AnalyticService
     }
 
     //use repo IndicatorRepository
-    public function analytic_by_id(string|int $id, string $month, string $prefix): array
+    public function monitoring_by_id(string|int $id, string $month, string $prefix): array
     {
         $indicator = $this->indicatorRepository->find__with__targets_realizations__by__id($id);
 
@@ -291,7 +291,7 @@ class AnalyticService
         return $newIndicators;
     }
 
-    private function mapping__analytic__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
+    private function mapping__monitoring__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
     {
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
@@ -440,7 +440,7 @@ class AnalyticService
             $this->iter++;
 
             if (!empty($item->childsHorizontalRecursive)) {
-                $this->mapping__analytic__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
+                $this->mapping__monitoring__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
             }
         });
     }

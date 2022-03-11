@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class AnalyticIndexRequest
+class MonitoringMonitoringRequest
 {
     public string $level;
     public string $unit;
