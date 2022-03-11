@@ -43,7 +43,7 @@ class AnalyticService
         $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
 
         $this->iter = 0; //reset iterator
-        $this->mapping__index__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
+        $this->mapping__analytic__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
         $indicators = $this->calc($this->indicators, $month);
 
@@ -291,7 +291,7 @@ class AnalyticService
         return $newIndicators;
     }
 
-    private function mapping__index__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
+    private function mapping__analytic__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
     {
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
@@ -440,7 +440,7 @@ class AnalyticService
             $this->iter++;
 
             if (!empty($item->childsHorizontalRecursive)) {
-                $this->mapping__index__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
+                $this->mapping__analytic__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
             }
         });
     }
