@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
+use App\DTO\MonitoringExportRequest;
+use App\DTO\MonitoringExportResponse;
 use App\DTO\MonitoringMonitoringRequest;
 use App\DTO\MonitoringMonitoringResponse;
 use App\Repositories\IndicatorRepository;
@@ -45,54 +47,14 @@ class MonitoringService
         $this->iter = 0; //reset iterator
         $this->mapping__monitoring__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-        $indicators = $this->calc($this->indicators, $month);
+        $indicators = $this->monitoring_calc($this->indicators, $month);
 
         $response->indicators = $indicators;
 
         return $response;
     }
 
-    //use repo IndicatorRepository
-    public function monitoring_by_id(string|int $id, string $month, string $prefix): array
-    {
-        $indicator = $this->indicatorRepository->find__with__targets_realizations__by__id($id);
-
-        $monthNumber = $this->monthName__to__monthNumber($month);
-
-        $targets = [];
-        $realizations = [];
-        $months = [];
-        for ($i = $monthNumber; $i > 0; $i--) {
-            $monthName = $this->monthNumber__to__monthName($i);
-
-            $months[$i] = $monthName;
-
-            $res = $indicator->targets->search(function ($value) use ($monthName) {
-                return $value->month === $monthName;
-            });
-            $targets[$i] = $res === false ? 0 : $indicator->targets[$res]->value;
-
-            $res = $indicator->realizations->search(function ($value) use ($monthName) {
-                return $value->month === $monthName;
-            });
-            $realizations[$i] = $res === false ? 0 : $indicator->realizations[$res]->value;
-        }
-
-        $temp = $indicator->indicator;
-
-        $newIndicator = [
-            'indicator' => "$prefix. $temp",
-            'measure' => $indicator->measure,
-            'type' => $indicator->type,
-            'targets' => array_reverse($targets),
-            'realizations' => array_reverse($realizations),
-            'months' => array_reverse($months),
-        ];
-
-        return $newIndicator;
-    }
-
-    private function calc(array $indicators, string $month): array
+    private function monitoring_calc(array $indicators, string $month): array
     {
         $newIndicators = [];
 
@@ -258,8 +220,6 @@ class MonitoringService
             $newIndicators['total']['KPI_110'] = $total_KPI_110;
             $newIndicators['total']['PI_100'] = $total_PI_100;
             $newIndicators['total']['PI_110'] = $total_PI_110;
-
-            $newIndicators['total']['bobot'] = $total_weight_counted_KPI + $total_weight_counted_PI;
 
             $newIndicators['total']['PK_100'] = $total_KPI_100 + $total_PI_100;
             $newIndicators['total']['PK_110'] = $total_KPI_110 + $total_PI_110;
@@ -443,6 +403,391 @@ class MonitoringService
                 $this->mapping__monitoring__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
             }
         });
+    }
+
+    //use repo LevelRepository, UnitRepository, IndicatorRepository
+    public function export(MonitoringExportRequest $monitoringRequest): MonitoringExportResponse
+    {
+        $response = new MonitoringExportResponse();
+
+        $level = $monitoringRequest->level;
+        $unit = $monitoringRequest->unit;
+        $year = $monitoringRequest->year;
+        $month = $monitoringRequest->month;
+
+        $levelId = $this->levelRepository->find__id__by__slug($level);
+        $unitId = $this->unitRepository->find__id__by__slug($unit);
+
+        $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
+
+        $this->iter = 0; //reset iterator
+        $this->mapping__export__indicators($indicators);
+
+        $indicators = $this->export_calc($this->indicators, $month);
+
+        $response->indicators = $indicators;
+
+        return $response;
+    }
+
+    private function export_calc(array $indicators, string $month): array
+    {
+        $newIndicators = [];
+
+        if (count($indicators) !== 0) {
+            $total_KPI_100 = 0;
+            $total_KPI_110 = 0;
+            $total_PI_100 = 0;
+            $total_PI_110 = 0;
+
+            $total_weight_counted_KPI = 0;
+            $total_weight_counted_PI = 0;
+
+            $total_weight_KPI = 0;
+            $total_weight_PI = 0;
+
+            $i = 0;
+            foreach ($indicators as $item) {
+                //perhitungan pencapaian
+                $achievement = 0;
+                if (!$item['dummy'] && !$item['reducing_factor']) {
+                    if ($item['targets'][$month]['value'] == (float) 0 && $item['realizations'][$month]['value'] == (float) 0) {
+                        $achievement = 100;
+                    } else if ($item['targets'][$month]['value'] == (float) 0 && $item['realizations'][$month]['value'] !== (float) 0) {
+                        $achievement = 0;
+                    } else if ($item['original_polarity'] === '1') {
+                        $achievement = $item['realizations'][$month]['value'] == (float) 0 ? 0 : ($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100;
+                    } else if ($item['original_polarity'] === '-1') {
+                        $achievement = $item['realizations'][$month]['value'] == (float) 0 ? 0 : (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100;
+                    } else {
+                        $achievement = null;
+                    }
+                } else {
+                    $achievement = null;
+                }
+
+                //perhitungan nilai capping 100%
+                $capping_value_100 = null;
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                    if ($item['targets'][$month]['value'] == (float) 0) {
+                        $capping_value_100 = 'BELUM DINILAI';
+                    } else if ($achievement <= (float) 0) {
+                        $capping_value_100 = 0;
+                    } else if ($achievement > (float) 0 && $achievement <= (float) 100) {
+                        $res = $achievement * $item['weight'][$month];
+                        $capping_value_100 = $res == (float) 0 ? 0 : $res / 100;
+                    } else {
+                        $capping_value_100 = $item['weight'][$month];
+                    }
+                }
+
+                //perhitungan nilai capping 110%
+                $capping_value_110 = null;
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                    if ($item['targets'][$month]['value'] == (float) 0) {
+                        $capping_value_110 = 'BELUM DINILAI';
+                    } else if ($achievement <= (float) 0) {
+                        $capping_value_110 = 0;
+                    } else if ($achievement > (float) 0 && $achievement <= (float) 110) {
+                        $res = $achievement * $item['weight'][$month];
+                        $capping_value_110 = $res == (float) 0 ? 0 : $res / 100;
+                    } else {
+                        $res = $item['weight'][$month] * 110;
+                        $capping_value_110 = $res == (float) 0 ? 0 : $res / 100;
+                    }
+                }
+
+                //perhitungan status
+                $status = null;
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                    if ($item['targets'][$month]['value'] == (float) 0) {
+                        $status = 'BELUM DINILAI';
+                    } else if ($achievement >= (float) 100) {
+                        $status = 'BAIK';
+                    } else if ($achievement >= (float) 95 && $achievement < (float) 100) {
+                        $status = 'HATI-HATI';
+                    } else if ($achievement < (float) 95) {
+                        $status = 'MASALAH';
+                    }
+                }
+
+                if (strtoupper($item['type']) === 'KPI') {
+                    if ($item['reducing_factor']) {
+                        $total_KPI_110 -= $item['realizations'][$month]['value'];
+                    } else {
+                        $total_KPI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
+                        $total_KPI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+
+                        if (array_key_exists($month, $item['weight'])) {
+                            $total_weight_KPI += $item['weight'][$month];
+                            $total_weight_counted_KPI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
+                        }
+                    }
+                }
+
+                if (strtoupper($item['type']) === 'PI') {
+                    if ($item['reducing_factor']) {
+                        $total_PI_110 -= $item['realizations'][$month]['value'];
+                    } else {
+                        $total_PI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
+                        $total_PI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+
+                        if (array_key_exists($month, $item['weight'])) {
+                            $total_weight_PI += $item['weight'][$month];
+                            $total_weight_counted_PI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
+                        }
+                    }
+                }
+
+                //packaging
+                $newIndicators[$i]['order'] = (string) $item['order'] + 1;
+                $newIndicators[$i]['indicator'] = (string) $item['indicator'];
+                $newIndicators[$i]['type'] = (string) $item['type'];
+                $newIndicators[$i]['formula'] = is_null($item['formula']) ? '-' : (string) $item['formula'];
+                $newIndicators[$i]['measure'] = is_null($item['measure']) ? '-' : (string) $item['measure'];
+
+                $polarity = '-';
+                if (is_null($item['original_polarity'])) {
+                    $polarity = '-';
+                } else {
+                    $polarity = $item['original_polarity'] == '1' ? 'Positif' : 'Nagatif';
+                }
+                $newIndicators[$i]['polarity'] = (string) $polarity;
+
+                $newIndicators[$i]['weight'] = array_key_exists($month, $item['weight']) ? (string) $item['weight'][$month] : '-';
+                $newIndicators[$i]['weight_counted'] = (string) ($capping_value_110 === 'BELUM DINILAI' ? 0 : (array_key_exists($month, $item['weight']) ? (string) $item['weight'][$month] : '-'));
+                $newIndicators[$i]['target'] = is_null($item['targets'][$month]['value']) ? '-' : (string) $item['targets'][$month]['value'];
+                $newIndicators[$i]['realization'] = is_null($item['realizations'][$month]['value']) ? '-' : (string) $item['realizations'][$month]['value'];
+                $newIndicators[$i]['achievement'] = is_null($achievement) ? '-' : (string) $achievement;
+                $newIndicators[$i]['capping_value_100'] = is_null($capping_value_100) ? '-' : (string) $capping_value_100;
+                $newIndicators[$i]['capping_value_110'] = is_null($capping_value_110) ? '-' : (string) $capping_value_110;
+                $newIndicators[$i]['status'] = is_null($status) ? '-' : (string) $status;
+                $i++;
+            }
+
+            $i = count($newIndicators);
+            $newIndicators[$i]['order'] = (string) $i + 1;
+            $newIndicators[$i]['indicator'] = 'TOTAL PENILAIAN KINERJA';
+            $newIndicators[$i]['type'] = '-';
+            $newIndicators[$i]['formula'] = '-';
+            $newIndicators[$i]['measure'] = '-';
+            $newIndicators[$i]['polarity'] = '-';
+            $newIndicators[$i]['weight'] = (string) ($total_weight_KPI + $total_weight_PI);
+            $newIndicators[$i]['weight_counted'] = (string) ($total_weight_counted_KPI + $total_weight_counted_PI);
+            $newIndicators[$i]['target'] = '-';
+            $newIndicators[$i]['realization'] = '-';
+            $newIndicators[$i]['achievement'] = '-';
+            $newIndicators[$i]['capping_value_100'] = (string) ($total_KPI_100 + $total_PI_100);
+            $newIndicators[$i]['capping_value_110'] = (string) ($total_KPI_110 + $total_PI_110);
+            $newIndicators[$i]['status'] = '-';
+
+            $i++;
+            $newIndicators[$i]['order'] = (string) $i + 1;
+            $newIndicators[$i]['indicator'] = 'TOTAL PROPORSIONAL PENILAIAN KINERJA';
+            $newIndicators[$i]['type'] = '-';
+            $newIndicators[$i]['formula'] = '-';
+            $newIndicators[$i]['measure'] = '-';
+            $newIndicators[$i]['polarity'] = '-';
+            $newIndicators[$i]['weight'] = (string) ($total_weight_KPI + $total_weight_PI);
+            $newIndicators[$i]['weight_counted'] = (string) ($total_weight_counted_KPI + $total_weight_counted_PI);
+            $newIndicators[$i]['target'] = '-';
+            $newIndicators[$i]['realization'] = '-';
+            $newIndicators[$i]['achievement'] = '-';
+            $newIndicators[$i]['capping_value_100'] = (string) (($total_KPI_100 + $total_PI_100) == (float) 0 ? 0 : (($total_KPI_100 + $total_PI_100) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100);
+            $newIndicators[$i]['capping_value_110'] = (string) (($total_KPI_110 + $total_PI_110) == (float) 0 ? 0 : (($total_KPI_110 + $total_PI_110) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100);
+            $newIndicators[$i]['status'] = '-';
+        }
+
+        return $newIndicators;
+    }
+
+    private function mapping__export__indicators(Collection $indicators, string $prefix = null, bool $first = true): void
+    {
+        $indicators->each(function ($item, $key) use ($prefix, $first) {
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+            $indicator = $item->indicator;
+
+            //indikator packaging
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['type'] = $item->type;
+            $this->indicators[$iteration]['formula'] = $item->formula;
+            $this->indicators[$iteration]['measure'] = $item->measure;
+            $this->indicators[$iteration]['weight'] = $item->weight;
+            $this->indicators[$iteration]['order'] = $iteration;
+
+            $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
+            $this->indicators[$iteration]['dummy'] = $item->dummy;
+            $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
+
+            //target packaging
+            $jan = $item->targets->search(function ($value) {
+                return $value->month === 'jan';
+            });
+            $this->indicators[$iteration]['targets']['jan']['value'] = $jan === false ? null : $item->targets[$jan]->value;
+
+            $feb = $item->targets->search(function ($value) {
+                return $value->month === 'feb';
+            });
+            $this->indicators[$iteration]['targets']['feb']['value'] = $feb === false ? null : $item->targets[$feb]->value;
+
+            $mar = $item->targets->search(function ($value) {
+                return $value->month === 'mar';
+            });
+            $this->indicators[$iteration]['targets']['mar']['value'] = $mar === false ? null : $item->targets[$mar]->value;
+
+            $apr = $item->targets->search(function ($value) {
+                return $value->month === 'apr';
+            });
+            $this->indicators[$iteration]['targets']['apr']['value'] = $apr === false ? null : $item->targets[$apr]->value;
+
+            $may = $item->targets->search(function ($value) {
+                return $value->month === 'may';
+            });
+            $this->indicators[$iteration]['targets']['may']['value'] = $may === false ? null : $item->targets[$may]->value;
+
+            $jun = $item->targets->search(function ($value) {
+                return $value->month === 'jun';
+            });
+            $this->indicators[$iteration]['targets']['jun']['value'] = $jun === false ? null : $item->targets[$jun]->value;
+
+            $jul = $item->targets->search(function ($value) {
+                return $value->month === 'jul';
+            });
+            $this->indicators[$iteration]['targets']['jul']['value'] = $jul === false ? null : $item->targets[$jul]->value;
+
+            $aug = $item->targets->search(function ($value) {
+                return $value->month === 'aug';
+            });
+            $this->indicators[$iteration]['targets']['aug']['value'] = $aug === false ? null : $item->targets[$aug]->value;
+
+            $sep = $item->targets->search(function ($value) {
+                return $value->month === 'sep';
+            });
+            $this->indicators[$iteration]['targets']['sep']['value'] = $sep === false ? null : $item->targets[$sep]->value;
+
+            $oct = $item->targets->search(function ($value) {
+                return $value->month === 'oct';
+            });
+            $this->indicators[$iteration]['targets']['oct']['value'] = $oct === false ? null : $item->targets[$oct]->value;
+
+            $nov = $item->targets->search(function ($value) {
+                return $value->month === 'nov';
+            });
+            $this->indicators[$iteration]['targets']['nov']['value'] = $nov === false ? null : $item->targets[$nov]->value;
+
+            $dec = $item->targets->search(function ($value) {
+                return $value->month === 'dec';
+            });
+            $this->indicators[$iteration]['targets']['dec']['value'] = $dec === false ? null : $item->targets[$dec]->value;
+
+            //realisasi packaging
+            $jan = $item->realizations->search(function ($value) {
+                return $value->month === 'jan';
+            });
+            $this->indicators[$iteration]['realizations']['jan']['value'] = $jan === false ? null : $item->realizations[$jan]->value;
+
+            $feb = $item->realizations->search(function ($value) {
+                return $value->month === 'feb';
+            });
+            $this->indicators[$iteration]['realizations']['feb']['value'] = $feb === false ? null : $item->realizations[$feb]->value;
+
+            $mar = $item->realizations->search(function ($value) {
+                return $value->month === 'mar';
+            });
+            $this->indicators[$iteration]['realizations']['mar']['value'] = $mar === false ? null : $item->realizations[$mar]->value;
+
+            $apr = $item->realizations->search(function ($value) {
+                return $value->month === 'apr';
+            });
+            $this->indicators[$iteration]['realizations']['apr']['value'] = $apr === false ? null : $item->realizations[$apr]->value;
+
+            $may = $item->realizations->search(function ($value) {
+                return $value->month === 'may';
+            });
+            $this->indicators[$iteration]['realizations']['may']['value'] = $may === false ? null : $item->realizations[$may]->value;
+
+            $jun = $item->realizations->search(function ($value) {
+                return $value->month === 'jun';
+            });
+            $this->indicators[$iteration]['realizations']['jun']['value'] = $jun === false ? null : $item->realizations[$jun]->value;
+
+            $jul = $item->realizations->search(function ($value) {
+                return $value->month === 'jul';
+            });
+            $this->indicators[$iteration]['realizations']['jul']['value'] = $jul === false ? null : $item->realizations[$jul]->value;
+
+            $aug = $item->realizations->search(function ($value) {
+                return $value->month === 'aug';
+            });
+            $this->indicators[$iteration]['realizations']['aug']['value'] = $aug === false ? null : $item->realizations[$aug]->value;
+
+            $sep = $item->realizations->search(function ($value) {
+                return $value->month === 'sep';
+            });
+            $this->indicators[$iteration]['realizations']['sep']['value'] = $sep === false ? null : $item->realizations[$sep]->value;
+
+            $oct = $item->realizations->search(function ($value) {
+                return $value->month === 'oct';
+            });
+            $this->indicators[$iteration]['realizations']['oct']['value'] = $oct === false ? null : $item->realizations[$oct]->value;
+
+            $nov = $item->realizations->search(function ($value) {
+                return $value->month === 'nov';
+            });
+            $this->indicators[$iteration]['realizations']['nov']['value'] = $nov === false ? null : $item->realizations[$nov]->value;
+
+            $dec = $item->realizations->search(function ($value) {
+                return $value->month === 'dec';
+            });
+            $this->indicators[$iteration]['realizations']['dec']['value'] = $dec === false ? null : $item->realizations[$dec]->value;
+
+            $this->iter++;
+
+            if (!empty($item->childsHorizontalRecursive)) {
+                $this->mapping__export__indicators($item->childsHorizontalRecursive, $prefix, false);
+            }
+        });
+    }
+
+    //use repo IndicatorRepository
+    public function monitoring_by_id(string|int $id, string $month, string $prefix): array
+    {
+        $indicator = $this->indicatorRepository->find__with__targets_realizations__by__id($id);
+
+        $monthNumber = $this->monthName__to__monthNumber($month);
+
+        $targets = [];
+        $realizations = [];
+        $months = [];
+        for ($i = $monthNumber; $i > 0; $i--) {
+            $monthName = $this->monthNumber__to__monthName($i);
+
+            $months[$i] = $monthName;
+
+            $res = $indicator->targets->search(function ($value) use ($monthName) {
+                return $value->month === $monthName;
+            });
+            $targets[$i] = $res === false ? 0 : $indicator->targets[$res]->value;
+
+            $res = $indicator->realizations->search(function ($value) use ($monthName) {
+                return $value->month === $monthName;
+            });
+            $realizations[$i] = $res === false ? 0 : $indicator->realizations[$res]->value;
+        }
+
+        $temp = $indicator->indicator;
+
+        $newIndicator = [
+            'indicator' => "$prefix. $temp",
+            'measure' => $indicator->measure,
+            'type' => $indicator->type,
+            'targets' => array_reverse($targets),
+            'realizations' => array_reverse($realizations),
+            'months' => array_reverse($months),
+        ];
+
+        return $newIndicator;
     }
 
     private function monthName__to__monthNumber(string $monthName): int
