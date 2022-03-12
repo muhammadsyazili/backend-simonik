@@ -151,6 +151,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['jan']['value'] = $jan === false ? null : $item->realizations[$jan]->value;
             $this->indicators[$iteration]['realizations']['jan']['updated_at'] = $jan === false ? null : Carbon::parse($item->realizations[$jan]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['jan']['locked'] = $jan === false ? null : $item->realizations[$jan]->locked;
+            $this->indicators[$iteration]['realizations']['jan']['status'] = $jan === false ? null : ($item->realizations[$jan]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['jan']['readonly'] = $jan === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$jan]->locked && now()->month !== 1 ? true : false);
 
             $feb = $item->realizations->search(function ($value) {
@@ -159,6 +160,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['feb']['value'] = $feb === false ? null : $item->realizations[$feb]->value;
             $this->indicators[$iteration]['realizations']['feb']['updated_at'] = $feb === false ? null : Carbon::parse($item->realizations[$feb]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['feb']['locked'] = $feb === false ? null : $item->realizations[$feb]->locked;
+            $this->indicators[$iteration]['realizations']['feb']['status'] = $feb === false ? null : ($item->realizations[$feb]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['feb']['readonly'] = $feb === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$feb]->locked && now()->month !== 2 ? true : false);
 
             $mar = $item->realizations->search(function ($value) {
@@ -167,6 +169,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['mar']['value'] = $mar === false ? null : $item->realizations[$mar]->value;
             $this->indicators[$iteration]['realizations']['mar']['updated_at'] = $mar === false ? null : Carbon::parse($item->realizations[$mar]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['mar']['locked'] = $mar === false ? null : $item->realizations[$mar]->locked;
+            $this->indicators[$iteration]['realizations']['mar']['status'] = $mar === false ? null : ($item->realizations[$mar]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['mar']['readonly'] = $mar === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$mar]->locked && now()->month !== 3 ? true : false);
 
             $apr = $item->realizations->search(function ($value) {
@@ -175,6 +178,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['apr']['value'] = $apr === false ? null : $item->realizations[$apr]->value;
             $this->indicators[$iteration]['realizations']['apr']['updated_at'] = $apr === false ? null : Carbon::parse($item->realizations[$apr]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['apr']['locked'] = $apr === false ? null : $item->realizations[$apr]->locked;
+            $this->indicators[$iteration]['realizations']['apr']['status'] = $apr === false ? null : ($item->realizations[$apr]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['apr']['readonly'] = $apr === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$apr]->locked && now()->month !== 4 ? true : false);
 
             $may = $item->realizations->search(function ($value) {
@@ -183,6 +187,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['may']['value'] = $may === false ? null : $item->realizations[$may]->value;
             $this->indicators[$iteration]['realizations']['may']['updated_at'] = $may === false ? null : Carbon::parse($item->realizations[$may]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['may']['locked'] = $may === false ? null : $item->realizations[$may]->locked;
+            $this->indicators[$iteration]['realizations']['may']['status'] = $may === false ? null : ($item->realizations[$may]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['may']['readonly'] = $may === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$may]->locked && now()->month !== 5 ? true : false);
 
             $jun = $item->realizations->search(function ($value) {
@@ -191,6 +196,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['jun']['value'] = $jun === false ? null : $item->realizations[$jun]->value;
             $this->indicators[$iteration]['realizations']['jun']['updated_at'] = $jun === false ? null : Carbon::parse($item->realizations[$jun]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['jun']['locked'] = $jun === false ? null : $item->realizations[$jun]->locked;
+            $this->indicators[$iteration]['realizations']['jun']['status'] = $jun === false ? null : ($item->realizations[$jun]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['jun']['readonly'] = $jun === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$jun]->locked && now()->month !== 6 ? true : false);
 
             $jul = $item->realizations->search(function ($value) {
@@ -199,6 +205,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['jul']['value'] = $jul === false ? null : $item->realizations[$jul]->value;
             $this->indicators[$iteration]['realizations']['jul']['updated_at'] = $jul === false ? null : Carbon::parse($item->realizations[$jul]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['jul']['locked'] = $jul === false ? null : $item->realizations[$jul]->locked;
+            $this->indicators[$iteration]['realizations']['jul']['status'] = $jul === false ? null : ($item->realizations[$jul]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['jul']['readonly'] = $jul === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$jul]->locked && now()->month !== 7 ? true : false);
 
             $aug = $item->realizations->search(function ($value) {
@@ -207,6 +214,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['aug']['value'] = $aug === false ? null : $item->realizations[$aug]->value;
             $this->indicators[$iteration]['realizations']['aug']['updated_at'] = $aug === false ? null : Carbon::parse($item->realizations[$aug]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['aug']['locked'] = $aug === false ? null : $item->realizations[$aug]->locked;
+            $this->indicators[$iteration]['realizations']['aug']['status'] = $aug === false ? null : ($item->realizations[$aug]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['aug']['readonly'] = $aug === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$aug]->locked && now()->month !== 8 ? true : false);
 
             $sep = $item->realizations->search(function ($value) {
@@ -215,6 +223,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['sep']['value'] = $sep === false ? null : $item->realizations[$sep]->value;
             $this->indicators[$iteration]['realizations']['sep']['updated_at'] = $sep === false ? null : Carbon::parse($item->realizations[$sep]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['sep']['locked'] = $sep === false ? null : $item->realizations[$sep]->locked;
+            $this->indicators[$iteration]['realizations']['sep']['status'] = $sep === false ? null : ($item->realizations[$sep]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['sep']['readonly'] = $sep === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$sep]->locked && now()->month !== 9 ? true : false);
 
             $oct = $item->realizations->search(function ($value) {
@@ -223,6 +232,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['oct']['value'] = $oct === false ? null : $item->realizations[$oct]->value;
             $this->indicators[$iteration]['realizations']['oct']['updated_at'] = $oct === false ? null : Carbon::parse($item->realizations[$oct]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['oct']['locked'] = $oct === false ? null : $item->realizations[$oct]->locked;
+            $this->indicators[$iteration]['realizations']['oct']['status'] = $oct === false ? null : ($item->realizations[$oct]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['oct']['readonly'] = $oct === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$oct]->locked && now()->month !== 10 ? true : false);
 
             $nov = $item->realizations->search(function ($value) {
@@ -231,6 +241,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['nov']['value'] = $nov === false ? null : $item->realizations[$nov]->value;
             $this->indicators[$iteration]['realizations']['nov']['updated_at'] = $nov === false ? null : Carbon::parse($item->realizations[$nov]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['nov']['locked'] = $nov === false ? null : $item->realizations[$nov]->locked;
+            $this->indicators[$iteration]['realizations']['nov']['status'] = $nov === false ? null : ($item->realizations[$nov]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['nov']['readonly'] = $nov === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$nov]->locked && now()->month !== 11 ? true : false);
 
             $dec = $item->realizations->search(function ($value) {
@@ -239,6 +250,7 @@ class RealizationPaperWorkService
             $this->indicators[$iteration]['realizations']['dec']['value'] = $dec === false ? null : $item->realizations[$dec]->value;
             $this->indicators[$iteration]['realizations']['dec']['updated_at'] = $dec === false ? null : Carbon::parse($item->realizations[$dec]->updated_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['realizations']['dec']['locked'] = $dec === false ? null : $item->realizations[$dec]->locked;
+            $this->indicators[$iteration]['realizations']['dec']['status'] = $dec === false ? null : ($item->realizations[$dec]->default ? 'D' : 'M');
             $this->indicators[$iteration]['realizations']['dec']['readonly'] = $dec === false ? null : (!in_array($this->role, ['super-admin', 'admin']) && $item->realizations[$dec]->locked && now()->month !== 12 ? true : false);
 
             $this->iter++;
