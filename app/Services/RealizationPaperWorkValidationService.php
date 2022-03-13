@@ -101,12 +101,18 @@ class RealizationPaperWorkValidationService
             'date_format' => ':attribute harus berformat yyyy.',
             'not_in' => ':attribute yang dipilih tidak sah.',
             'numeric' => ':attribute harus numerik.',
+            'gte' => [
+                'numeric' => ':attribute harus lebih besar dari atau sama dengan :value.',
+                'file'    => ':attribute harus lebih besar dari atau sama dengan :value kilobytes.',
+                'string'  => ':attribute harus lebih besar dari atau sama dengan :value characters.',
+                'array'   => ':attribute harus memiliki :value item atau lebih.',
+            ],
         ];
 
         //memastikan realisasi yang akan di-update tipe data 'numeric'
         foreach ($request->post('realizations') as $realizationK => $realizationV) {
             foreach ($realizationV as $K => $V) {
-                $attributes["realizations.$realizationK.$K"] = ['numeric'];
+                $attributes["realizations.$realizationK.$K"] = ['numeric', 'gte:0'];
             }
         }
 
@@ -123,7 +129,7 @@ class RealizationPaperWorkValidationService
             foreach ($months as $monthK => $monthV) {
                 if (!in_array($monthK, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('validity', "(#4.6) : Akses Ilegal !");
+                        $validator->errors()->add('realizations', "(#4.6) : Akses Ilegal !");
                     });
                     $isError = true;
                     break;
@@ -177,6 +183,79 @@ class RealizationPaperWorkValidationService
 
             if ($isError) {
                 break;
+            }
+        }
+
+        return $validator;
+    }
+
+    //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
+    public function updateImportValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    {
+        //memastikan level yang akan di-update sesuai dengan level user login saat ini atau level turunan yang diizinkan
+        //memastikan unit yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
+
+        $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
+
+        $realizations = $request->post('realizations');
+        $indicatorsId = array_keys($request->post('realizations')); //list KPI dari realization
+        $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
+
+        $attributes = [
+            'realizations' => ['required'],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user), new Unit__MatchWith__Level($request->post('level'))],
+            'tahun' => ['required', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+            'not_in' => ':attribute yang dipilih tidak sah.',
+            'numeric' => ':attribute harus numerik.',
+            'gte' => [
+                'numeric' => ':attribute harus lebih besar dari atau sama dengan :value.',
+                'file'    => ':attribute harus lebih besar dari atau sama dengan :value kilobytes.',
+                'string'  => ':attribute harus lebih besar dari atau sama dengan :value characters.',
+                'array'   => ':attribute harus memiliki :value item atau lebih.',
+            ],
+        ];
+
+        $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
+
+        //memastikan realisasi yang akan di-update tipe data 'numeric', jika bukan dummy
+        foreach ($indicators as $indicator) {
+            if (!$indicator->dummy) {
+                foreach ($request->post('realizations')[$indicator->id] as $monthName => $monthValue) {
+                    $id = $indicator->id;
+                    $attributes["realizations.$id.$monthName"] = ['numeric', 'gte:0'];
+                }
+            }
+        }
+
+        $input = Arr::only($request->post(), array_keys($attributes));
+
+        $validator = Validator::make($input, $attributes, $messages);
+
+        //memastikan realisasi yang akan di-update merupakan bulan jan-dec
+        foreach ($realizations as $id => $months) {
+            foreach ($months as $monthName => $monthValue) {
+                if (!in_array($monthName, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
+                    $validator->after(function ($validator) use ($id, $monthName) {
+                        $validator->errors()->add("realizations.$id.$monthName", "KPI ID: $id Bulan: $monthName tidak sah !");
+                    });
+                }
+            }
+        }
+
+        $indicatorsIdDB = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
+
+        //memastikan KPI yang akan di-update terdaftar di DB
+        foreach ($indicatorsId as $id) {
+            if (!in_array($id, $indicatorsIdDB)) {
+                $validator->after(function ($validator) use ($id) {
+                    $validator->errors()->add("realizations.$id", "KPI ID: $id tidak terdaftar di database !");
+                });
             }
         }
 

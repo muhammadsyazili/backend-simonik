@@ -195,6 +195,69 @@ class PaperWorkRealizationController extends ApiController
     }
 
     /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string|int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update_import(Request $request)
+    {
+        //logging
+        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $output->writeln(sprintf('realizations: %s', json_encode($request->post('realizations'))));
+
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $realizationRepository = new RealizationRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->realizationRepository = $realizationRepository;
+
+        $realizationPaperWorkValidationService = new RealizationPaperWorkValidationService($constructRequest);
+
+        $validation = $realizationPaperWorkValidationService->updateImportValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $requestDTO = new RealizationPaperWorkUpdateRequest();
+
+        $requestDTO->indicators = array_keys($request->post('realizations'));
+        $requestDTO->realizations = $request->post('realizations');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->unit = $request->post('unit');
+        $requestDTO->year = $request->post('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
+        $realizationPaperWorkService = new RealizationPaperWorkService($constructRequest);
+
+        $realizationPaperWorkService->update_import($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Kertas Kerja Realisasi (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Diubah", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
+            null,
+            null,
+        );
+    }
+
+    /**
      * Lock change.
      *
      * @param  \Illuminate\Http\Request  $request

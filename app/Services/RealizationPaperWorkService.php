@@ -412,6 +412,37 @@ class RealizationPaperWorkService
         });
     }
 
+    //use repo UserRepository, LevelRepository, UnitRepository, IndicatorRepository, RealizationRepository
+    public function update_import(RealizationPaperWorkUpdateRequest $realizationPaperWorkRequest): void
+    {
+        $indicatorsId = $realizationPaperWorkRequest->indicators;
+        $realizations = $realizationPaperWorkRequest->realizations;
+        $level = $realizationPaperWorkRequest->level;
+        $unit = $realizationPaperWorkRequest->unit;
+        $year = $realizationPaperWorkRequest->year;
+
+        //jika user adalah 'super-admin' or 'admin' maka bisa entry realisasi semua bulan, else hanya bisa bulan saat ini or bulan yang un-locked
+        DB::transaction(function () use ($indicatorsId, $realizations, $level, $unit, $year) {
+
+            $indicators = $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $this->levelRepository->find__id__by__slug($level), $this->unitRepository->find__id__by__slug($unit), $year);
+
+            foreach ($indicators as $indicator) {
+                if (!$indicator->dummy) {
+                    //section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                    foreach ($indicator->validity as $month => $value) {
+                        $realization = $this->realizationRepository->find__by__indicatorId_month($indicator->id, $month);
+
+                        //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                        if ($realization->value != $realizations[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $realizations[$indicator->id][$month] == 0 && $realization->default === true)) {
+                            $this->realizationRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $realizations[$indicator->id][$month]);
+                        }
+                    }
+                    //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                }
+            }
+        });
+    }
+
     //use repo RealizationRepository
     public function lock_change(RealizationPaperWorkChangeLockRequest $realizationPaperWorkRequest): void
     {

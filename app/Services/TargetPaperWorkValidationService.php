@@ -101,12 +101,18 @@ class TargetPaperWorkValidationService
             'date_format' => ':attribute harus berformat yyyy.',
             'not_in' => ':attribute yang dipilih tidak sah.',
             'numeric' => ':attribute harus numerik.',
+            'gte' => [
+                'numeric' => ':attribute harus lebih besar dari atau sama dengan :value.',
+                'file'    => ':attribute harus lebih besar dari atau sama dengan :value kilobytes.',
+                'string'  => ':attribute harus lebih besar dari atau sama dengan :value characters.',
+                'array'   => ':attribute harus memiliki :value item atau lebih.',
+            ],
         ];
 
         //memastikan target yang akan di-update tipe data 'numeric'
         foreach ($request->post('targets') as $targetK => $targetV) {
             foreach ($targetV as $K => $V) {
-                $attributes["targets.$targetK.$K"] = ['numeric'];
+                $attributes["targets.$targetK.$K"] = ['numeric', 'gte:0'];
             }
         }
 

@@ -43,6 +43,11 @@ class LevelRepository
         return ModelsLevel::findOrFail($id);
     }
 
+    public function find__by__slug(string $slug)
+    {
+        return ModelsLevel::firstWhere(['slug' => $slug]);
+    }
+
     public function find__id__by__slug(string $slug): string|int
     {
         return ModelsLevel::firstWhere(['slug' => $slug])->id;

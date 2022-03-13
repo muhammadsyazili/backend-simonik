@@ -90,12 +90,12 @@ class IndicatorReferenceService
             $this->indicators[$indicatorsIteration]['preferences'][0]['selected'] = is_null($indicatorsItem->parent_horizontal_id) ? true : false;
 
             $preferences->each(function ($preferencesItem, $preferencesKey) use ($indicatorsIteration, $indicatorsItem) {
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['id'] = $preferencesItem['id'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['indicator'] = $preferencesItem['indicator'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['referenced'] = $preferencesItem['referenced'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['order'] = $preferencesItem['order'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['showed'] = $preferencesItem['id'] === $indicatorsItem->id ? false : true;
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['selected'] = $preferencesItem['id'] === $indicatorsItem->parent_horizontal_id ? true : false;
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['id'] = $preferencesItem['id'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['indicator'] = $preferencesItem['indicator'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['referenced'] = $preferencesItem['referenced'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['order'] = $preferencesItem['order'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['showed'] = $preferencesItem['id'] === $indicatorsItem->id ? false : true;
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['selected'] = $preferencesItem['id'] === $indicatorsItem->parent_horizontal_id ? true : false;
             });
 
             $indicator = $indicatorsItem->indicator;
@@ -198,12 +198,12 @@ class IndicatorReferenceService
             $this->indicators[$indicatorsIteration]['preferences'][0]['selected'] = is_null($indicatorsItem->parent_horizontal_id) ? true : false;
 
             $preferences->each(function ($preferencesItem, $preferencesKey) use ($indicatorsIteration, $indicatorsItem) {
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['id'] = $preferencesItem['id'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['indicator'] = $preferencesItem['indicator'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['referenced'] = $preferencesItem['referenced'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['order'] = $preferencesItem['order'];
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['showed'] = $preferencesItem['id'] === $indicatorsItem->id ? false : true;
-                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey+1]['selected'] = $preferencesItem['id'] === $indicatorsItem->parent_horizontal_id ? true : false;
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['id'] = $preferencesItem['id'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['indicator'] = $preferencesItem['indicator'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['referenced'] = $preferencesItem['referenced'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['order'] = $preferencesItem['order'];
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['showed'] = $preferencesItem['id'] === $indicatorsItem->id ? false : true;
+                $this->indicators[$indicatorsIteration]['preferences'][$preferencesKey + 1]['selected'] = $preferencesItem['id'] === $indicatorsItem->parent_horizontal_id ? true : false;
             });
 
             $indicator = $indicatorsItem->indicator;

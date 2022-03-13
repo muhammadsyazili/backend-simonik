@@ -50,6 +50,12 @@ class IndicatorValidationService
             'boolean' => ':attribute harus true atau false.',
             'in' => ':attribute yang dipilih tidak sah.',
             'numeric' => ':attribute harus numerik.',
+            'gte' => [
+                'numeric' => ':attribute harus lebih besar dari atau sama dengan :value.',
+                'file'    => ':attribute harus lebih besar dari atau sama dengan :value kilobytes.',
+                'string'  => ':attribute harus lebih besar dari atau sama dengan :value characters.',
+                'array'   => ':attribute harus memiliki :value item atau lebih.',
+            ],
         ];
 
         if (!is_null($request->post('validity'))) {
@@ -60,7 +66,7 @@ class IndicatorValidationService
 
         if (!is_null($request->post('weight'))) {
             foreach ($request->post('weight') as $key => $value) {
-                $attributes["weight.$key"] = ['numeric'];
+                $attributes["weight.$key"] = ['numeric', 'gte:0'];
             }
         }
 
@@ -68,21 +74,25 @@ class IndicatorValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        foreach ($request->post('validity') as $key => $value) {
-            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
-                $validator->after(function ($validator) {
-                    $validator->errors()->add('validity', "(#7.1) : Akses Ilegal !");
-                });
-                break;
+        if (!is_null($request->post('validity'))) {
+            foreach ($request->post('validity') as $key => $value) {
+                if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
+                    $validator->after(function ($validator) {
+                        $validator->errors()->add('validity', "(#7.1) : Akses Ilegal !");
+                    });
+                    break;
+                }
             }
         }
 
-        foreach ($request->post('weight') as $key => $value) {
-            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
-                $validator->after(function ($validator) {
-                    $validator->errors()->add('validity', "(#7.2) : Akses Ilegal !");
-                });
-                break;
+        if (!is_null($request->post('weight'))) {
+            foreach ($request->post('weight') as $key => $value) {
+                if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
+                    $validator->after(function ($validator) {
+                        $validator->errors()->add('validity', "(#7.2) : Akses Ilegal !");
+                    });
+                    break;
+                }
             }
         }
 
@@ -139,6 +149,12 @@ class IndicatorValidationService
             'boolean' => ':attribute harus true atau false.',
             'in' => ':attribute yang dipilih tidak sah.',
             'numeric' => ':attribute harus numerik.',
+            'gte' => [
+                'numeric' => ':attribute harus lebih besar dari atau sama dengan :value.',
+                'file'    => ':attribute harus lebih besar dari atau sama dengan :value kilobytes.',
+                'string'  => ':attribute harus lebih besar dari atau sama dengan :value characters.',
+                'array'   => ':attribute harus memiliki :value item atau lebih.',
+            ],
         ];
 
         if (!is_null($request->post('validity'))) {
@@ -149,7 +165,7 @@ class IndicatorValidationService
 
         if (!is_null($request->post('weight'))) {
             foreach ($request->post('weight') as $key => $value) {
-                $attributes["weight.$key"] = ['numeric'];
+                $attributes["weight.$key"] = ['numeric', 'gte:0'];
             }
         }
 
@@ -157,21 +173,25 @@ class IndicatorValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        foreach ($request->post('validity') as $key => $value) {
-            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
-                $validator->after(function ($validator) {
-                    $validator->errors()->add('validity', "(#7.3) : Akses Ilegal !");
-                });
-                break;
+        if (!is_null($request->post('validity'))) {
+            foreach ($request->post('validity') as $key => $value) {
+                if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
+                    $validator->after(function ($validator) {
+                        $validator->errors()->add('validity', "(#7.3) : Akses Ilegal !");
+                    });
+                    break;
+                }
             }
         }
 
-        foreach ($request->post('weight') as $key => $value) {
-            if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
-                $validator->after(function ($validator) {
-                    $validator->errors()->add('validity', "(#7.4) : Akses Ilegal !");
-                });
-                break;
+        if (!is_null($request->post('weight'))) {
+            foreach ($request->post('weight') as $key => $value) {
+                if (!in_array($key, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
+                    $validator->after(function ($validator) {
+                        $validator->errors()->add('validity', "(#7.4) : Akses Ilegal !");
+                    });
+                    break;
+                }
             }
         }
 
