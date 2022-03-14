@@ -325,6 +325,8 @@ class TargetPaperWorkService
 
                         //section: paper work 'CHILD' updating ----------------------------------------------------------------------
                         foreach ($indicatorsChild as $indicatorChild) {
+
+                            //hanya unit turunan saja yang di-update
                             if (in_array($indicatorChild->unit_id, $unitsId)) {
                                 foreach ($indicatorChild->validity as $month => $value) {
                                     if (in_array($month, array_keys($targets[$indicator->id]))) {
