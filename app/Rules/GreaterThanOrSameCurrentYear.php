@@ -53,6 +53,6 @@ class GreaterThanOrSameCurrentYear implements Rule
      */
     public function message()
     {
-        return 'Tahun Yang Dipilih Tidak Boleh Kurang Dari Tahun Sekarang, Karena Fitur Sudah Di Lock Otomatis Oleh Aplikasi. Jika Ingin Tetap Melakukan Aksi Ini Silakkan Hubungi Super Admin !';
+        return 'Tahun Yang Anda Pilih Sudah Di Kunci Otomatis Oleh Aplikasi. Jika Ingin Tetap Melakukan Aksi Ini Silakkan Hubungi Super Admin !';
     }
 }

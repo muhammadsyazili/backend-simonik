@@ -225,7 +225,7 @@ class TargetPaperWorkValidationService
 
         //memastikan target yang akan di-update tipe data 'numeric'
         foreach ($indicators as $indicator) {
-            if (!$indicator->dummy) {
+            if (!$indicator->dummy && !$indicator->reducing_factor) {
                 foreach ($request->post('targets')[$indicator->id] as $monthName => $monthValue) {
                     $id = $indicator->id;
                     $attributes["targets.$id.$monthName"] = ['numeric', 'gte:0'];

@@ -142,6 +142,7 @@ class MonitoringService
 
                 if (strtoupper($item['type']) === 'KPI') {
                     if ($item['reducing_factor']) {
+                        $total_KPI_100 -= $item['realizations'][$month]['value'];
                         $total_KPI_110 -= $item['realizations'][$month]['value'];
                     } else {
                         $total_KPI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
@@ -156,6 +157,7 @@ class MonitoringService
 
                 if (strtoupper($item['type']) === 'PI') {
                     if ($item['reducing_factor']) {
+                        $total_PI_100 -= $item['realizations'][$month]['value'];
                         $total_PI_110 -= $item['realizations'][$month]['value'];
                     } else {
                         $total_PI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;

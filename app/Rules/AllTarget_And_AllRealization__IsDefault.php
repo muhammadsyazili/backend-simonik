@@ -85,6 +85,6 @@ class AllTarget_And_AllRealization__IsDefault implements Rule
      */
     public function message()
     {
-        return 'Terdapat Target/Realisasi Yang Suadah Pernah Diubah, Jika Ingin Tetap Menghapus Kurang Dari Tahun Sekarang Silakkan Hubungi Super Admin !';
+        return 'Terdapat Target/Realisasi Yang Suadah Pernah Diisi, Jika Ingin Tetap Melakikan Aksi Ini Silakkan Hubungi Super Admin !';
     }
 }
