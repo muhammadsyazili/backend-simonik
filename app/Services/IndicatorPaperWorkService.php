@@ -1414,8 +1414,12 @@ class IndicatorPaperWorkService
 
                 if (count($oldIndicatorsMaster) > 0) { //terdapat 'id' KPI lama yang di un-checked.
                     foreach ($oldIndicatorsMaster as $oldIndicatorMaster) {
-                        $this->targetRepository->delete__by__indicatorId($oldIndicatorMaster); //target deleting
-                        $this->indicatorRepository->delete__by__id($oldIndicatorMaster); //KPI deleting
+
+                        //hapus KPI yang di un-checked jika pada turunan unit-nya tidak ada yang menggunakan
+                        if ($this->indicatorRepository->count__all__by__parentVerticalId_year($oldIndicatorMaster, $year) === 0) {
+                            $this->targetRepository->delete__by__indicatorId($oldIndicatorMaster); //target deleting
+                            $this->indicatorRepository->delete__by__id($oldIndicatorMaster); //KPI deleting
+                        }
                     }
                 }
                 //end section: 'MASTER' updating ----------------------------------------------------------------------

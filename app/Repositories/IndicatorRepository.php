@@ -83,6 +83,11 @@ class IndicatorRepository
         return ModelsIndicator::where(['unit_id' => $unitId])->count();
     }
 
+    public function count__all__by__parentVerticalId_year(string|int $parentVerticalId, string|int $year): int
+    {
+        return ModelsIndicator::where(['parent_vertical_id' => $parentVerticalId, 'year' => $year])->count();
+    }
+
     public function count__all__by__code(string|int $code): int
     {
         return ModelsIndicator::where(['code' => $code])->count();
