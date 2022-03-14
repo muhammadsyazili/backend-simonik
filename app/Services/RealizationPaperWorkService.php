@@ -427,6 +427,8 @@ class RealizationPaperWorkService
             $indicators = $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $this->levelRepository->find__id__by__slug($level), $this->unitRepository->find__id__by__slug($unit), $year);
 
             foreach ($indicators as $indicator) {
+
+                //hanya update jika tidak dummy
                 if (!$indicator->dummy) {
                     //section: paper work 'CHILD' updating ----------------------------------------------------------------------
                     foreach ($indicator->validity as $month => $value) {

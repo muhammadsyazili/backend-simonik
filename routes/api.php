@@ -79,6 +79,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/targets/paper-work', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'update'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
+
+    Route::put('/targets/paper-work/import', [App\Http\Controllers\Extends\Target\PaperWorkTargetController::class, 'update_import'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
     //End Route : paper work - target
 
     //Route : paper work - realization

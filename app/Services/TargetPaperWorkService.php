@@ -345,6 +345,83 @@ class TargetPaperWorkService
         });
     }
 
+    //use repo LevelRepository, UnitRepository, IndicatorRepository, TargetRepository
+    public function update_import(TargetPaperWorkUpdateRequest $targetPaperWorkRequest): void
+    {
+        $userId = $targetPaperWorkRequest->userId;
+        $indicatorsId = $targetPaperWorkRequest->indicators;
+        $targets = $targetPaperWorkRequest->targets;
+        $level = $targetPaperWorkRequest->level;
+        $unit = $targetPaperWorkRequest->unit;
+        $year = $targetPaperWorkRequest->year;
+
+        DB::transaction(function () use ($userId, $indicatorsId, $targets, $level, $unit, $year) {
+            $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
+
+            $levelId = $this->levelRepository->find__id__by__slug($level);
+            $indicators = $unit === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $year) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+
+            foreach ($indicators as $indicator) {
+
+                //hanya update jika tidak dummy & bukan faktor pengurang
+                if (!$indicator->dummy && !$indicator->reducing_factor) {
+                    //section: paper work 'MASTER' updating ----------------------------------------------------------------------
+                    foreach ($indicator->validity as $month => $value) {
+                        $target = $this->targetRepository->find__by__indicatorId_month($indicator->id, $month);
+
+                        //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                        if ($target->value != $targets[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $targets[$indicator->id][$month] == 0 && $target->default === true)) {
+                            $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicator->id, $targets[$indicator->id][$month]);
+                        }
+                    }
+                    //end section: paper work 'MASTER' updating ----------------------------------------------------------------------
+
+                    if ($unit === 'master') {
+                        $indicatorsChild = $this->indicatorRepository->findAllByParentVerticalId($indicator->id);
+
+                        if ($user->role->name === 'super-admin') {
+                            //section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                            foreach ($indicatorsChild as $indicatorChild) {
+                                foreach ($indicatorChild->validity as $month => $value) {
+                                    if (in_array($month, array_keys($targets[$indicator->id]))) {
+                                        $target = $this->targetRepository->find__by__indicatorId_month($indicatorChild->id, $month);
+
+                                        //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                                        if ($target->value != $targets[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $targets[$indicator->id][$month] == 0 && $target->default === true)) {
+                                            $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
+                                        }
+                                    }
+                                }
+                            }
+                            //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                        } else {
+                            $unitsId = $this->unitRepository->find__allFlattenId__with__childs__by__id($user->unit->id); //mengambil daftar 'id' unit-unit turunan berdasarkan user
+
+                            //section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                            foreach ($indicatorsChild as $indicatorChild) {
+
+                                //hanya unit turunan saja yang di-update
+                                if (in_array($indicatorChild->unit_id, $unitsId)) {
+                                    foreach ($indicatorChild->validity as $month => $value) {
+                                        if (in_array($month, array_keys($targets[$indicator->id]))) {
+                                            $target = $this->targetRepository->find__by__indicatorId_month($indicatorChild->id, $month);
+
+                                            //update hanya jika value-nya berubah atau (bulan < bulan sekarang dan value = 0 dan masih default)
+                                            if ($target->value != $targets[$indicator->id][$month] || ($this->monthName__to__monthNumber($month) <= now()->month && $targets[$indicator->id][$month] == 0 && $target->default === true)) {
+                                                $this->targetRepository->update__value_default__by__month_indicatorId($month, $indicatorChild->id, $targets[$indicator->id][$month]);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            //end section: paper work 'CHILD' updating ----------------------------------------------------------------------
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     private function monthName__to__monthNumber(string $monthName): int
     {
         $monthNumber = 1;

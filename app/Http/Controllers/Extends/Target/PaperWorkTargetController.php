@@ -191,4 +191,66 @@ class PaperWorkTargetController extends ApiController
             null,
         );
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update_import(Request $request)
+    {
+        //logging
+        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        // $output->writeln(sprintf('targets: %s', json_encode($request->post('targets'))));
+
+        $userRepository = new UserRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+        $indicatorRepository = new IndicatorRepository();
+        $targetRepository = new TargetRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->userRepository = $userRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->targetRepository = $targetRepository;
+
+        $targetPaperWorkValidationService = new TargetPaperWorkValidationService($constructRequest);
+
+        $validation = $targetPaperWorkValidationService->updateImportValidation($request);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $requestDTO = new TargetPaperWorkUpdateRequest();
+
+        $requestDTO->indicators = array_keys($request->post('targets'));
+        $requestDTO->targets = $request->post('targets');
+        $requestDTO->level = $request->post('level');
+        $requestDTO->unit = $request->post('unit');
+        $requestDTO->year = $request->post('tahun');
+        $requestDTO->userId = $request->header('X-User-Id');
+
+        $targetPaperWorkService = new TargetPaperWorkService($constructRequest);
+
+        $targetPaperWorkService->update_import($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Kertas Kerja Target (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Diubah", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
+            null,
+            null,
+        );
+    }
 }
