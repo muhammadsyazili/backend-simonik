@@ -278,28 +278,40 @@ class MonitoringService
             $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
 
             $PPK_100_status = 'MASALAH';
+            $PPK_100_color_status = 'light';
             if ($newIndicators['total']['PPK_100'] < 95) {
                 $PPK_100_status = 'MASALAH';
+                $PPK_100_color_status = 'danger';
             } else if ($newIndicators['total']['PPK_100'] >= 95 && $newIndicators['total']['PPK_100'] < 100) {
                 $PPK_100_status = 'HATI-HATI';
+                $PPK_100_color_status = 'warning';
             } else if ($newIndicators['total']['PPK_100'] >= 100) {
                 $PPK_100_status = 'BAIK';
+                $PPK_100_color_status = 'success';
             } else {
                 $PPK_100_status = 'N/A';
+                $PPK_100_color_status = 'light';
             }
             $newIndicators['total']['PPK_100_status'] = $PPK_100_status;
+            $newIndicators['total']['PPK_100_color_status'] = $PPK_100_color_status;
 
             $PPK_110_status = 'MASALAH';
+            $PPK_110_color_status = 'light';
             if ($newIndicators['total']['PPK_110'] < 95) {
                 $PPK_110_status = 'MASALAH';
+                $PPK_110_color_status = 'danger';
             } else if ($newIndicators['total']['PPK_110'] >= 95 && $newIndicators['total']['PPK_110'] < 100) {
                 $PPK_110_status = 'HATI-HATI';
+                $PPK_110_color_status = 'warning';
             } else if ($newIndicators['total']['PPK_110'] >= 100) {
                 $PPK_110_status = 'BAIK';
+                $PPK_110_color_status = 'success';
             } else {
                 $PPK_110_status = 'N/A';
+                $PPK_110_color_status = 'light';
             }
             $newIndicators['total']['PPK_110_status'] = $PPK_110_status;
+            $newIndicators['total']['PPK_110_color_status'] = $PPK_110_color_status;
         }
 
         return $newIndicators;
