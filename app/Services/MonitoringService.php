@@ -91,7 +91,7 @@ class MonitoringService
                 }
 
                 //perhitungan nilai capping 100%
-                $capping_value_100 = null;
+                $capping_value_100 = '-';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_100 = 'BELUM DINILAI';
@@ -106,7 +106,7 @@ class MonitoringService
                 }
 
                 //perhitungan nilai capping 110%
-                $capping_value_110 = null;
+                $capping_value_110 = '-';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_110 = 'BELUM DINILAI';
@@ -121,9 +121,9 @@ class MonitoringService
                     }
                 }
 
-                //perhitungan status
-                $status = null;
-                $status_color = null;
+                //perhitungan status & warna status
+                $status = '-';
+                $status_color = 'none';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $status = 'BELUM DINILAI';
@@ -140,32 +140,34 @@ class MonitoringService
                     }
                 }
 
+                //perhitungan total KPI 100% & 110%
                 if (strtoupper($item['type']) === 'KPI') {
                     if ($item['reducing_factor']) {
                         $total_KPI_100 -= $item['realizations'][$month]['value'];
                         $total_KPI_110 -= $item['realizations'][$month]['value'];
                     } else {
-                        $total_KPI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
-                        $total_KPI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+                        $total_KPI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
+                        $total_KPI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
 
                         if (array_key_exists($month, $item['weight'])) {
                             $total_weight_KPI += $item['weight'][$month];
-                            $total_weight_counted_KPI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
+                            $total_weight_counted_KPI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
 
+                //perhitungan total PI 100% & 110%
                 if (strtoupper($item['type']) === 'PI') {
                     if ($item['reducing_factor']) {
                         $total_PI_100 -= $item['realizations'][$month]['value'];
                         $total_PI_110 -= $item['realizations'][$month]['value'];
                     } else {
-                        $total_PI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
-                        $total_PI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+                        $total_PI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
+                        $total_PI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
 
                         if (array_key_exists($month, $item['weight'])) {
                             $total_weight_PI += $item['weight'][$month];
-                            $total_weight_counted_PI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
+                            $total_weight_counted_PI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -174,46 +176,92 @@ class MonitoringService
                 $newIndicators['partials'][$i]['id'] = $item['id'];
                 $newIndicators['partials'][$i]['indicator'] = $item['indicator'];
                 $newIndicators['partials'][$i]['type'] = $item['type'];
-                $newIndicators['partials'][$i]['formula'] = is_null($item['formula']) ? '-' : $item['formula'];
+                $newIndicators['partials'][$i]['dummy'] = $item['dummy'];
+                // $newIndicators['partials'][$i]['formula'] = is_null($item['formula']) ? '-' : $item['formula'];
                 $newIndicators['partials'][$i]['measure'] = is_null($item['measure']) ? '-' : $item['measure'];
-                $newIndicators['partials'][$i]['weight'] = $item['weight'];
-                $newIndicators['partials'][$i]['validity'] = $item['validity'];
+                // $newIndicators['partials'][$i]['weight'] = $item['weight'];
+                // $newIndicators['partials'][$i]['validity'] = $item['validity'];
                 $newIndicators['partials'][$i]['polarity'] = $item['polarity'];
                 $newIndicators['partials'][$i]['order'] = $item['order'];
                 $newIndicators['partials'][$i]['bg_color'] = $item['bg_color'];
+
                 $newIndicators['partials'][$i]['achievement'] = $achievement === null ? null : $achievement;
-                $newIndicators['partials'][$i]['capping_value_110'] = $capping_value_110;
-                $newIndicators['partials'][$i]['capping_value_100'] = $capping_value_100;
                 $newIndicators['partials'][$i]['status'] = $status;
                 $newIndicators['partials'][$i]['status_color'] = $status_color;
+                $newIndicators['partials'][$i]['capping_value_110'] = $capping_value_110;
+                $newIndicators['partials'][$i]['capping_value_100'] = $capping_value_100;
 
                 $newIndicators['partials'][$i]['prefix'] = $item['prefix'];
 
-                $newIndicators['partials'][$i]['targets']['jan']['value'] = $item['targets']['jan']['value'];
-                $newIndicators['partials'][$i]['targets']['feb']['value'] = $item['targets']['feb']['value'];
-                $newIndicators['partials'][$i]['targets']['mar']['value'] = $item['targets']['mar']['value'];
-                $newIndicators['partials'][$i]['targets']['apr']['value'] = $item['targets']['apr']['value'];
-                $newIndicators['partials'][$i]['targets']['may']['value'] = $item['targets']['may']['value'];
-                $newIndicators['partials'][$i]['targets']['jun']['value'] = $item['targets']['jun']['value'];
-                $newIndicators['partials'][$i]['targets']['jul']['value'] = $item['targets']['jul']['value'];
-                $newIndicators['partials'][$i]['targets']['aug']['value'] = $item['targets']['aug']['value'];
-                $newIndicators['partials'][$i]['targets']['sep']['value'] = $item['targets']['sep']['value'];
-                $newIndicators['partials'][$i]['targets']['oct']['value'] = $item['targets']['oct']['value'];
-                $newIndicators['partials'][$i]['targets']['nov']['value'] = $item['targets']['nov']['value'];
-                $newIndicators['partials'][$i]['targets']['dec']['value'] = $item['targets']['dec']['value'];
+                $selected_weight = '-';
+                if ($item['dummy']) {
+                    $selected_weight = '-';
+                } else {
+                    if (is_null($item['weight'])) {
+                        $selected_weight = '-';
+                    } else {
+                        if (array_key_exists($month, $item['weight'])) {
+                            $selected_weight = (float) $item['weight'][$month];
+                        } else {
+                            $selected_weight = '-';
+                        }
+                    }
+                }
+                $newIndicators['partials'][$i]['selected_weight'] = $selected_weight;
 
-                $newIndicators['partials'][$i]['realizations']['jan']['value'] = $item['realizations']['jan']['value'];
-                $newIndicators['partials'][$i]['realizations']['feb']['value'] = $item['realizations']['feb']['value'];
-                $newIndicators['partials'][$i]['realizations']['mar']['value'] = $item['realizations']['mar']['value'];
-                $newIndicators['partials'][$i]['realizations']['apr']['value'] = $item['realizations']['apr']['value'];
-                $newIndicators['partials'][$i]['realizations']['may']['value'] = $item['realizations']['may']['value'];
-                $newIndicators['partials'][$i]['realizations']['jun']['value'] = $item['realizations']['jun']['value'];
-                $newIndicators['partials'][$i]['realizations']['jul']['value'] = $item['realizations']['jul']['value'];
-                $newIndicators['partials'][$i]['realizations']['aug']['value'] = $item['realizations']['aug']['value'];
-                $newIndicators['partials'][$i]['realizations']['sep']['value'] = $item['realizations']['sep']['value'];
-                $newIndicators['partials'][$i]['realizations']['oct']['value'] = $item['realizations']['oct']['value'];
-                $newIndicators['partials'][$i]['realizations']['nov']['value'] = $item['realizations']['nov']['value'];
-                $newIndicators['partials'][$i]['realizations']['dec']['value'] = $item['realizations']['dec']['value'];
+                $selected_target = '-';
+                if ($item['dummy']) {
+                    $selected_target = '-';
+                } else {
+                    if ($item['reducing_factor']) {
+                        $selected_target = '-';
+                    } else {
+                        if (array_key_exists($month, $item['targets'])) {
+                            $selected_target = (float) $item['targets'][$month]['value'];
+                        } else {
+                            $selected_target = '-';
+                        }
+                    }
+                }
+                $newIndicators['partials'][$i]['selected_target'] = $selected_target;
+
+                $selected_realization = '-';
+                if ($item['dummy']) {
+                    $selected_realization = '-';
+                } else {
+                    if (array_key_exists($month, $item['realizations'])) {
+                        $selected_realization = (float) $item['realizations'][$month]['value'];
+                    } else {
+                        $selected_realization = '-';
+                    }
+                }
+                $newIndicators['partials'][$i]['selected_realization'] = $selected_realization;
+
+                // $newIndicators['partials'][$i]['targets']['jan']['value'] = $item['targets']['jan']['value'];
+                // $newIndicators['partials'][$i]['targets']['feb']['value'] = $item['targets']['feb']['value'];
+                // $newIndicators['partials'][$i]['targets']['mar']['value'] = $item['targets']['mar']['value'];
+                // $newIndicators['partials'][$i]['targets']['apr']['value'] = $item['targets']['apr']['value'];
+                // $newIndicators['partials'][$i]['targets']['may']['value'] = $item['targets']['may']['value'];
+                // $newIndicators['partials'][$i]['targets']['jun']['value'] = $item['targets']['jun']['value'];
+                // $newIndicators['partials'][$i]['targets']['jul']['value'] = $item['targets']['jul']['value'];
+                // $newIndicators['partials'][$i]['targets']['aug']['value'] = $item['targets']['aug']['value'];
+                // $newIndicators['partials'][$i]['targets']['sep']['value'] = $item['targets']['sep']['value'];
+                // $newIndicators['partials'][$i]['targets']['oct']['value'] = $item['targets']['oct']['value'];
+                // $newIndicators['partials'][$i]['targets']['nov']['value'] = $item['targets']['nov']['value'];
+                // $newIndicators['partials'][$i]['targets']['dec']['value'] = $item['targets']['dec']['value'];
+
+                // $newIndicators['partials'][$i]['realizations']['jan']['value'] = $item['realizations']['jan']['value'];
+                // $newIndicators['partials'][$i]['realizations']['feb']['value'] = $item['realizations']['feb']['value'];
+                // $newIndicators['partials'][$i]['realizations']['mar']['value'] = $item['realizations']['mar']['value'];
+                // $newIndicators['partials'][$i]['realizations']['apr']['value'] = $item['realizations']['apr']['value'];
+                // $newIndicators['partials'][$i]['realizations']['may']['value'] = $item['realizations']['may']['value'];
+                // $newIndicators['partials'][$i]['realizations']['jun']['value'] = $item['realizations']['jun']['value'];
+                // $newIndicators['partials'][$i]['realizations']['jul']['value'] = $item['realizations']['jul']['value'];
+                // $newIndicators['partials'][$i]['realizations']['aug']['value'] = $item['realizations']['aug']['value'];
+                // $newIndicators['partials'][$i]['realizations']['sep']['value'] = $item['realizations']['sep']['value'];
+                // $newIndicators['partials'][$i]['realizations']['oct']['value'] = $item['realizations']['oct']['value'];
+                // $newIndicators['partials'][$i]['realizations']['nov']['value'] = $item['realizations']['nov']['value'];
+                // $newIndicators['partials'][$i]['realizations']['dec']['value'] = $item['realizations']['dec']['value'];
 
                 $i++;
             }
@@ -229,23 +277,27 @@ class MonitoringService
             $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] == (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
             $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
 
-            $PPK_100_status = '';
+            $PPK_100_status = 'MASALAH';
             if ($newIndicators['total']['PPK_100'] < 95) {
                 $PPK_100_status = 'MASALAH';
             } else if ($newIndicators['total']['PPK_100'] >= 95 && $newIndicators['total']['PPK_100'] < 100) {
                 $PPK_100_status = 'HATI-HATI';
             } else if ($newIndicators['total']['PPK_100'] >= 100) {
                 $PPK_100_status = 'BAIK';
+            } else {
+                $PPK_100_status = 'N/A';
             }
             $newIndicators['total']['PPK_100_status'] = $PPK_100_status;
 
-            $PPK_110_status = '';
+            $PPK_110_status = 'MASALAH';
             if ($newIndicators['total']['PPK_110'] < 95) {
                 $PPK_110_status = 'MASALAH';
             } else if ($newIndicators['total']['PPK_110'] >= 95 && $newIndicators['total']['PPK_110'] < 100) {
                 $PPK_110_status = 'HATI-HATI';
             } else if ($newIndicators['total']['PPK_110'] >= 100) {
                 $PPK_110_status = 'BAIK';
+            } else {
+                $PPK_110_status = 'N/A';
             }
             $newIndicators['total']['PPK_110_status'] = $PPK_110_status;
         }
@@ -264,18 +316,19 @@ class MonitoringService
             $this->indicators[$iteration]['id'] = $item->id;
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
             $this->indicators[$iteration]['type'] = $item->type;
-            $this->indicators[$iteration]['formula'] = $item->formula;
+            $this->indicators[$iteration]['dummy'] = $item->dummy;
+            $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
+            // $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
-            $this->indicators[$iteration]['validity'] = $item->validity;
+            // $this->indicators[$iteration]['validity'] = $item->validity;
             $this->indicators[$iteration]['polarity'] = $item->polarity;
+            $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
+
             $this->indicators[$iteration]['order'] = $iteration;
             $this->indicators[$iteration]['bg_color'] = $bg_color;
             $this->indicators[$iteration]['prefix'] = $prefix;
 
-            $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
-            $this->indicators[$iteration]['dummy'] = $item->dummy;
-            $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
 
             //target packaging
             $jan = $item->targets->search(function ($value) {
@@ -469,7 +522,7 @@ class MonitoringService
                 }
 
                 //perhitungan nilai capping 100%
-                $capping_value_100 = null;
+                $capping_value_100 = '-';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_100 = 'BELUM DINILAI';
@@ -484,7 +537,7 @@ class MonitoringService
                 }
 
                 //perhitungan nilai capping 110%
-                $capping_value_110 = null;
+                $capping_value_110 = '-';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_110 = 'BELUM DINILAI';
@@ -500,7 +553,7 @@ class MonitoringService
                 }
 
                 //perhitungan status
-                $status = null;
+                $status = '-';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $status = 'BELUM DINILAI';
@@ -517,12 +570,12 @@ class MonitoringService
                     if ($item['reducing_factor']) {
                         $total_KPI_110 -= $item['realizations'][$month]['value'];
                     } else {
-                        $total_KPI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
-                        $total_KPI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+                        $total_KPI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
+                        $total_KPI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
 
                         if (array_key_exists($month, $item['weight'])) {
                             $total_weight_KPI += $item['weight'][$month];
-                            $total_weight_counted_KPI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
+                            $total_weight_counted_KPI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -531,12 +584,12 @@ class MonitoringService
                     if ($item['reducing_factor']) {
                         $total_PI_110 -= $item['realizations'][$month]['value'];
                     } else {
-                        $total_PI_100 += $capping_value_100 === 'BELUM DINILAI' ? 0 : $capping_value_100;
-                        $total_PI_110 += $capping_value_110 === 'BELUM DINILAI' ? 0 : $capping_value_110;
+                        $total_PI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
+                        $total_PI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
 
                         if (array_key_exists($month, $item['weight'])) {
                             $total_weight_PI += $item['weight'][$month];
-                            $total_weight_counted_PI += $capping_value_110 === 'BELUM DINILAI' ? 0 : $item['weight'][$month];
+                            $total_weight_counted_PI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -547,29 +600,48 @@ class MonitoringService
                 $newIndicators[$i]['type'] = (string) $item['type'];
                 $newIndicators[$i]['formula'] = is_null($item['formula']) ? '-' : (string) $item['formula'];
                 $newIndicators[$i]['measure'] = is_null($item['measure']) ? '-' : (string) $item['measure'];
-
-                $polarity = '-';
-                if (is_null($item['original_polarity'])) {
-                    $polarity = '-';
-                } else {
-                    $polarity = $item['original_polarity'] == '1' ? 'Positif' : 'Nagatif';
-                }
-                $newIndicators[$i]['polarity'] = (string) $polarity;
-
+                $newIndicators[$i]['polarity'] = (string) is_null($item['original_polarity']) ? '-' : ($item['original_polarity'] == '1' ? 'Positif' : 'Nagatif');
                 $newIndicators[$i]['weight'] = array_key_exists($month, $item['weight']) ? (string) $item['weight'][$month] : '-';
-                $newIndicators[$i]['weight_counted'] = (string) ($capping_value_110 === 'BELUM DINILAI' ? 0 : (array_key_exists($month, $item['weight']) ? (string) $item['weight'][$month] : '-'));
-                $newIndicators[$i]['target'] = is_null($item['targets'][$month]['value']) ? '-' : (string) $item['targets'][$month]['value'];
-                $newIndicators[$i]['realization'] = is_null($item['realizations'][$month]['value']) ? '-' : (string) $item['realizations'][$month]['value'];
-                $newIndicators[$i]['achievement'] = is_null($achievement) ? '-' : (string) $achievement;
-                $newIndicators[$i]['capping_value_100'] = is_null($capping_value_100) ? '-' : (string) $capping_value_100;
-                $newIndicators[$i]['capping_value_110'] = is_null($capping_value_110) ? '-' : (string) $capping_value_110;
-                $newIndicators[$i]['status'] = is_null($status) ? '-' : (string) $status;
+                $newIndicators[$i]['weight_counted'] = (string) (in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : (array_key_exists($month, $item['weight']) ? $item['weight'][$month] : '-'));
+                $newIndicators[$i]['target'] = (string) is_null($item['targets'][$month]['value']) ? '-' : $item['targets'][$month]['value'];
+                $newIndicators[$i]['realization'] = (string) is_null($item['realizations'][$month]['value']) ? '-' : $item['realizations'][$month]['value'];
+                $newIndicators[$i]['achievement'] = (string) is_null($achievement) ? '-' : $achievement;
+                $newIndicators[$i]['capping_value_100'] = (string) is_null($capping_value_100) ? '-' : $capping_value_100;
+                $newIndicators[$i]['capping_value_110'] = (string) is_null($capping_value_110) ? '-' : $capping_value_110;
+                $newIndicators[$i]['status'] = (string) is_null($status) ? '-' : $status;
+
+                $newIndicators[$i]['target_jan'] = (string) $item['targets']['jan']['value'];
+                $newIndicators[$i]['target_feb'] = (string) $item['targets']['feb']['value'];
+                $newIndicators[$i]['target_mar'] = (string) $item['targets']['mar']['value'];
+                $newIndicators[$i]['target_apr'] = (string) $item['targets']['apr']['value'];
+                $newIndicators[$i]['target_may'] = (string) $item['targets']['may']['value'];
+                $newIndicators[$i]['target_jun'] = (string) $item['targets']['jun']['value'];
+                $newIndicators[$i]['target_jul'] = (string) $item['targets']['jul']['value'];
+                $newIndicators[$i]['target_aug'] = (string) $item['targets']['aug']['value'];
+                $newIndicators[$i]['target_sep'] = (string) $item['targets']['sep']['value'];
+                $newIndicators[$i]['target_oct'] = (string) $item['targets']['oct']['value'];
+                $newIndicators[$i]['target_nov'] = (string) $item['targets']['nov']['value'];
+                $newIndicators[$i]['target_dec'] = (string) $item['targets']['dec']['value'];
+
+                $newIndicators[$i]['realization_jan'] = (string) $item['realizations']['jan']['value'];
+                $newIndicators[$i]['realization_feb'] = (string) $item['realizations']['feb']['value'];
+                $newIndicators[$i]['realization_mar'] = (string) $item['realizations']['mar']['value'];
+                $newIndicators[$i]['realization_apr'] = (string) $item['realizations']['apr']['value'];
+                $newIndicators[$i]['realization_may'] = (string) $item['realizations']['may']['value'];
+                $newIndicators[$i]['realization_jun'] = (string) $item['realizations']['jun']['value'];
+                $newIndicators[$i]['realization_jul'] = (string) $item['realizations']['jul']['value'];
+                $newIndicators[$i]['realization_aug'] = (string) $item['realizations']['aug']['value'];
+                $newIndicators[$i]['realization_sep'] = (string) $item['realizations']['sep']['value'];
+                $newIndicators[$i]['realization_oct'] = (string) $item['realizations']['oct']['value'];
+                $newIndicators[$i]['realization_nov'] = (string) $item['realizations']['nov']['value'];
+                $newIndicators[$i]['realization_dec'] = (string) $item['realizations']['dec']['value'];
+
                 $i++;
             }
 
             $i = count($newIndicators);
             $newIndicators[$i]['order'] = (string) $i + 1;
-            $newIndicators[$i]['indicator'] = 'TOTAL PENILAIAN KINERJA';
+            $newIndicators[$i]['indicator'] = 'TOTAL';
             $newIndicators[$i]['type'] = '-';
             $newIndicators[$i]['formula'] = '-';
             $newIndicators[$i]['measure'] = '-';
@@ -583,9 +655,35 @@ class MonitoringService
             $newIndicators[$i]['capping_value_110'] = (string) ($total_KPI_110 + $total_PI_110);
             $newIndicators[$i]['status'] = '-';
 
+            $newIndicators[$i]['target_jan'] = '-';
+            $newIndicators[$i]['target_feb'] = '-';
+            $newIndicators[$i]['target_mar'] = '-';
+            $newIndicators[$i]['target_apr'] = '-';
+            $newIndicators[$i]['target_may'] = '-';
+            $newIndicators[$i]['target_jun'] = '-';
+            $newIndicators[$i]['target_jul'] = '-';
+            $newIndicators[$i]['target_aug'] = '-';
+            $newIndicators[$i]['target_sep'] = '-';
+            $newIndicators[$i]['target_oct'] = '-';
+            $newIndicators[$i]['target_nov'] = '-';
+            $newIndicators[$i]['target_dec'] = '-';
+
+            $newIndicators[$i]['realization_jan'] = '-';
+            $newIndicators[$i]['realization_feb'] = '-';
+            $newIndicators[$i]['realization_mar'] = '-';
+            $newIndicators[$i]['realization_apr'] = '-';
+            $newIndicators[$i]['realization_may'] = '-';
+            $newIndicators[$i]['realization_jun'] = '-';
+            $newIndicators[$i]['realization_jul'] = '-';
+            $newIndicators[$i]['realization_aug'] = '-';
+            $newIndicators[$i]['realization_sep'] = '-';
+            $newIndicators[$i]['realization_oct'] = '-';
+            $newIndicators[$i]['realization_nov'] = '-';
+            $newIndicators[$i]['realization_dec'] = '-';
+
             $i++;
             $newIndicators[$i]['order'] = (string) $i + 1;
-            $newIndicators[$i]['indicator'] = 'TOTAL PROPORSIONAL PENILAIAN KINERJA';
+            $newIndicators[$i]['indicator'] = 'NILAI KINERJA ORGANISASI (NKO)';
             $newIndicators[$i]['type'] = '-';
             $newIndicators[$i]['formula'] = '-';
             $newIndicators[$i]['measure'] = '-';
@@ -598,6 +696,32 @@ class MonitoringService
             $newIndicators[$i]['capping_value_100'] = (string) (($total_KPI_100 + $total_PI_100) == (float) 0 ? 0 : (($total_KPI_100 + $total_PI_100) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100);
             $newIndicators[$i]['capping_value_110'] = (string) (($total_KPI_110 + $total_PI_110) == (float) 0 ? 0 : (($total_KPI_110 + $total_PI_110) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100);
             $newIndicators[$i]['status'] = '-';
+
+            $newIndicators[$i]['target_jan'] = '-';
+            $newIndicators[$i]['target_feb'] = '-';
+            $newIndicators[$i]['target_mar'] = '-';
+            $newIndicators[$i]['target_apr'] = '-';
+            $newIndicators[$i]['target_may'] = '-';
+            $newIndicators[$i]['target_jun'] = '-';
+            $newIndicators[$i]['target_jul'] = '-';
+            $newIndicators[$i]['target_aug'] = '-';
+            $newIndicators[$i]['target_sep'] = '-';
+            $newIndicators[$i]['target_oct'] = '-';
+            $newIndicators[$i]['target_nov'] = '-';
+            $newIndicators[$i]['target_dec'] = '-';
+
+            $newIndicators[$i]['realization_jan'] = '-';
+            $newIndicators[$i]['realization_feb'] = '-';
+            $newIndicators[$i]['realization_mar'] = '-';
+            $newIndicators[$i]['realization_apr'] = '-';
+            $newIndicators[$i]['realization_may'] = '-';
+            $newIndicators[$i]['realization_jun'] = '-';
+            $newIndicators[$i]['realization_jul'] = '-';
+            $newIndicators[$i]['realization_aug'] = '-';
+            $newIndicators[$i]['realization_sep'] = '-';
+            $newIndicators[$i]['realization_oct'] = '-';
+            $newIndicators[$i]['realization_nov'] = '-';
+            $newIndicators[$i]['realization_dec'] = '-';
         }
 
         return $newIndicators;
@@ -613,136 +737,136 @@ class MonitoringService
             //indikator packaging
             $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
             $this->indicators[$iteration]['type'] = $item->type;
+            $this->indicators[$iteration]['dummy'] = $item->dummy;
+            $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
+            $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
             $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
             $this->indicators[$iteration]['order'] = $iteration;
 
-            $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
-            $this->indicators[$iteration]['dummy'] = $item->dummy;
-            $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
 
             //target packaging
             $jan = $item->targets->search(function ($value) {
                 return $value->month === 'jan';
             });
-            $this->indicators[$iteration]['targets']['jan']['value'] = $jan === false ? null : $item->targets[$jan]->value;
+            $this->indicators[$iteration]['targets']['jan']['value'] = $jan === false ? '-' : $item->targets[$jan]->value;
 
             $feb = $item->targets->search(function ($value) {
                 return $value->month === 'feb';
             });
-            $this->indicators[$iteration]['targets']['feb']['value'] = $feb === false ? null : $item->targets[$feb]->value;
+            $this->indicators[$iteration]['targets']['feb']['value'] = $feb === false ? '-' : $item->targets[$feb]->value;
 
             $mar = $item->targets->search(function ($value) {
                 return $value->month === 'mar';
             });
-            $this->indicators[$iteration]['targets']['mar']['value'] = $mar === false ? null : $item->targets[$mar]->value;
+            $this->indicators[$iteration]['targets']['mar']['value'] = $mar === false ? '-' : $item->targets[$mar]->value;
 
             $apr = $item->targets->search(function ($value) {
                 return $value->month === 'apr';
             });
-            $this->indicators[$iteration]['targets']['apr']['value'] = $apr === false ? null : $item->targets[$apr]->value;
+            $this->indicators[$iteration]['targets']['apr']['value'] = $apr === false ? '-' : $item->targets[$apr]->value;
 
             $may = $item->targets->search(function ($value) {
                 return $value->month === 'may';
             });
-            $this->indicators[$iteration]['targets']['may']['value'] = $may === false ? null : $item->targets[$may]->value;
+            $this->indicators[$iteration]['targets']['may']['value'] = $may === false ? '-' : $item->targets[$may]->value;
 
             $jun = $item->targets->search(function ($value) {
                 return $value->month === 'jun';
             });
-            $this->indicators[$iteration]['targets']['jun']['value'] = $jun === false ? null : $item->targets[$jun]->value;
+            $this->indicators[$iteration]['targets']['jun']['value'] = $jun === false ? '-' : $item->targets[$jun]->value;
 
             $jul = $item->targets->search(function ($value) {
                 return $value->month === 'jul';
             });
-            $this->indicators[$iteration]['targets']['jul']['value'] = $jul === false ? null : $item->targets[$jul]->value;
+            $this->indicators[$iteration]['targets']['jul']['value'] = $jul === false ? '-' : $item->targets[$jul]->value;
 
             $aug = $item->targets->search(function ($value) {
                 return $value->month === 'aug';
             });
-            $this->indicators[$iteration]['targets']['aug']['value'] = $aug === false ? null : $item->targets[$aug]->value;
+            $this->indicators[$iteration]['targets']['aug']['value'] = $aug === false ? '-' : $item->targets[$aug]->value;
 
             $sep = $item->targets->search(function ($value) {
                 return $value->month === 'sep';
             });
-            $this->indicators[$iteration]['targets']['sep']['value'] = $sep === false ? null : $item->targets[$sep]->value;
+            $this->indicators[$iteration]['targets']['sep']['value'] = $sep === false ? '-' : $item->targets[$sep]->value;
 
             $oct = $item->targets->search(function ($value) {
                 return $value->month === 'oct';
             });
-            $this->indicators[$iteration]['targets']['oct']['value'] = $oct === false ? null : $item->targets[$oct]->value;
+            $this->indicators[$iteration]['targets']['oct']['value'] = $oct === false ? '-' : $item->targets[$oct]->value;
 
             $nov = $item->targets->search(function ($value) {
                 return $value->month === 'nov';
             });
-            $this->indicators[$iteration]['targets']['nov']['value'] = $nov === false ? null : $item->targets[$nov]->value;
+            $this->indicators[$iteration]['targets']['nov']['value'] = $nov === false ? '-' : $item->targets[$nov]->value;
 
             $dec = $item->targets->search(function ($value) {
                 return $value->month === 'dec';
             });
-            $this->indicators[$iteration]['targets']['dec']['value'] = $dec === false ? null : $item->targets[$dec]->value;
+            $this->indicators[$iteration]['targets']['dec']['value'] = $dec === false ? '-' : $item->targets[$dec]->value;
 
             //realisasi packaging
             $jan = $item->realizations->search(function ($value) {
                 return $value->month === 'jan';
             });
-            $this->indicators[$iteration]['realizations']['jan']['value'] = $jan === false ? null : $item->realizations[$jan]->value;
+            $this->indicators[$iteration]['realizations']['jan']['value'] = $jan === false ? '-' : $item->realizations[$jan]->value;
 
             $feb = $item->realizations->search(function ($value) {
                 return $value->month === 'feb';
             });
-            $this->indicators[$iteration]['realizations']['feb']['value'] = $feb === false ? null : $item->realizations[$feb]->value;
+            $this->indicators[$iteration]['realizations']['feb']['value'] = $feb === false ? '-' : $item->realizations[$feb]->value;
 
             $mar = $item->realizations->search(function ($value) {
                 return $value->month === 'mar';
             });
-            $this->indicators[$iteration]['realizations']['mar']['value'] = $mar === false ? null : $item->realizations[$mar]->value;
+            $this->indicators[$iteration]['realizations']['mar']['value'] = $mar === false ? '-' : $item->realizations[$mar]->value;
 
             $apr = $item->realizations->search(function ($value) {
                 return $value->month === 'apr';
             });
-            $this->indicators[$iteration]['realizations']['apr']['value'] = $apr === false ? null : $item->realizations[$apr]->value;
+            $this->indicators[$iteration]['realizations']['apr']['value'] = $apr === false ? '-' : $item->realizations[$apr]->value;
 
             $may = $item->realizations->search(function ($value) {
                 return $value->month === 'may';
             });
-            $this->indicators[$iteration]['realizations']['may']['value'] = $may === false ? null : $item->realizations[$may]->value;
+            $this->indicators[$iteration]['realizations']['may']['value'] = $may === false ? '-' : $item->realizations[$may]->value;
 
             $jun = $item->realizations->search(function ($value) {
                 return $value->month === 'jun';
             });
-            $this->indicators[$iteration]['realizations']['jun']['value'] = $jun === false ? null : $item->realizations[$jun]->value;
+            $this->indicators[$iteration]['realizations']['jun']['value'] = $jun === false ? '-' : $item->realizations[$jun]->value;
 
             $jul = $item->realizations->search(function ($value) {
                 return $value->month === 'jul';
             });
-            $this->indicators[$iteration]['realizations']['jul']['value'] = $jul === false ? null : $item->realizations[$jul]->value;
+            $this->indicators[$iteration]['realizations']['jul']['value'] = $jul === false ? '-' : $item->realizations[$jul]->value;
 
             $aug = $item->realizations->search(function ($value) {
                 return $value->month === 'aug';
             });
-            $this->indicators[$iteration]['realizations']['aug']['value'] = $aug === false ? null : $item->realizations[$aug]->value;
+            $this->indicators[$iteration]['realizations']['aug']['value'] = $aug === false ? '-' : $item->realizations[$aug]->value;
 
             $sep = $item->realizations->search(function ($value) {
                 return $value->month === 'sep';
             });
-            $this->indicators[$iteration]['realizations']['sep']['value'] = $sep === false ? null : $item->realizations[$sep]->value;
+            $this->indicators[$iteration]['realizations']['sep']['value'] = $sep === false ? '-' : $item->realizations[$sep]->value;
 
             $oct = $item->realizations->search(function ($value) {
                 return $value->month === 'oct';
             });
-            $this->indicators[$iteration]['realizations']['oct']['value'] = $oct === false ? null : $item->realizations[$oct]->value;
+            $this->indicators[$iteration]['realizations']['oct']['value'] = $oct === false ? '-' : $item->realizations[$oct]->value;
 
             $nov = $item->realizations->search(function ($value) {
                 return $value->month === 'nov';
             });
-            $this->indicators[$iteration]['realizations']['nov']['value'] = $nov === false ? null : $item->realizations[$nov]->value;
+            $this->indicators[$iteration]['realizations']['nov']['value'] = $nov === false ? '-' : $item->realizations[$nov]->value;
 
             $dec = $item->realizations->search(function ($value) {
                 return $value->month === 'dec';
             });
-            $this->indicators[$iteration]['realizations']['dec']['value'] = $dec === false ? null : $item->realizations[$dec]->value;
+            $this->indicators[$iteration]['realizations']['dec']['value'] = $dec === false ? '-' : $item->realizations[$dec]->value;
 
             $this->iter++;
 
