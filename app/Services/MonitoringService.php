@@ -124,19 +124,24 @@ class MonitoringService
                 //perhitungan status & warna status
                 $status = '-';
                 $status_color = 'none';
+                $status_symbol = '-0';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $status = 'BELUM DINILAI';
                         $status_color = 'info';
+                        $status_symbol = '-0';
                     } else if ($achievement >= (float) 100) {
                         $status = 'BAIK';
                         $status_color = 'success';
+                        $status_symbol = '+1';
                     } else if ($achievement >= (float) 95 && $achievement < (float) 100) {
                         $status = 'HATI-HATI';
                         $status_color = 'warning';
+                        $status_symbol = '0';
                     } else if ($achievement < (float) 95) {
                         $status = 'MASALAH';
                         $status_color = 'danger';
+                        $status_symbol = '-1';
                     }
                 }
 
@@ -187,6 +192,7 @@ class MonitoringService
 
                 $newIndicators['partials'][$i]['achievement'] = $achievement === null ? null : $achievement;
                 $newIndicators['partials'][$i]['status'] = $status;
+                $newIndicators['partials'][$i]['status_symbol'] = $status_symbol;
                 $newIndicators['partials'][$i]['status_color'] = $status_color;
                 $newIndicators['partials'][$i]['capping_value_110'] = $capping_value_110;
                 $newIndicators['partials'][$i]['capping_value_100'] = $capping_value_100;
