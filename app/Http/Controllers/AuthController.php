@@ -12,7 +12,7 @@ use App\Models\User;
 class AuthController extends ApiController
 {
     /**
-     * Sign In.
+     * Login.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -79,14 +79,14 @@ class AuthController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Sign In successfully",
+            "Login successfully",
             $data,
             null,
         );
     }
 
     /**
-     * Sign Out.
+     * Logout.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -99,7 +99,7 @@ class AuthController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Sign Out successfully",
+            "Logout successfully",
             null,
             null,
         );
