@@ -285,27 +285,29 @@ class IndicatorService
                         }
                     }
                 } else { //masa berlaku lama nol
-                    if (count($indicatorNew->validity) > 0) {
-                        foreach ($indicatorNew->validity as $key => $value) {
-                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
-                                $targetDomain->id = (string) Str::orderedUuid();
-                                $targetDomain->indicator_id = $indicatorOld->id;
-                                $targetDomain->month = $key;
-                                $targetDomain->value = 0;
-                                $targetDomain->locked = true;
-                                $targetDomain->default = true;
+                    if (!is_null($indicatorNew->validity)) {
+                        if (count($indicatorNew->validity) > 0) {
+                            foreach ($indicatorNew->validity as $key => $value) {
+                                if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                    $targetDomain->id = (string) Str::orderedUuid();
+                                    $targetDomain->indicator_id = $indicatorOld->id;
+                                    $targetDomain->month = $key;
+                                    $targetDomain->value = 0;
+                                    $targetDomain->locked = true;
+                                    $targetDomain->default = true;
 
-                                $this->targetRepository->save($targetDomain); //save target
+                                    $this->targetRepository->save($targetDomain); //save target
+                                }
+
+                                $realizationDomain->id = (string) Str::orderedUuid();
+                                $realizationDomain->indicator_id = $indicatorOld->id;
+                                $realizationDomain->month = $key;
+                                $realizationDomain->value = 0;
+                                $realizationDomain->locked = true;
+                                $realizationDomain->default = true;
+
+                                $this->realizationRepository->save($realizationDomain); //save realisasi
                             }
-
-                            $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $indicatorOld->id;
-                            $realizationDomain->month = $key;
-                            $realizationDomain->value = 0;
-                            $realizationDomain->locked = true;
-                            $realizationDomain->default = true;
-
-                            $this->realizationRepository->save($realizationDomain); //save realisasi
                         }
                     }
                 }
@@ -414,27 +416,29 @@ class IndicatorService
                                 }
                             }
                         } else { //masa berlaku lama nol
-                            if (count($indicatorNew->validity) > 0) {
-                                foreach ($indicatorNew->validity as $key => $value) {
-                                    if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
-                                        $targetDomain->id = (string) Str::orderedUuid();
-                                        $targetDomain->indicator_id = $familyIndicatorOld->id;
-                                        $targetDomain->month = $key;
-                                        $targetDomain->value = 0;
-                                        $targetDomain->locked = true;
-                                        $targetDomain->default = true;
+                            if (!is_null($indicatorNew->validity)) {
+                                if (count($indicatorNew->validity) > 0) {
+                                    foreach ($indicatorNew->validity as $key => $value) {
+                                        if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                            $targetDomain->id = (string) Str::orderedUuid();
+                                            $targetDomain->indicator_id = $familyIndicatorOld->id;
+                                            $targetDomain->month = $key;
+                                            $targetDomain->value = 0;
+                                            $targetDomain->locked = true;
+                                            $targetDomain->default = true;
 
-                                        $this->targetRepository->save($targetDomain); //save target
+                                            $this->targetRepository->save($targetDomain); //save target
+                                        }
+
+                                        $realizationDomain->id = (string) Str::orderedUuid();
+                                        $realizationDomain->indicator_id = $familyIndicatorOld->id;
+                                        $realizationDomain->month = $key;
+                                        $realizationDomain->value = 0;
+                                        $realizationDomain->locked = true;
+                                        $realizationDomain->default = true;
+
+                                        $this->realizationRepository->save($realizationDomain); //save realisasi
                                     }
-
-                                    $realizationDomain->id = (string) Str::orderedUuid();
-                                    $realizationDomain->indicator_id = $familyIndicatorOld->id;
-                                    $realizationDomain->month = $key;
-                                    $realizationDomain->value = 0;
-                                    $realizationDomain->locked = true;
-                                    $realizationDomain->default = true;
-
-                                    $this->realizationRepository->save($realizationDomain); //save realisasi
                                 }
                             }
                         }
@@ -536,27 +540,29 @@ class IndicatorService
                         }
                     }
                 } else { //masa berlaku lama nol
-                    if (count($indicatorNew->validity) > 0) {
-                        foreach ($indicatorNew->validity as $key => $value) {
-                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
-                                $targetDomain->id = (string) Str::orderedUuid();
-                                $targetDomain->indicator_id = $indicatorOld->id;
-                                $targetDomain->month = $key;
-                                $targetDomain->value = 0;
-                                $targetDomain->locked = true;
-                                $targetDomain->default = true;
+                    if (!is_null($indicatorNew->validity)) {
+                        if (count($indicatorNew->validity) > 0) {
+                            foreach ($indicatorNew->validity as $key => $value) {
+                                if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                    $targetDomain->id = (string) Str::orderedUuid();
+                                    $targetDomain->indicator_id = $indicatorOld->id;
+                                    $targetDomain->month = $key;
+                                    $targetDomain->value = 0;
+                                    $targetDomain->locked = true;
+                                    $targetDomain->default = true;
 
-                                $this->targetRepository->save($targetDomain); //save target
+                                    $this->targetRepository->save($targetDomain); //save target
+                                }
+
+                                $realizationDomain->id = (string) Str::orderedUuid();
+                                $realizationDomain->indicator_id = $indicatorOld->id;
+                                $realizationDomain->month = $key;
+                                $realizationDomain->value = 0;
+                                $realizationDomain->locked = true;
+                                $realizationDomain->default = true;
+
+                                $this->realizationRepository->save($realizationDomain); //save realisasi
                             }
-
-                            $realizationDomain->id = (string) Str::orderedUuid();
-                            $realizationDomain->indicator_id = $indicatorOld->id;
-                            $realizationDomain->month = $key;
-                            $realizationDomain->value = 0;
-                            $realizationDomain->locked = true;
-                            $realizationDomain->default = true;
-
-                            $this->realizationRepository->save($realizationDomain); //save realisasi
                         }
                     }
                 }
