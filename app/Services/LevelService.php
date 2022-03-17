@@ -234,4 +234,32 @@ class LevelService
 
         return $newUnits;
     }
+
+    //use repo LevelRepository
+    public function categories_of_level()
+    {
+        $categories = $this->levelRepository->find__all__categories__not__superMaster();
+
+        $temp = [];
+        $i = 0;
+        foreach ($categories as $category) {
+            $levels = $this->levelRepository->find__all__by__parentId($category->parent_id);
+
+            $levelCategoriesName = '';
+            for ($j = 0; $j < count($levels); $j++) {
+                $name = count($levels) - 1 === $j ? $levels[$j]->name : $levels[$j]->name . ' ,';
+                $levelCategoriesName .= $name;
+            }
+
+            $order = $i + 1;
+            $temp[$i] = [
+                'id' => $category->parent_id,
+                'name' => "Kategori $order - $levelCategoriesName",
+            ];
+
+            $i++;
+        }
+
+        return $temp;
+    }
 }

@@ -2,10 +2,9 @@
 
 namespace App\DTO;
 
-class MonitoringMonitoringRequest
+class RangkingRangkingRequest
 {
-    public string $level;
-    public string $unit;
+    public string|int $id;
     public string|int $year;
     public string $month;
 }

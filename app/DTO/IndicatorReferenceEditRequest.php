@@ -6,5 +6,5 @@ class IndicatorReferenceEditRequest
 {
     public string $level;
     public ?string $unit = null;
-    public ?string $year = null;
+    public string|int|null $year = null;
 }

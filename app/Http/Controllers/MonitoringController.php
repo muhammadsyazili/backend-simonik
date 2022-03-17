@@ -50,7 +50,7 @@ class MonitoringController extends ApiController
 
         $requestDTO->level = $request->query('level');
         $requestDTO->unit = $request->query('unit');
-        $requestDTO->year = $request->query('tahun');
+        $requestDTO->year = (int) $request->query('tahun');
         $requestDTO->month = $request->query('bulan');
 
         $monitoringService = new MonitoringService($constructRequest);

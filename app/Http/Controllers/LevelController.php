@@ -283,11 +283,9 @@ class LevelController extends ApiController
     /**
      * Open levels.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function open_levels(Request $request)
+    public function open_levels()
     {
         $levelRepository = new LevelRepository();
 
@@ -333,6 +331,33 @@ class LevelController extends ApiController
             Response::HTTP_OK,
             "Parents",
             $levels,
+            null,
+        );
+    }
+
+    /**
+     * Categories of level.
+     *
+     * @param  string  $slug
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function categories_of_level()
+    {
+        $levelRepository = new LevelRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->levelRepository = $levelRepository;
+
+        $levelService = new LevelService($constructRequest);
+
+        $categories = $levelService->categories_of_level();
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            "Categories of level",
+            $categories,
             null,
         );
     }

@@ -6,5 +6,5 @@ class IndicatorReferenceStoreRequest
 {
     public array $indicators;
     public array $preferences;
-    public string|int|null $userId;
+    public string|int|null $userId = null;
 }

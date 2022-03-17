@@ -6,6 +6,6 @@ class IndicatorPaperWorkStoreFromMasterRequest
 {
     public string|int $levelId;
     public string|int $unitId;
-    public string $year;
+    public string|int $year;
     public string|int $userId;
 }

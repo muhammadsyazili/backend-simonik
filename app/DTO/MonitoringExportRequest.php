@@ -6,6 +6,6 @@ class MonitoringExportRequest
 {
     public string $level;
     public string $unit;
-    public int $year;
+    public string|int $year;
     public string $month;
 }

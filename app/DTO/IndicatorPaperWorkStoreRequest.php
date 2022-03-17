@@ -6,6 +6,6 @@ class IndicatorPaperWorkStoreRequest
 {
     public array $indicators;
     public string $level;
-    public string $year;
+    public string|int $year;
     public string|int $userId;
 }

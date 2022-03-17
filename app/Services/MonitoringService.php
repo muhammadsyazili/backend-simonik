@@ -23,7 +23,6 @@ class MonitoringService
 
     public function __construct(ConstructRequest $constructRequest)
     {
-        $this->userRepository = $constructRequest->userRepository;
         $this->levelRepository = $constructRequest->levelRepository;
         $this->indicatorRepository = $constructRequest->indicatorRepository;
         $this->unitRepository = $constructRequest->unitRepository;

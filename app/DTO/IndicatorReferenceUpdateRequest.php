@@ -8,6 +8,6 @@ class IndicatorReferenceUpdateRequest
     public array $preferences;
     public string $level;
     public ?string $unit = null;
-    public ?string $year = null;
-    public string|int|null $userId;
+    public string|int|null $year = null;
+    public string|int|null $userId = null;
 }

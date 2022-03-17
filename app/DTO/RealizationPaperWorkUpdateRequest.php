@@ -9,5 +9,5 @@ class RealizationPaperWorkUpdateRequest
     public array $realizations;
     public string $level;
     public string $unit;
-    public string $year;
+    public string|int $year;
 }
