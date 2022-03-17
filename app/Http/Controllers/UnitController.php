@@ -135,7 +135,7 @@ class UnitController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level Berhasil Ditambahkan",
+            "Unit Berhasil Ditambahkan",
             null,
             null,
         );
@@ -226,7 +226,7 @@ class UnitController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Level Berhasil Diubah",
+            "Unit Berhasil Diubah",
             null,
             null,
         );
