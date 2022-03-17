@@ -182,6 +182,7 @@ class MonitoringService
                 $newIndicators['partials'][$i]['indicator'] = $item['indicator'];
                 $newIndicators['partials'][$i]['type'] = $item['type'];
                 $newIndicators['partials'][$i]['dummy'] = $item['dummy'];
+                $newIndicators['partials'][$i]['reducing_factor'] = $item['reducing_factor'];
                 // $newIndicators['partials'][$i]['formula'] = is_null($item['formula']) ? '-' : $item['formula'];
                 $newIndicators['partials'][$i]['measure'] = is_null($item['measure']) ? '-' : $item['measure'];
                 // $newIndicators['partials'][$i]['weight'] = $item['weight'];
