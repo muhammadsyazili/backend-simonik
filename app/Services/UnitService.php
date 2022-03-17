@@ -98,7 +98,7 @@ class UnitService
             $unitDomain->name = "$level__uppercase - $name__uppercase";
             $unitDomain->slug = Str::slug("$level__lowercase-$name__lowercase");
             $unitDomain->level_id = $this->levelRepository->find__id__by__slug($unitRequest->level);
-            $unitDomain->parent_id = is_null($unitRequest->parent_unit) ? null : $this->unitRepository->find__id__by__slug($unitRequest->parent_unit);
+            $unitDomain->parent_id = is_null($unitRequest->parentUnit) ? null : $this->unitRepository->find__id__by__slug($unitRequest->parentUnit);
 
             $this->unitRepository->save($unitDomain);
 
@@ -170,7 +170,7 @@ class UnitService
             $unitDomain->name = "$level__uppercase - $name__uppercase";
             $unitDomain->slug = Str::slug("$level__lowercase-$name__lowercase");
             $unitDomain->level_id = $this->levelRepository->find__id__by__slug($unitRequest->level);
-            $unitDomain->parent_id = is_null($unitRequest->parent_unit) ? null : $this->unitRepository->find__id__by__slug($unitRequest->parent_unit);
+            $unitDomain->parent_id = is_null($unitRequest->parentUnit) ? null : $this->unitRepository->find__id__by__slug($unitRequest->parentUnit);
 
             $this->unitRepository->update__by__id($unitDomain);
         });

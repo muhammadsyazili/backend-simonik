@@ -88,7 +88,7 @@ class LevelService
 
             $levelDomain->name = $name__uppercase;
             $levelDomain->slug = Str::slug($name__lowercase);
-            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
+            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parentLevel);
 
             $this->levelRepository->save($levelDomain);
         });
@@ -139,7 +139,7 @@ class LevelService
             $levelDomain->id = $levelRequest->id;
             $levelDomain->name = $name__uppercase;
             $levelDomain->slug = Str::slug($name__lowercase);
-            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parent_level);
+            $levelDomain->parent_id = $this->levelRepository->find__id__by__slug($levelRequest->parentLevel);
 
             $this->levelRepository->update__by__id($levelDomain);
 

@@ -5,5 +5,5 @@ namespace App\DTO;
 class LevelStoreRequest
 {
     public string $name;
-    public string $parent_level;
+    public string $parentLevel;
 }

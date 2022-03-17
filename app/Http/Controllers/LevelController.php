@@ -104,7 +104,7 @@ class LevelController extends ApiController
         $requestDTO = new LevelStoreRequest();
 
         $requestDTO->name = $request->post('name');
-        $requestDTO->parent_level = $request->post('parent_level');
+        $requestDTO->parentLevel = $request->post('parent_level');
 
         $levelService = new LevelService($constructRequest);
 
@@ -188,7 +188,7 @@ class LevelController extends ApiController
 
         $requestDTO->id = $id;
         $requestDTO->name = $request->post('name');
-        $requestDTO->parent_level = $request->post('parent_level');
+        $requestDTO->parentLevel = $request->post('parent_level');
 
         $levelService = new LevelService($constructRequest);
 

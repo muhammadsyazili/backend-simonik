@@ -125,7 +125,7 @@ class UnitController extends ApiController
 
         $requestDTO->name = $request->post('name');
         $requestDTO->level = $request->post('level');
-        $requestDTO->parent_unit = $request->post('parent_unit');
+        $requestDTO->parentUnit = $request->post('parent_unit');
         $requestDTO->userId = $request->header('X-User-Id');
 
         $unitService = new UnitService($constructRequest);
@@ -216,7 +216,7 @@ class UnitController extends ApiController
         $requestDTO->id = $id;
         $requestDTO->name = $request->post('name');
         $requestDTO->level = $request->post('level');
-        $requestDTO->parent_unit = $request->post('parent_unit');
+        $requestDTO->parentUnit = $request->post('parent_unit');
         $requestDTO->userId = $request->header('X-User-Id');
 
         $unitService = new UnitService($constructRequest);

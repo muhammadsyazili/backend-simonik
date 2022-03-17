@@ -48,7 +48,7 @@ class IndicatorService
                 $indicatorDomain->validity = null;
                 $indicatorDomain->weight = null;
             } else {
-                if ($indicator->reducing_factor === '1') {
+                if ($indicator->reducingFactor === '1') {
                     $indicatorDomain->reducing_factor = true;
                     $indicatorDomain->polarity = null;
                 } else {
@@ -76,7 +76,7 @@ class IndicatorService
             $indicatorDomain->code = null;
             $indicatorDomain->parent_vertical_id = null;
             $indicatorDomain->parent_horizontal_id = null;
-            $indicatorDomain->created_by = $indicator->user_id;
+            $indicatorDomain->created_by = $indicator->userId;
 
             $this->indicatorRepository->save($indicatorDomain);
             $this->indicatorRepository->update__code__by__id($indicatorDomain->id);
@@ -158,7 +158,7 @@ class IndicatorService
                     $indicatorDomain->validity = null;
                     $indicatorDomain->weight = null;
                 } else {
-                    if ($indicatorNew->reducing_factor === '1') {
+                    if ($indicatorNew->reducingFactor === '1') {
                         $indicatorDomain->reducing_factor = true;
                         $indicatorDomain->polarity = null;
                     } else {
@@ -202,7 +202,7 @@ class IndicatorService
                     $indicatorDomain->validity = null;
                     $indicatorDomain->weight = null;
                 } else {
-                    if ($indicatorNew->reducing_factor === '1') {
+                    if ($indicatorNew->reducingFactor === '1') {
                         $indicatorDomain->reducing_factor = true;
                         $indicatorDomain->polarity = null;
                     } else {
@@ -246,7 +246,7 @@ class IndicatorService
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
-                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                            if ($indicatorNew->reducingFactor !== '1') { //bukan faktor reduksi
                                 $targetDomain->id = (string) Str::orderedUuid();
                                 $targetDomain->indicator_id = $indicatorOld->id;
                                 $targetDomain->month = $v;
@@ -288,7 +288,7 @@ class IndicatorService
                     if (!is_null($indicatorNew->validity)) {
                         if (count($indicatorNew->validity) > 0) {
                             foreach ($indicatorNew->validity as $key => $value) {
-                                if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                if ($indicatorNew->reducingFactor !== '1') { //bukan faktor reduksi
                                     $targetDomain->id = (string) Str::orderedUuid();
                                     $targetDomain->indicator_id = $indicatorOld->id;
                                     $targetDomain->month = $key;
@@ -333,7 +333,7 @@ class IndicatorService
                             $indicatorDomain->validity = null;
                             $indicatorDomain->weight = null;
                         } else {
-                            if ($indicatorNew->reducing_factor === '1') {
+                            if ($indicatorNew->reducingFactor === '1') {
                                 $indicatorDomain->reducing_factor = true;
                                 $indicatorDomain->polarity = null;
                             } else {
@@ -377,7 +377,7 @@ class IndicatorService
 
                             if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                                 foreach ($new as $v) {
-                                    if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                    if ($indicatorNew->reducingFactor !== '1') { //bukan faktor reduksi
                                         $targetDomain->id = (string) Str::orderedUuid();
                                         $targetDomain->indicator_id = $familyIndicatorOld->id;
                                         $targetDomain->month = $v;
@@ -419,7 +419,7 @@ class IndicatorService
                             if (!is_null($indicatorNew->validity)) {
                                 if (count($indicatorNew->validity) > 0) {
                                     foreach ($indicatorNew->validity as $key => $value) {
-                                        if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                        if ($indicatorNew->reducingFactor !== '1') { //bukan faktor reduksi
                                             $targetDomain->id = (string) Str::orderedUuid();
                                             $targetDomain->indicator_id = $familyIndicatorOld->id;
                                             $targetDomain->month = $key;
@@ -457,7 +457,7 @@ class IndicatorService
                     $indicatorDomain->validity = null;
                     $indicatorDomain->weight = null;
                 } else {
-                    if ($indicatorNew->reducing_factor === '1') {
+                    if ($indicatorNew->reducingFactor === '1') {
                         $indicatorDomain->reducing_factor = true;
                         $indicatorDomain->polarity = null;
                     } else {
@@ -501,7 +501,7 @@ class IndicatorService
 
                     if (count($new) > 0) { //terdapat selisih antara masa berlaku baru dengan lama
                         foreach ($new as $v) {
-                            if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                            if ($indicatorNew->reducingFactor !== '1') { //bukan faktor reduksi
                                 $targetDomain->id = (string) Str::orderedUuid();
                                 $targetDomain->indicator_id = $indicatorOld->id;
                                 $targetDomain->month = $v;
@@ -543,7 +543,7 @@ class IndicatorService
                     if (!is_null($indicatorNew->validity)) {
                         if (count($indicatorNew->validity) > 0) {
                             foreach ($indicatorNew->validity as $key => $value) {
-                                if ($indicatorNew->reducing_factor !== '1') { //bukan faktor reduksi
+                                if ($indicatorNew->reducingFactor !== '1') { //bukan faktor reduksi
                                     $targetDomain->id = (string) Str::orderedUuid();
                                     $targetDomain->indicator_id = $indicatorOld->id;
                                     $targetDomain->month = $key;

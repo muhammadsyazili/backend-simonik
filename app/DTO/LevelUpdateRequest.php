@@ -6,5 +6,5 @@ class LevelUpdateRequest
 {
     public string|int $id;
     public string $name;
-    public string $parent_level;
+    public string $parentLevel;
 }

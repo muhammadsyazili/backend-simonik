@@ -55,12 +55,12 @@ class IndicatorController extends ApiController
         $requestDTO->weight = $request->post('weight');
         $requestDTO->dummy = $request->post('dummy');
         $requestDTO->type = $request->post('type');
-        $requestDTO->reducing_factor = $request->post('reducing_factor');
+        $requestDTO->reducingFactor = $request->post('reducing_factor');
         $requestDTO->polarity = $request->post('polarity');
         $requestDTO->indicator = $request->post('indicator');
         $requestDTO->formula = $request->post('formula');
         $requestDTO->measure = $request->post('measure');
-        $requestDTO->user_id = $request->header('X-User-Id');
+        $requestDTO->userId = $request->header('X-User-Id');
 
         $indicatorService = new IndicatorService($constructRequest);
 
@@ -167,13 +167,13 @@ class IndicatorController extends ApiController
         $requestDTO->indicator = $request->post('indicator');
         $requestDTO->dummy = $request->post('dummy');
         $requestDTO->type = $request->post('type');
-        $requestDTO->reducing_factor = $request->post('reducing_factor');
+        $requestDTO->reducingFactor = $request->post('reducing_factor');
         $requestDTO->polarity = $request->post('polarity');
         $requestDTO->formula = $request->post('formula');
         $requestDTO->measure = $request->post('measure');
         $requestDTO->validity = $request->post('validity');
         $requestDTO->weight = $request->post('weight');
-        $requestDTO->user_id = $request->header('X-User-Id');
+        $requestDTO->userId = $request->header('X-User-Id');
 
         $indicatorService = new IndicatorService($constructRequest);
 
