@@ -121,7 +121,7 @@ class RealizationPaperWorkValidationService
         $validator = Validator::make($input, $attributes, $messages);
 
         $realizations = $request->post('realizations');
-        $indicatorsId = array_keys($request->post('realizations')); //list KPI dari realization
+        $indicatorsId = array_keys($request->post('realizations')); //list indikator dari realization
 
         //memastikan realisasi yang akan di-update merupakan bulan jan-dec
         foreach ($realizations as $months) {
@@ -143,7 +143,7 @@ class RealizationPaperWorkValidationService
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang akan di-update terdaftar di DB
+        //memastikan indikator yang akan di-update terdaftar di DB
         foreach ($indicatorsId as $value) {
             if (!in_array($value, $indicators)) {
                 $validator->after(function ($validator) {
@@ -155,7 +155,7 @@ class RealizationPaperWorkValidationService
 
         $indicators = $request->post('unit') === 'master' ? $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($indicatorsId, $levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang akan di-update tidak ada yang ber-status dummy
+        //memastikan indikator yang akan di-update tidak ada yang ber-status dummy
         foreach ($indicators as $indicator) {
             if ($indicator->dummy) {
                 $validator->after(function ($validator) {
@@ -165,7 +165,7 @@ class RealizationPaperWorkValidationService
             }
         }
 
-        //memastikan bulan yang akan di-update sesuai dengan masa berlaku setiap KPI
+        //memastikan bulan yang akan di-update sesuai dengan masa berlaku setiap indikator
         foreach ($realizations as $realizationK => $realizationV) {
             $indicator = $this->indicatorRepository->find__by__id($realizationK);
             $validityMonths = array_keys($indicator->validity);
@@ -198,7 +198,7 @@ class RealizationPaperWorkValidationService
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $realizations = $request->post('realizations');
-        $indicatorsId = array_keys($request->post('realizations')); //list KPI dari realization
+        $indicatorsId = array_keys($request->post('realizations')); //list indikator dari realization
         $levelId = $this->levelRepository->find__id__by__slug($request->post('level'));
 
         $attributes = [
@@ -242,7 +242,7 @@ class RealizationPaperWorkValidationService
             foreach ($months as $monthName => $monthValue) {
                 if (!in_array($monthName, ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])) {
                     $validator->after(function ($validator) use ($id, $monthName) {
-                        $validator->errors()->add("realizations.$id.$monthName", "KPI ID: $id Bulan: $monthName tidak sah !");
+                        $validator->errors()->add("realizations.$id.$monthName", "Indikator ID: $id Bulan: $monthName tidak sah !");
                     });
                 }
             }
@@ -250,11 +250,11 @@ class RealizationPaperWorkValidationService
 
         $indicatorsIdDB = $request->post('unit') === 'master' ? $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $request->post('tahun')) : $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan KPI yang akan di-update terdaftar di DB
+        //memastikan indikator yang akan di-update terdaftar di DB
         foreach ($indicatorsId as $id) {
             if (!in_array($id, $indicatorsIdDB)) {
                 $validator->after(function ($validator) use ($id) {
-                    $validator->errors()->add("realizations.$id", "KPI ID: $id tidak terdaftar di database !");
+                    $validator->errors()->add("realizations.$id", "Indikator ID: $id tidak terdaftar di database !");
                 });
             }
         }
@@ -284,14 +284,14 @@ class RealizationPaperWorkValidationService
 
         $indicator = $this->indicatorRepository->find__by__id($request->id);
 
-        //memastikan KPI yang akan di-update berlabel 'child'
+        //memastikan indikator yang akan di-update berlabel 'child'
         if (in_array($indicator->label, ['super-master', 'master'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('id', "(#4.4) : Akses Ilegal !");
             });
         }
 
-        //memastikan unit dari KPI yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
+        //memastikan unit dari indikator yang akan di-update sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
         if ($user->role->name !== 'super-admin') {
             if (!in_array($indicator->unit_id, $this->unitRepository->find__allFlattenId__with__this_childs__by__id($user->unit->id))) {
                 $validator->after(function ($validator) {

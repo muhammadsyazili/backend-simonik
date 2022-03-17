@@ -8,7 +8,7 @@ use App\Repositories\UnitRepository;
 use Illuminate\Contracts\Validation\Rule;
 use App\Models\User;
 
-//Terdapat KPI yang sudah punya kertas kerja target & realisasi
+//Terdapat indikator yang sudah punya kertas kerja target & realisasi
 class AllTarget_And_AllRealization__IsDefault implements Rule
 {
     private IndicatorRepository $indicatorRepository;

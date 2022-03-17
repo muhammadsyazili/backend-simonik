@@ -38,7 +38,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI Referensi",
+            "Kertas Kerja Referensi Indikator",
             [
                 'indicators' => $response->indicators,
             ],
@@ -87,7 +87,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI (Level: SUPER-MASTER) Berhasil Direferensikan",
+            "Kertas Kerja Indikator (Level: SUPER-MASTER) Berhasil Direferensikan",
             null,
             null,
         );
@@ -140,7 +140,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Kertas Kerja KPI Referensi",
+            "Kertas Kerja Referensi Indikator",
             [
                 'indicators' => $response->indicators,
             ],
@@ -198,7 +198,7 @@ class IndicatorReferenceController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            $requestDTO->level === 'super-master' ? sprintf("Kertas Kerja KPI (Level: %s) Berhasil Direferensikan", strtoupper($requestDTO->level)) : sprintf("Kertas Kerja KPI (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Direferensikan", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
+            $requestDTO->level === 'super-master' ? sprintf("Kertas Kerja Indikator (Level: %s) Berhasil Direferensikan", strtoupper($requestDTO->level)) : sprintf("Kertas Kerja Indikator (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Direferensikan", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             null,
             null,
         );

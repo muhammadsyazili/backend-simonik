@@ -67,8 +67,8 @@ class IndicatorPaperWorkValidationService
     public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang akan di-store sesuai dengan level user login saat ini atau level turunan yang diizinkan
-        //memastikan semua KPI yang akan di-store merupakan KPI yang ber-label super-master
-        //memastikan kertas kerja KPI yang akan di-store belum tersedia di DB
+        //memastikan semua indikator yang akan di-store merupakan indikator yang ber-label super-master
+        //memastikan kertas kerja indikator yang akan di-store belum tersedia di DB
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
@@ -92,7 +92,7 @@ class IndicatorPaperWorkValidationService
     //use repo UserRepository
     public function editValidation(string|int $userId, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan kertas kerja KPI yang akan di-edit sudah tersedia di DB
+        //memastikan kertas kerja indikator yang akan di-edit sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
@@ -117,7 +117,7 @@ class IndicatorPaperWorkValidationService
     //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository
     public function updateValidation(Request $request, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan kertas kerja KPI yang akan di-update sudah tersedia di DB
+        //memastikan kertas kerja indikator yang akan di-update sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
@@ -152,7 +152,7 @@ class IndicatorPaperWorkValidationService
 
         $res = $this->indicatorRepository->count__all__by__idList_superMasterLabel($new);
 
-        //memastikan jumlah KPI yang akan di-update sama dengan di DB
+        //memastikan jumlah indikator yang akan di-update sama dengan di DB
         if (count($new) !== $res) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('indicators', "(#2.1) : Akses Ilegal !");
@@ -166,7 +166,7 @@ class IndicatorPaperWorkValidationService
     public function destroyValidation(string|int $userId, string $level, string $unit, string $year): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan semua target & realisasi masih default
-        //memastikan kertas kerja KPI yang akan di-destroy sudah tersedia di DB
+        //memastikan kertas kerja indikator yang akan di-destroy sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
@@ -222,14 +222,14 @@ class IndicatorPaperWorkValidationService
             }
         }
 
-        //memastikan jumlah KPI yang akan di-reorder sama dengan di DB
+        //memastikan jumlah indikator yang akan di-reorder sama dengan di DB
         if (count($request->post('indicators')) !== count($indicators)) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('indicators', "(#2.2) : Akses Ilegal !");
             });
         }
 
-        //memastikan semua KPI yang akan di-reorder terdaftar di DB
+        //memastikan semua indikator yang akan di-reorder terdaftar di DB
         foreach ($request->post('indicators') as $indicator) {
             if (!in_array($indicator, $indicators)) {
                 $validator->after(function ($validator) {

@@ -102,7 +102,7 @@ class UnitService
 
             $this->unitRepository->save($unitDomain);
 
-            //buat kertas kerja KPI tahun saat ini, jika sudah tersedia
+            //buat kertas kerja indikator tahun saat ini, jika sudah tersedia
             $constructRequest = new ConstructRequest();
 
             $constructRequest->indicatorRepository = $this->indicatorRepository;

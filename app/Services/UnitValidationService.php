@@ -221,11 +221,11 @@ class UnitValidationService
 
         $validator = Validator::make(['id' => $id], $attributes, $messages);
 
-        //memastikan unit yang akan dihapus belum memiliki kertas kerja KPI
+        //memastikan unit yang akan dihapus belum memiliki kertas kerja indikator
         $result = $this->indicatorRepository->count__all__by__unitId($id);
         if ($result !== 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "(#1.1) : Unit Kerja Tidak Bisa Dihapus, Karena Sudah Memiliki Kertas Kerja KPI.");
+                $validator->errors()->add('id', "(#1.1) : Unit Kerja Tidak Bisa Dihapus, Karena Sudah Memiliki Kertas Kerja Indikator.");
             });
         }
 

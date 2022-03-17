@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 
-//KPI tidak berlabel 'super-master'
+//Indikator tidak berlabel 'super-master'
 class Indicator__IsSuperMaster implements Rule
 {
     private IndicatorRepository $indicatorRepository;
@@ -39,6 +39,6 @@ class Indicator__IsSuperMaster implements Rule
      */
     public function message()
     {
-        return "(#1) : KPI Tidak Bisa Dihapus !";
+        return "(#1) : Indikator Tidak Bisa Dihapus !";
     }
 }

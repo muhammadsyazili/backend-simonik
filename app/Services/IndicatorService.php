@@ -186,7 +186,7 @@ class IndicatorService
                 $indicatorDomain->parent_vertical_id = $indicatorOld->parent_vertical_id;
                 $indicatorDomain->parent_horizontal_id = $indicatorOld->parent_horizontal_id;
 
-                $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain); //update indikator
             } else if ($indicatorOld->label === 'master') {
                 /**
                  * section: master
@@ -312,13 +312,13 @@ class IndicatorService
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain); //update indikator
 
                 /**
                  * section: childs
                  */
 
-                //semua turunan KPI yang dipilih
+                //semua turunan indikator yang dipilih
                 $familiesIndicatorOld = $this->indicatorRepository->findAllByParentVerticalId($indicatorOld->id);
 
                 if (count($familiesIndicatorOld) > 0) {
@@ -443,7 +443,7 @@ class IndicatorService
                             }
                         }
 
-                        $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
+                        $this->indicatorRepository->update__by__id($indicatorDomain); //update indikator
                     }
                 }
             } else if ($indicatorOld->label === 'child') {
@@ -567,7 +567,7 @@ class IndicatorService
                     }
                 }
 
-                $this->indicatorRepository->update__by__id($indicatorDomain); //update KPI
+                $this->indicatorRepository->update__by__id($indicatorDomain); //update indikator
             }
         });
     }

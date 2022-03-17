@@ -305,7 +305,7 @@ class PaperWorkRealizationController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            sprintf("Kertas Kerja Realisasi (KPI: %s) (Bulan: %s) Berhasil Diubah", $id, $month),
+            sprintf("Kertas Kerja Realisasi (Indikator: %s) (Bulan: %s) Berhasil Diubah", $id, $month),
             null,
             null,
         );

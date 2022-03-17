@@ -218,13 +218,13 @@ class IndicatorPaperWorkService
 
             $levelId = $this->levelRepository->find__id__by__slug($level);
 
-            //membuat nasab KPI
+            //membuat nasab indikator
             $pathsOfSelectedIndicator = [];
             foreach ($indicators as $value) {
                 $pathsOfSelectedIndicator = array_merge($pathsOfSelectedIndicator, $this->indicatorRepository->find__all__with__parents__by__id($value));
             }
 
-            //nasab KPI
+            //nasab indikator
             $superMasterIndicators = $this->indicatorRepository->find__all__by__idList(array_unique($pathsOfSelectedIndicator));
 
             //section: paper work 'MASTER' creating ----------------------------------------------------------------------
@@ -362,7 +362,7 @@ class IndicatorPaperWorkService
 
         $masterIndicators = $this->indicatorRepository->find__all__by__levelId_unitId_year($levelId, null, $year);
 
-        if (count($masterIndicators) !== 0) { //kertas kerja KPI sudah tersedia
+        if (count($masterIndicators) !== 0) { //kertas kerja indikator sudah tersedia
             //build ID
             $idListChild = [];
             foreach ($masterIndicators as $masterIndicator) {
@@ -502,10 +502,10 @@ class IndicatorPaperWorkService
             if ($unit === 'master') {
                 //section: 'MASTER' updating ----------------------------------------------------------------------
 
-                //daftar 'id' dari KPI-KPI 'master'
+                //daftar 'id' dari indikator-indikator 'master'
                 $oldIndicatorsMasterOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, null, $year);
 
-                //daftar 'code' dari KPI-KPI 'master'
+                //daftar 'code' dari indikator-indikator 'master'
                 $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
                 $newIndicatorsMaster = [];
@@ -528,7 +528,7 @@ class IndicatorPaperWorkService
                     }
                 }
 
-                $newIndicatorsNotExisInMaster = []; //daftar KPI baru yang belum terdaftar di 'master'
+                $newIndicatorsNotExisInMaster = []; //daftar indikator baru yang belum terdaftar di 'master'
                 $i = 0;
                 foreach ($newIndicatorsMaster as $newIndicatorMaster) {
                     if (!in_array($newIndicatorMaster, $oldIndicatorsMasterOnlyCode)) {
@@ -539,13 +539,13 @@ class IndicatorPaperWorkService
 
                 if (count($newIndicatorsNotExisInMaster) > 0) {
 
-                    //nasab KPI baru yang belum terdaftar di 'master'.
+                    //nasab indikator baru yang belum terdaftar di 'master'.
                     $pathsNewIndicators = [];
                     foreach ($newIndicatorsNotExisInMaster as $newIndicatorNotExisInMaster) {
                         $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInMaster));
                     }
 
-                    //gabungan daftar KPI master & KPI baru yang belum terdaftar di 'master'.
+                    //gabungan daftar indikator master & indikator baru yang belum terdaftar di 'master'.
                     $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsMasterOnlyCode));
 
                     //menghapus item yang 'null'
@@ -571,7 +571,7 @@ class IndicatorPaperWorkService
                     $indicatorsIdSuspended = [];
                     $i = 0;
                     foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
-                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //KPI belum terdaftar di 'master'
+                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //indikator belum terdaftar di 'master'
 
                             $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
@@ -586,7 +586,7 @@ class IndicatorPaperWorkService
 
                             if (count($havePathsIndicatorNotRegistedInMaster) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) {
 
-                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get indikator 'super-master' by id
 
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
@@ -637,7 +637,7 @@ class IndicatorPaperWorkService
                     while (count($indicatorsIdSuspended) > 0) {
                         for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
-                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
                             if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
@@ -680,7 +680,7 @@ class IndicatorPaperWorkService
                                     }
                                 }
 
-                                //remove & replace KPI suspended
+                                //remove & replace indikator suspended
                                 $temp = [];
                                 $j = 0;
                                 foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -698,14 +698,14 @@ class IndicatorPaperWorkService
 
                                         $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
-                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
+                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get indikator 'super-master' by id
 
                                         if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
 
                                             //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'master'
                                             $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
 
-                                            if (($sum > 0) && !in_array($indicatorSuperMaster->id, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
+                                            if (($sum > 0) && !in_array($indicatorSuperMaster->id, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id indikator baru sudah terdaftar di master, tapi indikator baru bukan anggota indikator lama
                                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
                                                 $indicatorDomain->type = $indicatorSuperMaster->type;
@@ -746,7 +746,7 @@ class IndicatorPaperWorkService
                                                     }
                                                 }
 
-                                                //remove & replace KPI suspended
+                                                //remove & replace indikator suspended
                                                 $temp = [];
                                                 $j = 0;
                                                 foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -769,22 +769,22 @@ class IndicatorPaperWorkService
 
                 $units = $this->unitRepository->find__all__by__levelId($levelId);
 
-                //daftar 'code' dari KPI-KPI 'child'
+                //daftar 'code' dari indikator-indikator 'child'
                 $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
-                //daftar 'id' dari KPI-KPI 'master' yang di un-checked
+                //daftar 'id' dari indikator-indikator 'master' yang di un-checked
                 $oldIndicatorsMasterUnchecked = $this->indicatorRepository->find__all__by__idList_levelId_unitId_year($oldIndicatorsMaster, $levelId, null, $year);
 
                 //jika role user adalah 'super-admin' maka implementasi diterapkan pada semua unit, selain itu hanya unit turunannya
                 if ($user->role->name === 'super-admin') {
                     foreach ($units as $unit) {
-                        //daftar 'id' dari KPI-KPI 'child'
+                        //daftar 'id' dari indikator-indikator 'child'
                         $oldIndicatorsChildOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unit->id, $year);
 
-                        //daftar 'code' dari KPI-KPI 'child'
+                        //daftar 'code' dari indikator-indikator 'child'
                         $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
-                        $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
+                        $newIndicatorsNotExisInChild = []; //daftar indikator baru yang belum terdaftar di 'child'
                         $i = 0;
                         foreach ($newIndicatorsChild as $newIndicatorChild) {
                             if (!in_array($newIndicatorChild, $oldIndicatorsChildOnlyCode)) {
@@ -793,7 +793,7 @@ class IndicatorPaperWorkService
                             }
                         }
 
-                        $indicatorsExisInMasterButNotExisInChild = []; //daftar KPI sudah terdaftar di 'master', tapi belum terdaftar di 'child'
+                        $indicatorsExisInMasterButNotExisInChild = []; //daftar indikator sudah terdaftar di 'master', tapi belum terdaftar di 'child'
                         $i = 0;
                         foreach ($oldIndicatorsMasterOnlyCode as $oldIndicatorMasterOnlyCode) {
                             if (!in_array($oldIndicatorMasterOnlyCode, $oldIndicatorsChildOnlyCode)) {
@@ -818,13 +818,13 @@ class IndicatorPaperWorkService
 
                         if (count($newIndicatorsNotExisInChild) > 0) {
 
-                            //nasab KPI baru yang belum terdaftar di 'child'.
+                            //nasab indikator baru yang belum terdaftar di 'child'.
                             $pathsNewIndicators = [];
                             foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
                                 $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild));
                             }
 
-                            //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
+                            //gabungan daftar indikator child & indikator baru yang belum terdaftar di 'child'.
                             $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsChildOnlyCode));
 
                             //menghapus item yang 'null'
@@ -850,7 +850,7 @@ class IndicatorPaperWorkService
                             $indicatorsIdSuspended = [];
                             $i = 0;
                             foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
-                                if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
+                                if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //indikator belum terdaftar di 'child'
 
                                     $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
@@ -865,7 +865,7 @@ class IndicatorPaperWorkService
 
                                     if (count($havePathsIndicatorNotRegistedInChild) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) {
 
-                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get indikator 'super-master' by id
 
                                         $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                         $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
@@ -925,7 +925,7 @@ class IndicatorPaperWorkService
                             while (count($indicatorsIdSuspended) > 0) {
                                 for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
-                                    $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+                                    $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
                                     if ($indicatorSuperMaster->parent_horizontal_id === null) {
                                         $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
@@ -977,7 +977,7 @@ class IndicatorPaperWorkService
                                             }
                                         }
 
-                                        //remove & replace KPI suspended
+                                        //remove & replace indikator suspended
                                         $temp = [];
                                         $j = 0;
                                         foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -996,7 +996,7 @@ class IndicatorPaperWorkService
 
                                                 $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
-                                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
+                                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get indikator 'super-master' by id
 
                                                 if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
 
@@ -1053,7 +1053,7 @@ class IndicatorPaperWorkService
                                                             }
                                                         }
 
-                                                        //remove & replace KPI suspended
+                                                        //remove & replace indikator suspended
                                                         $temp = [];
                                                         $j = 0;
                                                         foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1082,11 +1082,11 @@ class IndicatorPaperWorkService
                             }
                         }
 
-                        if (count($oldIndicatorsChild) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                        if (count($oldIndicatorsChild) > 0) { //terdapat 'id' indikator lama yang di un-checked.
                             foreach ($oldIndicatorsChild as $oldIndicatorChild) {
                                 $this->targetRepository->delete__by__indicatorId($oldIndicatorChild); //target deleting
                                 $this->realizationRepository->delete__by__indicatorId($oldIndicatorChild); //realisasi deleting
-                                $this->indicatorRepository->delete__by__id($oldIndicatorChild); //KPI deleting
+                                $this->indicatorRepository->delete__by__id($oldIndicatorChild); //indikator deleting
                             }
                         }
                     }
@@ -1095,13 +1095,13 @@ class IndicatorPaperWorkService
 
                     foreach ($units as $unit) {
                         if (in_array($unit->id, $unitsId)) {
-                            //daftar 'id' dari KPI-KPI 'child'
+                            //daftar 'id' dari indikator-indikator 'child'
                             $oldIndicatorsChildOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unit->id, $year);
 
-                            //daftar 'code' dari KPI-KPI 'child'
+                            //daftar 'code' dari indikator-indikator 'child'
                             $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
-                            $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
+                            $newIndicatorsNotExisInChild = []; //daftar indikator baru yang belum terdaftar di 'child'
                             $i = 0;
                             foreach ($newIndicatorsChild as $newIndicatorChild) {
                                 if (!in_array($newIndicatorChild, $oldIndicatorsChildOnlyCode)) {
@@ -1110,7 +1110,7 @@ class IndicatorPaperWorkService
                                 }
                             }
 
-                            $indicatorsExisInMasterButNotExisInChild = []; //daftar KPI sudah terdaftar di 'master', tapi belum terdaftar di 'child'
+                            $indicatorsExisInMasterButNotExisInChild = []; //daftar indikator sudah terdaftar di 'master', tapi belum terdaftar di 'child'
                             $i = 0;
                             foreach ($oldIndicatorsMasterOnlyCode as $oldIndicatorMasterOnlyCode) {
                                 if (!in_array($oldIndicatorMasterOnlyCode, $oldIndicatorsChildOnlyCode)) {
@@ -1135,13 +1135,13 @@ class IndicatorPaperWorkService
 
                             if (count($newIndicatorsNotExisInChild) > 0) {
 
-                                //nasab KPI baru yang belum terdaftar di 'child'.
+                                //nasab indikator baru yang belum terdaftar di 'child'.
                                 $pathsNewIndicators = [];
                                 foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
                                     $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild));
                                 }
 
-                                //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
+                                //gabungan daftar indikator child & indikator baru yang belum terdaftar di 'child'.
                                 $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsChildOnlyCode));
 
                                 //menghapus item yang 'null'
@@ -1167,7 +1167,7 @@ class IndicatorPaperWorkService
                                 $indicatorsIdSuspended = [];
                                 $i = 0;
                                 foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
-                                    if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
+                                    if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //indikator belum terdaftar di 'child'
 
                                         $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
@@ -1182,7 +1182,7 @@ class IndicatorPaperWorkService
 
                                         if (count($havePathsIndicatorNotRegistedInChild) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) {
 
-                                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+                                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get indikator 'super-master' by id
 
                                             $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                             $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
@@ -1242,7 +1242,7 @@ class IndicatorPaperWorkService
                                 while (count($indicatorsIdSuspended) > 0) {
                                     for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
-                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
                                         if ($indicatorSuperMaster->parent_horizontal_id === null) {
                                             $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
@@ -1294,7 +1294,7 @@ class IndicatorPaperWorkService
                                                 }
                                             }
 
-                                            //remove & replace KPI suspended
+                                            //remove & replace indikator suspended
                                             $temp = [];
                                             $j = 0;
                                             foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1313,7 +1313,7 @@ class IndicatorPaperWorkService
 
                                                     $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unit->id, $year);
 
-                                                    $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
+                                                    $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get indikator 'super-master' by id
 
                                                     if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
 
@@ -1370,7 +1370,7 @@ class IndicatorPaperWorkService
                                                                 }
                                                             }
 
-                                                            //remove & replace KPI suspended
+                                                            //remove & replace indikator suspended
                                                             $temp = [];
                                                             $j = 0;
                                                             foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1399,11 +1399,11 @@ class IndicatorPaperWorkService
                                 }
                             }
 
-                            if (count($oldIndicatorsChild) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                            if (count($oldIndicatorsChild) > 0) { //terdapat 'id' indikator lama yang di un-checked.
                                 foreach ($oldIndicatorsChild as $oldIndicatorChild) {
                                     $this->targetRepository->delete__by__indicatorId($oldIndicatorChild); //target deleting
                                     $this->realizationRepository->delete__by__indicatorId($oldIndicatorChild); //realisasi deleting
-                                    $this->indicatorRepository->delete__by__id($oldIndicatorChild); //KPI deleting
+                                    $this->indicatorRepository->delete__by__id($oldIndicatorChild); //indikator deleting
                                 }
                             }
                         }
@@ -1412,19 +1412,19 @@ class IndicatorPaperWorkService
 
                 //end section: 'CHILD' updating ----------------------------------------------------------------------
 
-                if (count($oldIndicatorsMaster) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                if (count($oldIndicatorsMaster) > 0) { //terdapat 'id' indikator lama yang di un-checked.
                     foreach ($oldIndicatorsMaster as $oldIndicatorMaster) {
 
-                        //hapus KPI yang di un-checked jika pada turunan unit-nya tidak ada yang menggunakan
+                        //hapus indikator yang di un-checked jika pada turunan unit-nya tidak ada yang menggunakan
                         if ($this->indicatorRepository->count__all__by__parentVerticalId_year($oldIndicatorMaster, $year) === 0) {
                             $this->targetRepository->delete__by__indicatorId($oldIndicatorMaster); //target deleting
-                            $this->indicatorRepository->delete__by__id($oldIndicatorMaster); //KPI deleting
+                            $this->indicatorRepository->delete__by__id($oldIndicatorMaster); //indikator deleting
                         }
                     }
                 }
                 //end section: 'MASTER' updating ----------------------------------------------------------------------
             } else {
-                //daftar 'id' dari KPI-KPI 'child'
+                //daftar 'id' dari indikator-indikator 'child'
                 $oldIndicatorsChildOnlyId = $this->indicatorRepository->find__allId__by__levelId_unitId_year($levelId, $unitId, $year);
 
                 $newIndicatorsChild = [];
@@ -1438,10 +1438,10 @@ class IndicatorPaperWorkService
 
                 //section: 'MASTER' updating ----------------------------------------------------------------------
 
-                //daftar 'code' dari KPI-KPI 'master'
+                //daftar 'code' dari indikator-indikator 'master'
                 $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
-                $newIndicatorsNotExisInMaster = []; //daftar KPI baru yang belum terdaftar di 'master'
+                $newIndicatorsNotExisInMaster = []; //daftar indikator baru yang belum terdaftar di 'master'
                 $i = 0;
                 foreach ($newIndicatorsChild as $newIndicatorChild) {
                     if (!in_array($newIndicatorChild, $oldIndicatorsMasterOnlyCode)) {
@@ -1452,13 +1452,13 @@ class IndicatorPaperWorkService
 
                 if (count($newIndicatorsNotExisInMaster) > 0) {
 
-                    //nasab KPI baru yang belum terdaftar di 'master'.
+                    //nasab indikator baru yang belum terdaftar di 'master'.
                     $pathsNewIndicators = [];
                     foreach ($newIndicatorsNotExisInMaster as $newIndicatorNotExisInMaster) {
                         $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInMaster));
                     }
 
-                    //gabungan daftar KPI master & KPI baru yang belum terdaftar di 'master'.
+                    //gabungan daftar indikator master & indikator baru yang belum terdaftar di 'master'.
                     $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsMasterOnlyCode));
 
                     //menghapus item yang 'null'
@@ -1484,7 +1484,7 @@ class IndicatorPaperWorkService
                     $indicatorsIdSuspended = [];
                     $i = 0;
                     foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
-                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //KPI belum terdaftar di 'master'
+                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) { //indikator belum terdaftar di 'master'
 
                             $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
@@ -1499,7 +1499,7 @@ class IndicatorPaperWorkService
 
                             if (count($havePathsIndicatorNotRegistedInMaster) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsMasterOnlyCode)) {
 
-                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get indikator 'super-master' by id
 
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
@@ -1550,7 +1550,7 @@ class IndicatorPaperWorkService
                     while (count($indicatorsIdSuspended) > 0) {
                         for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
-                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
                             if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
@@ -1593,7 +1593,7 @@ class IndicatorPaperWorkService
                                     }
                                 }
 
-                                //remove & replace KPI suspended
+                                //remove & replace indikator suspended
                                 $temp = [];
                                 $j = 0;
                                 foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1611,14 +1611,14 @@ class IndicatorPaperWorkService
 
                                         $oldIndicatorsMasterOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, null, $year);
 
-                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
+                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get indikator 'super-master' by id
 
                                         if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
 
                                             //'code' dengan 'parent_horizontal_id' X sudah tersedia di 'master'
                                             $sum = $this->indicatorRepository->count__all__by__code_levelId_unitId_year($indicatorSuperMaster->parent_horizontal_id, $levelId, null, $year);
 
-                                            if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id KPI baru sudah terdaftar di master, tapi KPI baru bukan anggota KPI lama
+                                            if (($sum > 0) && !in_array($pathNewIndicator, $oldIndicatorsMasterOnlyCode)) { //parent_horizontal_id indikator baru sudah terdaftar di master, tapi indikator baru bukan anggota indikator lama
                                                 $indicatorDomain->id = $idListMaster[$indicatorSuperMaster->id];
                                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
                                                 $indicatorDomain->type = $indicatorSuperMaster->type;
@@ -1659,7 +1659,7 @@ class IndicatorPaperWorkService
                                                     }
                                                 }
 
-                                                //remove & replace KPI suspended
+                                                //remove & replace indikator suspended
                                                 $temp = [];
                                                 $j = 0;
                                                 foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1681,7 +1681,7 @@ class IndicatorPaperWorkService
 
                 //section: 'CHILD' updating ----------------------------------------------------------------------
 
-                //daftar 'code' dari KPI-KPI 'child'
+                //daftar 'code' dari indikator-indikator 'child'
                 $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unitId, $year);
 
                 $oldIndicatorsChild = [];
@@ -1693,7 +1693,7 @@ class IndicatorPaperWorkService
                     }
                 }
 
-                $newIndicatorsNotExisInChild = []; //daftar KPI baru yang belum terdaftar di 'child'
+                $newIndicatorsNotExisInChild = []; //daftar indikator baru yang belum terdaftar di 'child'
                 $i = 0;
                 foreach ($newIndicatorsChild as $newIndicatorChild) {
                     if (!in_array($newIndicatorChild, $oldIndicatorsChildOnlyCode)) {
@@ -1704,13 +1704,13 @@ class IndicatorPaperWorkService
 
                 if (count($newIndicatorsNotExisInChild) > 0) {
 
-                    //nasab KPI baru yang belum terdaftar di 'child'.
+                    //nasab indikator baru yang belum terdaftar di 'child'.
                     $pathsNewIndicators = [];
                     foreach ($newIndicatorsNotExisInChild as $newIndicatorNotExisInChild) {
                         $pathsNewIndicators = array_merge($pathsNewIndicators, $this->indicatorRepository->find__all__with__parents__by__id($newIndicatorNotExisInChild));
                     }
 
-                    //gabungan daftar KPI child & KPI baru yang belum terdaftar di 'child'.
+                    //gabungan daftar indikator child & indikator baru yang belum terdaftar di 'child'.
                     $mergePathsNewAndOldIndicator = array_unique(array_merge($pathsNewIndicators, $oldIndicatorsChildOnlyCode));
 
                     //menghapus item yang 'null'
@@ -1736,7 +1736,7 @@ class IndicatorPaperWorkService
                     $indicatorsIdSuspended = [];
                     $i = 0;
                     foreach ($mergePathsNewAndOldIndicator as $mergePathNewAndOldIndicator) {
-                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //KPI belum terdaftar di 'child'
+                        if (!in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) { //indikator belum terdaftar di 'child'
 
                             $pathsNewIndicator = $this->indicatorRepository->find__all__with__parents__by__id($mergePathNewAndOldIndicator);
 
@@ -1751,7 +1751,7 @@ class IndicatorPaperWorkService
 
                             if (count($havePathsIndicatorNotRegistedInChild) === 0 && in_array($mergePathNewAndOldIndicator, $oldIndicatorsChildOnlyCode)) {
 
-                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get KPI 'super-master' by id
+                                $indicatorSuperMaster = $this->indicatorRepository->find__by__id($mergePathNewAndOldIndicator); //get indikator 'super-master' by id
 
                                 $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
@@ -1811,7 +1811,7 @@ class IndicatorPaperWorkService
                     while (count($indicatorsIdSuspended) > 0) {
                         for ($i = 0; $i < count($indicatorsIdSuspended); $i++) {
 
-                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get KPI 'super-master' by id
+                            $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
                             if ($indicatorSuperMaster->parent_horizontal_id === null) {
                                 $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
@@ -1863,7 +1863,7 @@ class IndicatorPaperWorkService
                                     }
                                 }
 
-                                //remove & replace KPI suspended
+                                //remove & replace indikator suspended
                                 $temp = [];
                                 $j = 0;
                                 foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1882,7 +1882,7 @@ class IndicatorPaperWorkService
 
                                         $oldIndicatorsChildOnlyCode = $this->indicatorRepository->find__allCode__by__levelId_unitId_year($levelId, $unitId, $year);
 
-                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get KPI 'super-master' by id
+                                        $indicatorSuperMaster = $this->indicatorRepository->find__by__id($pathNewIndicator); //get indikator 'super-master' by id
 
                                         if (!is_null($indicatorSuperMaster->parent_horizontal_id)) {
 
@@ -1939,7 +1939,7 @@ class IndicatorPaperWorkService
                                                     }
                                                 }
 
-                                                //remove & replace KPI suspended
+                                                //remove & replace indikator suspended
                                                 $temp = [];
                                                 $j = 0;
                                                 foreach ($indicatorsIdSuspended as $indicatorSuspended) {
@@ -1958,11 +1958,11 @@ class IndicatorPaperWorkService
                     }
                 }
 
-                if (count($oldIndicatorsChild) > 0) { //terdapat 'id' KPI lama yang di un-checked.
+                if (count($oldIndicatorsChild) > 0) { //terdapat 'id' indikator lama yang di un-checked.
                     foreach ($oldIndicatorsChild as $oldIndicatorChild) {
                         $this->targetRepository->delete__by__indicatorId($oldIndicatorChild); //target deleting
                         $this->realizationRepository->delete__by__indicatorId($oldIndicatorChild); //realisasi deleting
-                        $this->indicatorRepository->delete__by__id($oldIndicatorChild); //KPI deleting
+                        $this->indicatorRepository->delete__by__id($oldIndicatorChild); //indikator deleting
                     }
                 }
                 //end section: 'CHILD' updating ----------------------------------------------------------------------
@@ -1996,7 +1996,7 @@ class IndicatorPaperWorkService
                 }
             }
 
-            //KPI deleting
+            //indikator deleting
             $unit === 'master' ? $this->indicatorRepository->delete__by__levelId_unitId_year($this->levelRepository->find__id__by__slug($level), null, $year) : $this->indicatorRepository->delete__by__levelId_unitId_year($this->levelRepository->find__id__by__slug($level), $this->unitRepository->find__id__by__slug($unit), $year);
         });
         DB::statement('SET FOREIGN_KEY_CHECKS=1');

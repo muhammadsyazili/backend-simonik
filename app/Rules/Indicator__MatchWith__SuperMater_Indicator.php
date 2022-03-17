@@ -6,7 +6,7 @@ use App\Repositories\IndicatorRepository;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Arr;
 
-//Terdapat KPI yang tidak cocok dengan kertas kerja 'super-master'
+//Terdapat indikator yang tidak cocok dengan kertas kerja 'super-master'
 class Indicator__MatchWith__SuperMater_Indicator implements Rule
 {
     private IndicatorRepository $indicatorRepository;

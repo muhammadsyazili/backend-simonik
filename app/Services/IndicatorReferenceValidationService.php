@@ -50,7 +50,7 @@ class IndicatorReferenceValidationService
 
         $indicators = $this->indicatorRepository->find__allId__by_SuperMasterLabel(); //get indicators paper work
 
-        //memastikan semua KPI yang akan di-store sesuai dengan kertas kerja KPI yang ber-label super-master
+        //memastikan semua indikator yang akan di-store sesuai dengan kertas kerja indikator yang ber-label super-master
         foreach ($request->post('indicators') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
@@ -62,7 +62,7 @@ class IndicatorReferenceValidationService
 
         $indicators[count($indicators)] = ['id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
 
-        //memastikan semua preferensi KPI yang akan di-store sesuai dengan kertas kerja KPI yang ber-label super-master
+        //memastikan semua preferensi indikator yang akan di-store sesuai dengan kertas kerja indikator yang ber-label super-master
         foreach ($request->post('preferences') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
@@ -72,7 +72,7 @@ class IndicatorReferenceValidationService
             }
         }
 
-        //memastikan semua KPI yang akan di-store tidak sama dengan preferensi KPI bersesuaian (menghindari loop self)
+        //memastikan semua indikator yang akan di-store tidak sama dengan preferensi indikator bersesuaian (menghindari loop self)
         for ($i = 0; $i < count($request->post('indicators')); $i++) {
             if ($request->post('indicators')[$i] === $request->post('preferences')[$i]) {
                 $validator->after(function ($validator) {
@@ -88,7 +88,7 @@ class IndicatorReferenceValidationService
     //use repo UserRepository
     public function editValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
-        //memastikan kertas kerja KPI yang akan di-edit sudah tersedia di DB
+        //memastikan kertas kerja indikator yang akan di-edit sudah tersedia di DB
         //memastikan unit yang dikirim besesuaian dengan level
 
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
@@ -138,7 +138,7 @@ class IndicatorReferenceValidationService
 
         $indicators = $request->post('level') === 'super-master' ? $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__id_parentHorizontalId__by__label_levelId_unitId_year($request->post('unit') === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($request->post('level')), $request->post('unit') === 'master' ? null : $this->unitRepository->find__id__by__slug($request->post('unit')), $request->post('tahun'));
 
-        //memastikan semua KPI yang akan di-update sesuai dengan kertas kerja KPI yang ber-label super-master
+        //memastikan semua indikator yang akan di-update sesuai dengan kertas kerja indikator yang ber-label super-master
         foreach ($request->post('indicators') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
@@ -150,7 +150,7 @@ class IndicatorReferenceValidationService
 
         $indicators[count($indicators)] = ['id' => 'root', 'parent_horizontal_id' => 'root']; //sisipan, agar valid jika input-nya 'ROOT'
 
-        //memastikan semua preferensi KPI yang akan di-update sesuai dengan kertas kerja KPI yang ber-label super-master
+        //memastikan semua preferensi indikator yang akan di-update sesuai dengan kertas kerja indikator yang ber-label super-master
         foreach ($request->post('preferences') as $value) {
             if (!in_array($value, Arr::flatten($indicators))) {
                 $validator->after(function ($validator) {
@@ -160,7 +160,7 @@ class IndicatorReferenceValidationService
             }
         }
 
-        //memastikan semua KPI yang akan di-store tidak sama dengan preferensi KPI bersesuaian (menghindari loop self)
+        //memastikan semua indikator yang akan di-store tidak sama dengan preferensi indikator bersesuaian (menghindari loop self)
         for ($i = 0; $i < count($request->post('indicators')); $i++) {
             if ($request->post('indicators')[$i] === $request->post('preferences')[$i]) {
                 $validator->after(function ($validator) {

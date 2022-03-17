@@ -99,7 +99,7 @@ class MonitoringValidationService
 
         $validator = Validator::make($input, $attributes, $messages);
 
-        //bukan merupakan KPI super-master
+        //bukan merupakan indikator super-master
         if (is_null($unit)) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('id', "(#7.1) : Akses Ilegal !");

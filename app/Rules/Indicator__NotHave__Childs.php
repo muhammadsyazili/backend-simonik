@@ -38,6 +38,6 @@ class Indicator__NotHave__Childs implements Rule
      */
     public function message()
     {
-        return "(#2) : KPI Tidak Bisa Dihapus, Karena Sudah Pernah Digunakan !";
+        return "(#2) : Indikator Tidak Bisa Dihapus, Karena Sudah Pernah Digunakan !";
     }
 }
