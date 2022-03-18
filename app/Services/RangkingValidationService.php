@@ -11,7 +11,7 @@ class RangkingValidationService
     public function rangkingValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'id' => ['required'],
+            'kategori_level' => ['required'],
             'tahun' => ['required', 'integer', 'date_format:Y'],
             'bulan' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];

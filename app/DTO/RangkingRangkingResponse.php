@@ -4,5 +4,5 @@ namespace App\DTO;
 
 class RangkingRangkingResponse
 {
-    public array $indicators;
+    public array $units;
 }

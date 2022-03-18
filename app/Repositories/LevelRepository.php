@@ -140,6 +140,6 @@ class LevelRepository
 
     public function find__all__by__parentId(string|int $parentId)
     {
-        return ModelsLevel::where(['parent_id' => $parentId])->orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
+        return ModelsLevel::with('units')->where(['parent_id' => $parentId])->orderBy('parent_id', 'asc')->orderBy('name', 'asc')->get();
     }
 }

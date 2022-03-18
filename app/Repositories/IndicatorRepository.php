@@ -306,4 +306,9 @@ class IndicatorRepository
 
         return Arr::flatten($result);
     }
+
+    public function find__all__with__childs_targets_realizations__by__levelId_year(string|int $levelId, string|int $unitId, string|int $year)
+    {
+        return ModelsIndicator::with(['targets', 'realizations', 'childsHorizontalRecursive'])->referenced()->rootHorizontal()->where(['label' => 'child', 'level_id' => $levelId, 'unit_id' => $unitId, 'year' => $year])->orderBy('type', 'asc')->orderBy('order', 'asc')->get();
+    }
 }
