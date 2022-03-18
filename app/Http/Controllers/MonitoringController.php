@@ -118,7 +118,7 @@ class MonitoringController extends ApiController
         );
     }
 
-    public function monitoring_by_id($id, $prefix, $month)
+    public function monitoring_by_id(Request $request, $id, $month)
     {
         $indicatorRepository = new IndicatorRepository();
 
@@ -141,6 +141,8 @@ class MonitoringController extends ApiController
         }
 
         $monitoringService = new MonitoringService($constructRequest);
+
+        $prefix = is_null($request->query('prefix')) ? '1' : $request->query('prefix');
 
         $indicator = $monitoringService->monitoring_by_id($id, $month, $prefix);
 

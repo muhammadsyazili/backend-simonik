@@ -171,15 +171,17 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'units_of_level']);
 Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'parents_of_level']);
 Route::get('/level/categories', [App\Http\Controllers\LevelController::class, 'categories_of_level']);
-Route::get('/open/levels', [App\Http\Controllers\LevelController::class, 'open_levels']);
-Route::get('/user/{id}/levels', [App\Http\Controllers\LevelController::class, 'levels_of_user']);
+Route::get('/levels/public', [App\Http\Controllers\LevelController::class, 'open_levels']);
+Route::get('/levels/user/{id}', [App\Http\Controllers\LevelController::class, 'levels_of_user']);
 
 Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
 
 Route::get('/monitoring', [App\Http\Controllers\MonitoringController::class, 'monitoring']);
-Route::get('/monitoring/{id}/{prefix}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
+Route::get('/monitoring/{id}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
 Route::get('/monitoring/export', [App\Http\Controllers\MonitoringController::class, 'export']);
 
 Route::get('/rangking', [App\Http\Controllers\RangkingController::class, 'rangking']);
+
+Route::get('/comparing', [App\Http\Controllers\RangkingController::class, 'rangking']);
 
 Route::get('/export', [App\Http\Controllers\ExportController::class, 'export']);
