@@ -12,15 +12,9 @@ class ComparingValidationService
     {
         $attributes = [
             'id_left' => ['required', 'uuid'],
-            'level_left' => ['required', 'string', 'not_in:super-master'],
-            'unit_left' => ['required', 'string', 'not_in:master'],
-            'tahun_left' => ['required', 'integer', 'date_format:Y'],
             'bulan_left' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
 
             'id_right' => ['required', 'uuid'],
-            'level_right' => ['required', 'string', 'not_in:super-master'],
-            'unit_right' => ['required', 'string', 'not_in:master'],
-            'tahun_right' => ['required', 'integer', 'date_format:Y'],
             'bulan_right' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
