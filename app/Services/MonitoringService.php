@@ -123,7 +123,7 @@ class MonitoringService
                 //perhitungan status & warna status
                 $status = '-';
                 $status_color = 'none';
-                $status_symbol = '-0';
+                $status_symbol = '+0';
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $status = 'BELUM DINILAI';
