@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Collection;
 class MonitoringService
 {
     private ?LevelRepository $levelRepository;
-    private ?IndicatorRepository $indicatorRepository;
     private ?UnitRepository $unitRepository;
+    private ?IndicatorRepository $indicatorRepository;
 
     private array $indicators = [];
     private int $iter = 0;
@@ -24,8 +24,8 @@ class MonitoringService
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->levelRepository = $constructRequest->levelRepository;
-        $this->indicatorRepository = $constructRequest->indicatorRepository;
         $this->unitRepository = $constructRequest->unitRepository;
+        $this->indicatorRepository = $constructRequest->indicatorRepository;
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository

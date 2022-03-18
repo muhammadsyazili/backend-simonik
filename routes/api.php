@@ -182,6 +182,6 @@ Route::get('/monitoring/export', [App\Http\Controllers\MonitoringController::cla
 
 Route::get('/rangking', [App\Http\Controllers\RangkingController::class, 'rangking']);
 
-Route::get('/comparing', [App\Http\Controllers\RangkingController::class, 'rangking']);
+Route::get('/comparing', [App\Http\Controllers\ComparingController::class, 'comparing']);
 
 Route::get('/export', [App\Http\Controllers\ExportController::class, 'export']);
