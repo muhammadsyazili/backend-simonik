@@ -47,6 +47,7 @@ class RangkingService
                     $temp[$i]['status'] = 'DATA TIDAK TERSEDIA';
                     $temp[$i]['color_status'] = 'light';
                 } else {
+                    $this->indicators = []; //reset indicators
                     $this->iter = 0; //reset iterator
                     $this->mapping__rangking__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
