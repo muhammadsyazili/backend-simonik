@@ -35,7 +35,7 @@ class IsSuperAdmin
         $user = $this->userRepository->find__with__role__by__id($request->header('X-User-Id'));
 
         return $user->role->name === 'super-admin' ?
-        $next($request) :
-        $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+            $next($request) :
+            $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
     }
 }

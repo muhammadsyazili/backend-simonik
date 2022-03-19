@@ -280,12 +280,12 @@ class UnitController extends ApiController
     }
 
     /**
-     * Units of level.
+     * get units by level slug.
      *
      * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
      */
-    public function units_of_level($slug)
+    public function get_units_by_levelSlug($slug)
     {
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
@@ -297,12 +297,12 @@ class UnitController extends ApiController
 
         $unitService = new UnitService($constructRequest);
 
-        $units = $unitService->units_of_level($slug);
+        $units = $unitService->get_units_by_levelSlug($slug);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Unit: $slug",
+            "Units",
             $units,
             null,
         );

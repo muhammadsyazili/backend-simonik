@@ -251,13 +251,13 @@ class LevelController extends ApiController
     }
 
     /**
-     * Levels of user.
+     * get levels by user id.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string|int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function levels_of_user(Request $request, $id)
+    public function get_levels_by_userId(Request $request, $id)
     {
         $levelRepository = new LevelRepository();
         $userRepository = new UserRepository();
@@ -269,7 +269,7 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $levels = $levelService->levels_of_user($id, $request->query('with-super-master') === 'true' ? true : false);
+        $levels = $levelService->get_levels_by_userId($id, $request->query('with-super-master') === 'true' ? true : false);
 
         return $this->APIResponse(
             true,
@@ -281,11 +281,11 @@ class LevelController extends ApiController
     }
 
     /**
-     * Open levels.
+     * public levels.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function open_levels()
+    public function public_levels()
     {
         $levelRepository = new LevelRepository();
 
@@ -295,7 +295,7 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $levels = $levelService->open_levels();
+        $levels = $levelService->public_levels();
 
         return $this->APIResponse(
             true,
@@ -307,12 +307,12 @@ class LevelController extends ApiController
     }
 
     /**
-     * Parents of level.
+     * get parents by level slug.
      *
      * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
      */
-    public function parents_of_level($slug)
+    public function get_parents_by_levelSlug($slug)
     {
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
@@ -324,7 +324,7 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $levels = $levelService->parents_of_level($slug);
+        $levels = $levelService->get_parents_by_levelSlug($slug);
 
         return $this->APIResponse(
             true,
@@ -336,12 +336,12 @@ class LevelController extends ApiController
     }
 
     /**
-     * Categories of level.
+     * get categories.
      *
      * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
      */
-    public function categories_of_level()
+    public function get_categories()
     {
         $levelRepository = new LevelRepository();
 
@@ -351,7 +351,7 @@ class LevelController extends ApiController
 
         $levelService = new LevelService($constructRequest);
 
-        $categories = $levelService->categories_of_level();
+        $categories = $levelService->get_categories();
 
         return $this->APIResponse(
             true,

@@ -21,7 +21,7 @@ class HasUserIdInHeader
     public function handle(Request $request, Closure $next)
     {
         return $request->hasHeader('X-User-Id') === true && Str::isUuid($request->header('X-User-Id')) === true ?
-        $next($request) :
-        $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
+            $next($request) :
+            $this->APIResponse(false, Response::HTTP_UNAUTHORIZED, Response::$statusTexts[Response::HTTP_UNAUTHORIZED], null, null);
     }
 }

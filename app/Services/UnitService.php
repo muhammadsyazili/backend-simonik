@@ -77,7 +77,7 @@ class UnitService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levels_of_user($userId, false);
+        $response->levels = $levelService->get_levels_by_userId($userId, false);
 
         return $response;
     }
@@ -145,7 +145,7 @@ class UnitService
 
         $levelService = new LevelService($constructRequest);
 
-        $response->levels = $levelService->levels_of_user($unitRequest->userId, false);
+        $response->levels = $levelService->get_levels_by_userId($unitRequest->userId, false);
 
         return $response;
     }
@@ -187,7 +187,7 @@ class UnitService
     }
 
     //use repo LevelRepository, UnitRepository
-    public function units_of_level(string $slug)
+    public function get_units_by_levelSlug(string $slug)
     {
         return $this->unitRepository->find__allSlug_allName__by__levelId($this->levelRepository->find__id__by__slug($slug));
     }

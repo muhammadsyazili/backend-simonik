@@ -186,7 +186,6 @@ class IndicatorRepository
     public function find__with__level_unit__by__id(string|int $id)
     {
         return ModelsIndicator::with(['level', 'unit'])->findOrFail($id);
-
     }
 
     public function find__with__targets_realizations__by__id(string|int $id)

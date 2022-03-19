@@ -169,7 +169,7 @@ class LevelService
     }
 
     //use repo LevelRepository, UserRepository
-    public function levels_of_user(string|int $id, bool $withSuperMaster)
+    public function get_levels_by_userId(string|int $id, bool $withSuperMaster)
     {
         $user = $this->userRepository->find__with__role_unit_level__by__id($id);
 
@@ -181,13 +181,30 @@ class LevelService
         }
 
         $this->iter = 0; //reset iterator
-        $this->mapping__levels_of_user($levels);
+        $this->mapping__levels_by_userId($levels);
 
         return $this->levels;
     }
 
+    private function mapping__levels_by_userId(Collection $levels, bool $first = true): void
+    {
+        $levels->each(function ($item) use ($first) {
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+
+            $this->levels[$iteration]['id'] = $item->id;
+            $this->levels[$iteration]['slug'] = $item->slug;
+            $this->levels[$iteration]['name'] = $item->name;
+
+            $this->iter++;
+
+            if (!empty($item->childsRecursive)) {
+                $this->mapping__levels_by_userId($item->childsRecursive, false);
+            }
+        });
+    }
+
     //use repo LevelRepository
-    public function open_levels()
+    public function public_levels()
     {
         $levels = $this->levelRepository->find__all__not__superMaster();
 
@@ -201,25 +218,8 @@ class LevelService
         return $newLevels;
     }
 
-    private function mapping__levels_of_user(Collection $levels, bool $first = true): void
-    {
-        $levels->each(function ($item) use ($first) {
-            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
-
-            $this->levels[$iteration]['id'] = $item->id;
-            $this->levels[$iteration]['slug'] = $item->slug;
-            $this->levels[$iteration]['name'] = $item->name;
-
-            $this->iter++;
-
-            if (!empty($item->childsRecursive)) {
-                $this->mapping__levels_of_user($item->childsRecursive, false);
-            }
-        });
-    }
-
     //use repo LevelRepository, UnitRepository
-    public function parents_of_level(string $slug)
+    public function get_parents_by_levelSlug(string $slug)
     {
         $level = $this->levelRepository->find__with__parent__by__slug($slug);
 
@@ -236,7 +236,7 @@ class LevelService
     }
 
     //use repo LevelRepository
-    public function categories_of_level()
+    public function get_categories()
     {
         $categories = $this->levelRepository->find__all__categories__not__superMaster();
 

@@ -39,7 +39,7 @@ class RangkingController extends ApiController
 
         $requestDTO = new RangkingRangkingRequest();
 
-        $requestDTO->levelCategory = $request->query('kategori_level');
+        $requestDTO->category = $request->query('kategori');
         $requestDTO->year = (int) $request->query('tahun');
         $requestDTO->month = $request->query('bulan');
 

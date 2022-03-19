@@ -28,11 +28,11 @@ class RangkingService
     {
         $response = new RangkingRangkingResponse();
 
-        $levelCategory = $rangkingRequest->levelCategory;
+        $category = $rangkingRequest->category;
         $year = $rangkingRequest->year;
         $month = $rangkingRequest->month;
 
-        $levels = $this->levelRepository->find__all__by__parentId($levelCategory);
+        $levels = $this->levelRepository->find__all__by__parentId($category);
 
         $temp = [];
         $i = 0;

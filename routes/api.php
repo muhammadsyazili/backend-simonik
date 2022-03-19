@@ -42,20 +42,6 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlByLevel::class]);
     //End Route : paper work - indicator
 
-    //Route : indicator
-    Route::post('/indicator', [App\Http\Controllers\IndicatorController::class, 'store'])
-        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
-
-    Route::get('/indicator/{id}/edit', [App\Http\Controllers\IndicatorController::class, 'edit'])
-        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlById::class]);
-
-    Route::put('/indicator/{id}', [App\Http\Controllers\IndicatorController::class, 'update'])
-        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlById::class]);
-
-    Route::delete('/indicator/{id}', [App\Http\Controllers\IndicatorController::class, 'destroy'])
-        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class, App\Http\Middleware\IsSuperMaster::class]);
-    //End Route : indicator
-
     //Route : reference - indicator
     Route::get('/indicators/reference/create', [App\Http\Controllers\Extends\Indicator\IndicatorReferenceController::class, 'create'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
@@ -97,6 +83,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/realizations/paper-work/import', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'update_import'])
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class]);
     //End Route : paper work - realization
+
+    //Route : indicator
+    Route::post('/indicator', [App\Http\Controllers\IndicatorController::class, 'store'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
+
+    Route::get('/indicator/{id}/edit', [App\Http\Controllers\IndicatorController::class, 'edit'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlById::class]);
+
+    Route::put('/indicator/{id}', [App\Http\Controllers\IndicatorController::class, 'update'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdminOrAdminHaveChild::class, App\Http\Middleware\CurrentLevelNotSameWithUserLevelFromUrlById::class]);
+
+    Route::delete('/indicator/{id}', [App\Http\Controllers\IndicatorController::class, 'destroy'])
+        ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class, App\Http\Middleware\IsSuperMaster::class]);
+    //End Route : indicator
 
     //Route : user
     Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])
@@ -168,11 +168,14 @@ Route::middleware('auth:sanctum')->group(function () {
     //End Route : unit
 });
 
-Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'units_of_level']);
-Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'parents_of_level']);
-Route::get('/level/categories', [App\Http\Controllers\LevelController::class, 'categories_of_level']);
-Route::get('/levels/public', [App\Http\Controllers\LevelController::class, 'open_levels']);
-Route::get('/levels/user/{id}', [App\Http\Controllers\LevelController::class, 'levels_of_user']);
+Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'get_units_by_levelSlug']);
+
+Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'get_parents_by_levelSlug']);
+Route::get('/level/categories', [App\Http\Controllers\LevelController::class, 'get_categories']);
+Route::get('/levels/public', [App\Http\Controllers\LevelController::class, 'public_levels']);
+Route::get('/levels/user/{id}', [App\Http\Controllers\LevelController::class, 'get_levels_by_userId']);
+
+Route::get('/indicators/paper-work/{level}/{unit}/{year}/public', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'public_indicators']);
 
 Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
 
