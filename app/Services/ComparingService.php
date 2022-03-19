@@ -69,8 +69,8 @@ class ComparingService
         $result = [];
 
         //perhitungan pencapaian
-        $achievement = 0;
-        if (!$indicator->dummy && !$indicator->reducing_factor) {
+        $achievement = '-';
+        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->validity)) {
             if ($target == (float) 0 && $realization == (float) 0) {
                 $achievement = 100;
             } else if ($target == (float) 0 && $realization !== (float) 0) {
@@ -79,16 +79,12 @@ class ComparingService
                 $achievement = $realization == (float) 0 ? 0 : ($realization / $target) * 100;
             } else if ($indicator->getRawOriginal('polarity') === '-1') {
                 $achievement = $realization == (float) 0 ? 0 : (2 - ($realization / $target)) * 100;
-            } else {
-                $achievement = null;
             }
-        } else {
-            $achievement = null;
         }
 
         //perhitungan nilai capping 100%
         $capping_value_100 = '-';
-        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->weight)) {
+        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->validity)) {
             if ($target == (float) 0) {
                 $capping_value_100 = 'BELUM DINILAI';
             } else if ($achievement <= (float) 0) {
@@ -103,7 +99,7 @@ class ComparingService
 
         //perhitungan nilai capping 110%
         $capping_value_110 = '-';
-        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->weight)) {
+        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->validity)) {
             if ($target == (float) 0) {
                 $capping_value_110 = 'BELUM DINILAI';
             } else if ($achievement <= (float) 0) {
@@ -120,7 +116,7 @@ class ComparingService
         //perhitungan status & warna status
         $status = '-';
         $status_color = 'none';
-        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->weight)) {
+        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->validity)) {
             if ($target == (float) 0) {
                 $status = 'BELUM DINILAI';
                 $status_color = 'info';
@@ -148,46 +144,20 @@ class ComparingService
         $result['capping_value_100'] = $capping_value_100;
 
         $selected_weight = '-';
-        if ($indicator->dummy) {
-            $selected_weight = '-';
-        } else {
-            if (is_null($indicator->weight)) {
-                $selected_weight = '-';
-            } else {
-                if (array_key_exists($month, $indicator->weight)) {
-                    $selected_weight = (float) $indicator->weight[$month];
-                } else {
-                    $selected_weight = '-';
-                }
-            }
+        if (!$indicator->dummy && count($indicator->weight) !== 0 && array_key_exists($month, $indicator->validity)) {
+            $selected_weight = (float) $indicator->weight[$month];
         }
         $result['selected_weight'] = $selected_weight;
 
         $selected_target = '-';
-        if ($indicator->dummy) {
-            $selected_target = '-';
-        } else {
-            if ($indicator->reducing_factor) {
-                $selected_target = '-';
-            } else {
-                if (array_key_exists($month, $target)) {
-                    $selected_target = (float) $target[$month]['value'];
-                } else {
-                    $selected_target = '-';
-                }
-            }
+        if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->validity)) {
+            $selected_target = (float) $target;
         }
         $result['selected_target'] = $selected_target;
 
         $selected_realization = '-';
-        if ($indicator->dummy) {
-            $selected_realization = '-';
-        } else {
-            if (array_key_exists($month, $realization)) {
-                $selected_realization = (float) $realization[$month]['value'];
-            } else {
-                $selected_realization = '-';
-            }
+        if (!$indicator->dummy && array_key_exists($month, $indicator->validity)) {
+            $selected_realization = (float) $realization;
         }
         $result['selected_realization'] = $selected_realization;
 

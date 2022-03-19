@@ -241,4 +241,23 @@ class IndicatorPaperWorkValidationService
 
         return $validator;
     }
+
+    public function publicIndicatorsValidation(string $level, string $unit, string|int $year): \Illuminate\Contracts\Validation\Validator
+    {
+        $attributes = [
+            'level' => ['required', 'string'],
+            'unit' => ['required_unless:level,super-master', 'string'],
+            'year' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
+        ];
+
+        $messages = [
+            'required' => ':attribute tidak boleh kosong.',
+            'required_unless' => ':attribute tidak boleh kosong.',
+            'date_format' => ':attribute harus berformat yyyy.',
+        ];
+
+        $input = Arr::only(['level' => $level, 'unit' => $unit, 'year' => $year], array_keys($attributes));
+
+        return Validator::make($input, $attributes, $messages);
+    }
 }

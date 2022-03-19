@@ -17,6 +17,8 @@ use App\DTO\IndicatorPaperWorkReorderRequest;
 use App\DTO\IndicatorPaperWorkStoreFromMasterRequest;
 use App\DTO\IndicatorPaperWorkStoreRequest;
 use App\DTO\IndicatorPaperWorkUpdateRequest;
+use App\DTO\PublicIndicatorsRequest;
+use App\DTO\PublicIndicatorsResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -2026,6 +2028,44 @@ class IndicatorPaperWorkService
                         $this->indicatorRepository->update__order__by__id($indicatorKey + 1, $indicatorValue); //'CHILD' updating
                     }
                 }
+            }
+        });
+    }
+
+    //use repo IndicatorRepository, LevelRepository, UnitRepository
+    public function public_indicators(PublicIndicatorsRequest $publicIndicatorsRequest): PublicIndicatorsResponse
+    {
+        $response = new PublicIndicatorsResponse();
+
+        $level = $publicIndicatorsRequest->level;
+        $unit = $publicIndicatorsRequest->unit;
+        $year = $publicIndicatorsRequest->year;
+
+        $indicators = $level === 'super-master' ? $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
+
+        $this->iter = 0; //reset iterator
+        $this->mapping__public_indicators__indicators($indicators);
+
+        $response->indicators = $this->indicators;
+
+        return $response;
+    }
+
+    private function mapping__public_indicators__indicators(Collection $indicators, string $prefix = null, bool $first = true): void
+    {
+        $indicators->each(function ($item, $key) use ($prefix, $first) {
+            $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
+            $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+            $indicator = $item->indicator;
+
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
+            $this->indicators[$iteration]['prefix'] = $prefix;
+
+            $this->iter++;
+
+            if (!empty($item->childsHorizontalRecursive)) {
+                $this->mapping__public_indicators__indicators($item->childsHorizontalRecursive, $prefix, false);
             }
         });
     }

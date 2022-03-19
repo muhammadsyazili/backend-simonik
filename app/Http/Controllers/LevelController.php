@@ -338,7 +338,6 @@ class LevelController extends ApiController
     /**
      * get categories.
      *
-     * @param  string  $slug
      * @return \Illuminate\Http\JsonResponse
      */
     public function get_categories()

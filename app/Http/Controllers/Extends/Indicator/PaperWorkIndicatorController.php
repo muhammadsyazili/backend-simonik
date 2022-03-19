@@ -13,6 +13,7 @@ use App\DTO\IndicatorPaperWorkIndexRequest;
 use App\DTO\IndicatorPaperWorkReorderRequest;
 use App\DTO\IndicatorPaperWorkStoreRequest;
 use App\DTO\IndicatorPaperWorkUpdateRequest;
+use App\DTO\PublicIndicatorsRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\RealizationRepository;
@@ -409,6 +410,59 @@ class PaperWorkIndicatorController extends ApiController
             Response::HTTP_OK,
             $requestDTO->level === 'super-master' ? sprintf("Kertas Kerja Indikator (Level: %s) Berhasil Diurutkan Ulang", strtoupper($requestDTO->level)) : sprintf("Kertas Kerja Indikator (Level: %s) (Unit: %s) (Tahun: %s) Berhasil Diurutkan Ulang", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
             null,
+            null,
+        );
+    }
+
+    /**
+     * public indicators.
+     *
+     * @param  string  $level
+     * @param  string  $unit
+     * @param  string  $year
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function public_indicators($level, $unit, $year)
+    {
+        $indicatorRepository = new IndicatorRepository();
+        $levelRepository = new LevelRepository();
+        $unitRepository = new UnitRepository();
+
+        $constructRequest = new ConstructRequest();
+
+        $constructRequest->indicatorRepository = $indicatorRepository;
+        $constructRequest->levelRepository = $levelRepository;
+        $constructRequest->unitRepository = $unitRepository;
+
+        $IndicatorPaperWorkValidationService = new IndicatorPaperWorkValidationService();
+
+        $validation = $IndicatorPaperWorkValidationService->publicIndicatorsValidation($level, $unit, $year);
+
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
+        }
+
+        $requestDTO = new PublicIndicatorsRequest();
+
+        $requestDTO->level = $level;
+        $requestDTO->unit = $unit;
+        $requestDTO->year = $year;
+
+        $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
+
+        $response = $indicatorPaperWorkService->public_indicators($requestDTO);
+
+        return $this->APIResponse(
+            true,
+            Response::HTTP_OK,
+            sprintf("Daftar Indikator (Level: %s) (Unit: %s) (Tahun: %s)", strtoupper($requestDTO->level), strtoupper($requestDTO->unit), strtoupper($requestDTO->year)),
+            $response->indicators,
             null,
         );
     }

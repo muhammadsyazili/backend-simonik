@@ -95,8 +95,8 @@ class RangkingService
             $i = 0;
             foreach ($indicators as $item) {
                 //perhitungan pencapaian
-                $achievement = 0;
-                if (!$item['dummy'] && !$item['reducing_factor']) {
+                $achievement = '-';
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0 && $item['realizations'][$month]['value'] == (float) 0) {
                         $achievement = 100;
                     } else if ($item['targets'][$month]['value'] == (float) 0 && $item['realizations'][$month]['value'] !== (float) 0) {
@@ -105,16 +105,12 @@ class RangkingService
                         $achievement = $item['realizations'][$month]['value'] == (float) 0 ? 0 : ($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100;
                     } else if ($item['original_polarity'] === '-1') {
                         $achievement = $item['realizations'][$month]['value'] == (float) 0 ? 0 : (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100;
-                    } else {
-                        $achievement = null;
                     }
-                } else {
-                    $achievement = null;
                 }
 
                 //perhitungan nilai capping 100%
                 $capping_value_100 = '-';
-                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_100 = 'BELUM DINILAI';
                     } else if ($achievement <= (float) 0) {
@@ -129,7 +125,7 @@ class RangkingService
 
                 //perhitungan nilai capping 110%
                 $capping_value_110 = '-';
-                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_110 = 'BELUM DINILAI';
                     } else if ($achievement <= (float) 0) {
@@ -147,7 +143,7 @@ class RangkingService
                 // $status = '-';
                 // $status_color = 'none';
                 // $status_symbol = '-0';
-                // if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                // if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                 //     if ($item['targets'][$month]['value'] == (float) 0) {
                 //         $status = 'BELUM DINILAI';
                 //         $status_color = 'info';
@@ -177,7 +173,7 @@ class RangkingService
                         $total_KPI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
                         $total_KPI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
 
-                        if (array_key_exists($month, $item['weight'])) {
+                        if (array_key_exists($month, $item['validity'])) {
                             $total_weight_KPI += $item['weight'][$month];
                             $total_weight_counted_KPI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
@@ -194,7 +190,7 @@ class RangkingService
                         $total_PI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
                         $total_PI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
 
-                        if (array_key_exists($month, $item['weight'])) {
+                        if (array_key_exists($month, $item['validity'])) {
                             $total_weight_PI += $item['weight'][$month];
                             $total_weight_counted_PI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
@@ -222,46 +218,20 @@ class RangkingService
                 // $newIndicators['partials'][$i]['prefix'] = $item['prefix'];
 
                 // $selected_weight = '-';
-                // if ($item['dummy']) {
-                //     $selected_weight = '-';
-                // } else {
-                //     if (is_null($item['weight'])) {
-                //         $selected_weight = '-';
-                //     } else {
-                //         if (array_key_exists($month, $item['weight'])) {
-                //             $selected_weight = (float) $item['weight'][$month];
-                //         } else {
-                //             $selected_weight = '-';
-                //         }
-                //     }
+                // if (!$item['dummy'] && count($item['weight']) !== 0 && array_key_exists($month, $item['validity'])) {
+                //     $selected_weight = (float) $item['weight'][$month];
                 // }
                 // $newIndicators['partials'][$i]['selected_weight'] = $selected_weight;
 
                 // $selected_target = '-';
-                // if ($item['dummy']) {
-                //     $selected_target = '-';
-                // } else {
-                //     if ($item['reducing_factor']) {
-                //         $selected_target = '-';
-                //     } else {
-                //         if (array_key_exists($month, $item['targets'])) {
-                //             $selected_target = (float) $item['targets'][$month]['value'];
-                //         } else {
-                //             $selected_target = '-';
-                //         }
-                //     }
+                // if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
+                //     $selected_target = (float) $item['targets'][$month]['value'];
                 // }
                 // $newIndicators['partials'][$i]['selected_target'] = $selected_target;
 
                 // $selected_realization = '-';
-                // if ($item['dummy']) {
-                //     $selected_realization = '-';
-                // } else {
-                //     if (array_key_exists($month, $item['realizations'])) {
-                //         $selected_realization = (float) $item['realizations'][$month]['value'];
-                //     } else {
-                //         $selected_realization = '-';
-                //     }
+                // if (!$item['dummy'] && array_key_exists($month, $item['validity'])) {
+                //     $selected_realization = (float) $item['realizations'][$month]['value'];
                 // }
                 // $newIndicators['partials'][$i]['selected_realization'] = $selected_realization;
 
@@ -333,6 +303,7 @@ class RangkingService
             $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
             //$this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
+            $this->indicators[$iteration]['validity'] = $item->validity;
             //$this->indicators[$iteration]['polarity'] = $item->polarity;
             $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
 
