@@ -77,9 +77,13 @@ class IndicatorPaperWorkService
         }
 
         // 'permissions paper work indicator (create, edit, delete)' handler
-        $numberOfChildLevel = $isSuperAdmin ? count($this->levelRepository->find__allSlug__with__childs__by__root()) : count($this->levelRepository->find__allFlattenSlug__with__this_childs__by__id($user->unit->level->id));
+        $numberOfChildLevel = $isSuperAdmin ?
+            count($this->levelRepository->find__allSlug__with__childs__by__root()) :
+            count($this->levelRepository->find__allFlattenSlug__with__this_childs__by__id($user->unit->level->id));
 
-        $indicators = $level === 'super-master' ? $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) : $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
+        $indicators = $level === 'super-master' ?
+            $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year('super-master', null, null, null) :
+            $this->indicatorRepository->find__allReferenced_rootHorizontal__with__childs__by__label_levelId_unitId_year($unit === 'master' ? 'master' : 'child', $this->levelRepository->find__id__by__slug($level), $unit === 'master' ? null : $this->unitRepository->find__id__by__slug($unit), $year);
 
         $this->iter = 0; //reset iterator
         $this->mapping__index__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
@@ -1972,34 +1976,113 @@ class IndicatorPaperWorkService
         });
     }
 
-    //use repo IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
+    //use repo UserRepository, IndicatorRepository, LevelRepository, UnitRepository, TargetRepository, RealizationRepository
     public function destroy(IndicatorPaperWorkDestroyRequest $indicatorPaperWorkRequest): void
     {
         $level = $indicatorPaperWorkRequest->level;
         $unit = $indicatorPaperWorkRequest->unit;
         $year = $indicatorPaperWorkRequest->year;
+        $userId = $indicatorPaperWorkRequest->userId;
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        DB::transaction(function () use ($level, $unit, $year) {
+        DB::transaction(function () use ($userId, $level, $unit, $year) {
+            $user = $this->userRepository->find__with__role_unit_level__by__id($userId);
+
             $levelId = $this->levelRepository->find__id__by__slug($level);
 
-            $indicators = $unit === 'master' ?
-                $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
-                $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+            if ($user->role->name === 'super-admin') {
+                $indicators = $unit === 'master' ?
+                    $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
+                    $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
 
-            //target & realisasi deleting
-            foreach ($indicators as $indicator) {
-                foreach ($indicator->targets as $target) {
-                    $this->targetRepository->delete__by__id($target->id);
+                //target & realisasi deleting
+                foreach ($indicators as $indicator) {
+                    foreach ($indicator->targets as $target) {
+                        $this->targetRepository->delete__by__id($target->id);
+                    }
+
+                    foreach ($indicator->realizations as $realization) {
+                        $this->realizationRepository->delete__by__id($realization->id);
+                    }
                 }
 
-                foreach ($indicator->realizations as $realization) {
-                    $this->realizationRepository->delete__by__id($realization->id);
+                //indikator deleting
+                $unit === 'master' ?
+                    $this->indicatorRepository->delete__by__levelId_unitId_year($levelId, null, $year) :
+                    $this->indicatorRepository->delete__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+            } else if ($user->role->name === 'admin') {
+                if ($unit === 'master') {
+                    $units = $this->unitRepository->find__all__by__levelId($levelId);
+
+                    $unitsId = $this->unitRepository->find__allFlattenId__with__childs__by__id($user->unit->id);
+
+                    $allSome = true;
+                    foreach ($units as $item) {
+                        if (!in_array($item->id, $unitsId)) {
+                            $allSome = false;
+                            break;
+                        }
+                    }
+
+                    if ($allSome) {
+                        $indicators = $unit === 'master' ?
+                            $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, null, $year) :
+                            $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+
+                        //target & realisasi deleting
+                        foreach ($indicators as $indicator) {
+                            foreach ($indicator->targets as $target) {
+                                $this->targetRepository->delete__by__id($target->id);
+                            }
+
+                            foreach ($indicator->realizations as $realization) {
+                                $this->realizationRepository->delete__by__id($realization->id);
+                            }
+                        }
+
+                        //indikator deleting
+                        $unit === 'master' ?
+                            $this->indicatorRepository->delete__by__levelId_unitId_year($levelId, null, $year) :
+                            $this->indicatorRepository->delete__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+                    } else {
+                        foreach ($units as $unit) {
+                            if (in_array($unit->id, $unitsId)) {
+                                $indicators = $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $unit->id, $year);
+
+                                //target & realisasi deleting
+                                foreach ($indicators as $indicator) {
+                                    foreach ($indicator->targets as $target) {
+                                        $this->targetRepository->delete__by__id($target->id);
+                                    }
+
+                                    foreach ($indicator->realizations as $realization) {
+                                        $this->realizationRepository->delete__by__id($realization->id);
+                                    }
+                                }
+
+                                //indikator deleting
+                                $this->indicatorRepository->delete__by__levelId_unitId_year($levelId, $unit->id, $year);
+                            }
+                        }
+                    }
+                } else {
+                    $indicators = $this->indicatorRepository->find__all__with__targets_realizations__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
+
+                    //target & realisasi deleting
+                    foreach ($indicators as $indicator) {
+                        foreach ($indicator->targets as $target) {
+                            $this->targetRepository->delete__by__id($target->id);
+                        }
+
+                        foreach ($indicator->realizations as $realization) {
+                            $this->realizationRepository->delete__by__id($realization->id);
+                        }
+                    }
+
+                    //indikator deleting
+                    $this->indicatorRepository->delete__by__levelId_unitId_year($levelId, $this->unitRepository->find__id__by__slug($unit), $year);
                 }
             }
-
-            //indikator deleting
-            $unit === 'master' ? $this->indicatorRepository->delete__by__levelId_unitId_year($this->levelRepository->find__id__by__slug($level), null, $year) : $this->indicatorRepository->delete__by__levelId_unitId_year($this->levelRepository->find__id__by__slug($level), $this->unitRepository->find__id__by__slug($unit), $year);
         });
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }

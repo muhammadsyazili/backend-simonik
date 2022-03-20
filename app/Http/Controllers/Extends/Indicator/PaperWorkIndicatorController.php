@@ -346,6 +346,7 @@ class PaperWorkIndicatorController extends ApiController
         $requestDTO->level = $level;
         $requestDTO->unit = $unit;
         $requestDTO->year = $year;
+        $requestDTO->userId = $userId;
 
         $indicatorPaperWorkService = new IndicatorPaperWorkService($constructRequest);
 
