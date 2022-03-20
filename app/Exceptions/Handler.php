@@ -49,10 +49,6 @@ class Handler extends ExceptionHandler
 
             //4xx
             if ($e instanceof ModelNotFoundException) {
-                //logging
-                $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-                $output->writeln(sprintf('errors: %s', json_encode($e->getTrace())));
-
                 return $this->APIResponse(
                     false,
                     Response::HTTP_NOT_FOUND,
@@ -63,10 +59,6 @@ class Handler extends ExceptionHandler
             }
 
             if ($e instanceof MethodNotAllowedHttpException) {
-                //logging
-                $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-                $output->writeln(sprintf('errors: %s', json_encode($e->getTrace())));
-
                 return $this->APIResponse(
                     false,
                     Response::HTTP_METHOD_NOT_ALLOWED,
@@ -77,10 +69,6 @@ class Handler extends ExceptionHandler
             }
 
             if ($e instanceof NotFoundHttpException) {
-                //logging
-                $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-                $output->writeln(sprintf('errors: %s', json_encode($e->getTrace())));
-
                 return $this->APIResponse(
                     false,
                     Response::HTTP_NOT_FOUND,
@@ -92,10 +80,6 @@ class Handler extends ExceptionHandler
 
             //5xx
             if ($e instanceof QueryException) {
-                //logging
-                $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-                $output->writeln(sprintf('errors: %s', json_encode($e->getTrace())));
-
                 return $this->APIResponse(
                     false,
                     Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -106,10 +90,6 @@ class Handler extends ExceptionHandler
             }
 
             if ($e instanceof BadMethodCallException) {
-                //logging
-                $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-                $output->writeln(sprintf('errors: %s', json_encode($e->getTrace())));
-                
                 return $this->APIResponse(
                     false,
                     Response::HTTP_INTERNAL_SERVER_ERROR,

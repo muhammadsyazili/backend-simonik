@@ -140,10 +140,6 @@ class PaperWorkRealizationController extends ApiController
      */
     public function update(Request $request)
     {
-        //logging
-        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $output->writeln(sprintf('realizations: %s', json_encode($request->post('realizations'))));
-
         $userRepository = new UserRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
@@ -203,10 +199,6 @@ class PaperWorkRealizationController extends ApiController
      */
     public function update_import(Request $request)
     {
-        //logging
-        // $output = new \Symfony\Component\Console\Output\ConsoleOutput();
-        // $output->writeln(sprintf('realizations: %s', json_encode($request->post('realizations'))));
-
         $userRepository = new UserRepository();
         $levelRepository = new LevelRepository();
         $unitRepository = new UnitRepository();
