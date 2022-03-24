@@ -138,14 +138,14 @@ class IndicatorService
     }
 
     //use repo IndicatorRepository, TargetRepository, RealizationRepository
-    public function update(IndicatorUpdateRequest $indicatorNew): void
+    public function update(IndicatorUpdateRequest $indicatorNew): bool
     {
-        DB::transaction(function () use ($indicatorNew) {
+        $indicatorOld = $this->indicatorRepository->find__by__id($indicatorNew->id);
+
+        DB::transaction(function () use ($indicatorNew, $indicatorOld) {
             $indicatorDomain = new Indicator();
             $targetDomain = new Target();
             $realizationDomain = new Realization();
-
-            $indicatorOld = $this->indicatorRepository->find__by__id($indicatorNew->id);
 
             if ($indicatorOld->label === 'super-master') {
                 //convert (validity & weight) from array to JSON string
@@ -570,6 +570,8 @@ class IndicatorService
                 $this->indicatorRepository->update__by__id($indicatorDomain); //update indikator
             }
         });
+
+        return $indicatorOld->referenced;
     }
 
     //use repo IndicatorRepository

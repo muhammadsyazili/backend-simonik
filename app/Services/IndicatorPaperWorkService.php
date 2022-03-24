@@ -29,6 +29,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 class IndicatorPaperWorkService
 {
@@ -182,6 +183,7 @@ class IndicatorPaperWorkService
             $this->indicators[$iteration]['weight'] = $item->weight;
             $this->indicators[$iteration]['validity'] = $item->validity;
             $this->indicators[$iteration]['polarity'] = $item->polarity;
+            $this->indicators[$iteration]['created_at'] = Carbon::parse($item->created_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['order'] = $iteration;
             $this->indicators[$iteration]['bg_color'] = $bg_color;
 
@@ -473,6 +475,7 @@ class IndicatorPaperWorkService
             $this->indicators[$iteration]['weight'] = $result === false ? $item->weight : $current_indicators[$result]->weight;
             $this->indicators[$iteration]['validity'] = $result === false ? $item->validity : $current_indicators[$result]->validity;
             $this->indicators[$iteration]['polarity'] = $result === false ? $item->polarity : $current_indicators[$result]->polarity;
+            $this->indicators[$iteration]['created_at'] = Carbon::parse($item->created_at)->format('d/m/Y H:i:s');
             $this->indicators[$iteration]['order'] = $iteration;
             $this->indicators[$iteration]['bg_color'] = $bg_color;
             $this->indicators[$iteration]['selected'] = $result === false ? false : true;

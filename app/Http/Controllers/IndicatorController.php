@@ -177,13 +177,15 @@ class IndicatorController extends ApiController
 
         $indicatorService = new IndicatorService($constructRequest);
 
-        $indicatorService->update($requestDTO);
+        $res = $indicatorService->update($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
             "Indikator Berhasil Diubah",
-            null,
+            [
+                'referenced' => $res,
+            ],
             null,
         );
     }
