@@ -14,9 +14,11 @@ use App\Rules\Level__IsChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Level__IsThisAndChildFromUser;
 use App\Rules\IndicatorPaperWork__NotAvailable;
 use App\Rules\IndicatorPaperWork__Available;
+use App\Rules\Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Unit__IsChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Unit__MatchWith__Level;
 use App\Rules\Unit__IsThisAndChildFromUser;
+use App\Rules\Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -47,8 +49,8 @@ class IndicatorPaperWorkValidationService
         $user = $this->userRepository->find__with__role_unit_level__by__id($request->header('X-User-Id'));
 
         $attributes = [
-            'level' => ['required', 'string', new Level__IsThisAndChildFromUser($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildFromUser($user)],
+            'level' => ['required', 'string', new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)], //Level__IsThisAndChildFromUser($user)
+            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)], //Unit__IsThisAndChildFromUser($user)
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
