@@ -7,8 +7,10 @@ use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
 use App\Repositories\UnitRepository;
 use App\Repositories\UserRepository;
+use App\Rules\Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Level__IsThisAndChildFromUser__Except__Employee;
-use App\Rules\Unit__IsThisAndChildUser__Except__Employee;
+use App\Rules\Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee;
+use App\Rules\Unit__IsThisAndChildFromUser__Except__Employee;
 use App\Rules\Unit__MatchWith__Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -41,7 +43,7 @@ class RealizationPaperWorkValidationService
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildFromUser__Except__Employee($user)],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -66,7 +68,7 @@ class RealizationPaperWorkValidationService
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildFromUser__Except__Employee($user)],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -92,7 +94,7 @@ class RealizationPaperWorkValidationService
         $attributes = [
             'realizations' => ['required'],
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user), new Unit__MatchWith__Level($request->post('level'))],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildFromUser__Except__Employee($user), new Unit__MatchWith__Level($request->post('level'))],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 
@@ -203,8 +205,8 @@ class RealizationPaperWorkValidationService
 
         $attributes = [
             'realizations' => ['required'],
-            'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__Employee($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Except__Employee($user), new Unit__MatchWith__Level($request->post('level'))],
+            'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildFromUser__Except__DataEntry_And_Employee($user), new Unit__MatchWith__Level($request->post('level'))],
             'tahun' => ['required', 'string', 'date_format:Y'],
         ];
 

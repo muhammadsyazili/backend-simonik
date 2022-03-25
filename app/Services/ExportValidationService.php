@@ -5,7 +5,7 @@ namespace App\Services;
 use App\DTO\ConstructRequest;
 use App\Repositories\UserRepository;
 use App\Rules\Level__IsThisAndChildFromUser__Custom;
-use App\Rules\Unit__IsThisAndChildUser__Custom;
+use App\Rules\Unit__IsThisAndChildFromUser__Custom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -31,7 +31,7 @@ class ExportValidationService
 
         $attributes = [
             'level' => ['required', 'string', 'not_in:super-master', new Level__IsThisAndChildFromUser__Custom($user)],
-            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildUser__Custom($user)],
+            'unit' => ['required', 'string', 'not_in:master', new Unit__IsThisAndChildFromUser__Custom($user)],
             'tahun' => ['required', 'integer', 'date_format:Y'],
         ];
 

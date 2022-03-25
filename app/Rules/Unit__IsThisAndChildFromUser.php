@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Rule;
 use App\Repositories\UnitRepository;
 use App\Models\User;
 
-class Unit__IsThisAndChildUser implements Rule
+class Unit__IsThisAndChildFromUser implements Rule
 {
     private UnitRepository $unitRepository;
     private User $user;

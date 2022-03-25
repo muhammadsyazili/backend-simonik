@@ -16,7 +16,7 @@ use App\Rules\IndicatorPaperWork__NotAvailable;
 use App\Rules\IndicatorPaperWork__Available;
 use App\Rules\Unit__IsChildFromUser__Except__DataEntry_And_Employee;
 use App\Rules\Unit__MatchWith__Level;
-use App\Rules\Unit__IsThisAndChildUser;
+use App\Rules\Unit__IsThisAndChildFromUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -48,7 +48,7 @@ class IndicatorPaperWorkValidationService
 
         $attributes = [
             'level' => ['required', 'string', new Level__IsThisAndChildFromUser($user)],
-            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildUser($user)],
+            'unit' => ['required_unless:level,super-master', 'string', new Unit__IsThisAndChildFromUser($user)],
             'tahun' => ['required_unless:level,super-master', 'string', 'date_format:Y'],
         ];
 
