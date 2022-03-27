@@ -70,8 +70,8 @@ class AuthController extends ApiController
             'id' => $user->id,
             'username' => $user->username,
             'role' => $user->role->name,
-            'level' => $user->unit == null ? null : $user->unit->level->slug,
-            'unit' => $user->unit == null ? null : $user->unit->slug,
+            'level' => is_null($user->unit) ? null : $user->unit->level->slug,
+            'unit' => is_null($user->unit) ? null : $user->unit->slug,
             'actived' => $user->actived,
             'token' => $user->createToken('token_name')->plainTextToken,
         ];

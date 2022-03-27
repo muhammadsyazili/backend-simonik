@@ -137,7 +137,7 @@ class ComparingService
         $result['measure'] = is_null($indicator->measure) ? '-' : $indicator->measure;
         $result['polarity'] = $indicator->polarity;
 
-        $result['achievement'] = $achievement === null ? null : $achievement;
+        $result['achievement'] = is_null($achievement) ? null : $achievement;
         $result['status'] = $status;
         $result['status_color'] = $status_color;
         $result['capping_value_110'] = $capping_value_110;

@@ -186,7 +186,7 @@ class MonitoringService
                 $newIndicators['partials'][$i]['order'] = $item['order'];
                 $newIndicators['partials'][$i]['bg_color'] = $item['bg_color'];
 
-                $newIndicators['partials'][$i]['achievement'] = $achievement === null ? null : $achievement;
+                $newIndicators['partials'][$i]['achievement'] = is_null($achievement) ? null : $achievement;
                 $newIndicators['partials'][$i]['status'] = $status;
                 $newIndicators['partials'][$i]['status_symbol'] = $status_symbol;
                 $newIndicators['partials'][$i]['status_color'] = $status_color;

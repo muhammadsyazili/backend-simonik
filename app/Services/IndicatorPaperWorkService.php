@@ -936,7 +936,7 @@ class IndicatorPaperWorkService
 
                                     $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
-                                    if ($indicatorSuperMaster->parent_horizontal_id === null) {
+                                    if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                         $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                         $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
                                         $indicatorDomain->type = $indicatorSuperMaster->type;
@@ -1253,7 +1253,7 @@ class IndicatorPaperWorkService
 
                                         $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
-                                        if ($indicatorSuperMaster->parent_horizontal_id === null) {
+                                        if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                             $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                             $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
                                             $indicatorDomain->type = $indicatorSuperMaster->type;
@@ -1822,7 +1822,7 @@ class IndicatorPaperWorkService
 
                             $indicatorSuperMaster = $this->indicatorRepository->find__by__id($indicatorsIdSuspended[$i]); //get indikator 'super-master' by id
 
-                            if ($indicatorSuperMaster->parent_horizontal_id === null) {
+                            if (is_null($indicatorSuperMaster->parent_horizontal_id)) {
                                 $indicatorDomain->id = $idListChild[$indicatorSuperMaster->id];
                                 $indicatorDomain->indicator = $indicatorSuperMaster->indicator;
                                 $indicatorDomain->type = $indicatorSuperMaster->type;
