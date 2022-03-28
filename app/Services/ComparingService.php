@@ -11,6 +11,8 @@ class ComparingService
 {
     private ?IndicatorRepository $indicatorRepository;
 
+    private int $decimals_showed = 2;
+
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->indicatorRepository = $constructRequest->indicatorRepository;
@@ -137,11 +139,14 @@ class ComparingService
         $result['measure'] = is_null($indicator->measure) ? '-' : $indicator->measure;
         $result['polarity'] = $indicator->polarity;
 
-        $result['achievement'] = is_null($achievement) ? null : $achievement;
+        $result['achievement']['value']['original'] = $achievement;
+        $result['achievement']['value']['showed'] = in_array(gettype($achievement), ['double', 'integer']) ? number_format($achievement, $this->decimals_showed, ',', '.') : $achievement;
         $result['status'] = $status;
         $result['status_color'] = $status_color;
-        $result['capping_value_110'] = $capping_value_110;
-        $result['capping_value_100'] = $capping_value_100;
+        $result['capping_value_100']['value']['original'] = $capping_value_100;
+        $result['capping_value_100']['value']['showed'] = in_array(gettype($capping_value_100), ['double', 'integer']) ? number_format($capping_value_100, $this->decimals_showed, ',', '.') : $capping_value_100;
+        $result['capping_value_110']['value']['original'] = $capping_value_110;
+        $result['capping_value_110']['value']['showed'] = in_array(gettype($capping_value_110), ['double', 'integer']) ? number_format($capping_value_110, $this->decimals_showed, ',', '.') : $capping_value_110;
 
         $selected_weight = '-';
         if (!$indicator->dummy && count($indicator->weight) !== 0 && array_key_exists($month, $indicator->validity)) {
@@ -153,13 +158,15 @@ class ComparingService
         if (!$indicator->dummy && !$indicator->reducing_factor && array_key_exists($month, $indicator->validity)) {
             $selected_target = (float) $target;
         }
-        $result['selected_target'] = $selected_target;
+        $result['selected_target']['value']['original'] = $selected_target;
+        $result['selected_target']['value']['showed'] = in_array(gettype($selected_target), ['double', 'integer']) ? number_format($selected_target, $this->decimals_showed, ',', '.') : $selected_target;
 
         $selected_realization = '-';
         if (!$indicator->dummy && array_key_exists($month, $indicator->validity)) {
             $selected_realization = (float) $realization;
         }
-        $result['selected_realization'] = $selected_realization;
+        $result['selected_realization']['value']['original'] = $selected_realization;
+        $result['selected_realization']['value']['showed'] = in_array(gettype($selected_realization), ['double', 'integer']) ? number_format($selected_realization, $this->decimals_showed, ',', '.') : $selected_realization;
 
         return $result;
     }

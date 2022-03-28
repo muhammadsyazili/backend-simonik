@@ -43,7 +43,8 @@ class RangkingService
                 if (count($indicators) === 0) {
                     $temp[$i]['level_id'] = $level->id;
                     $temp[$i]['name'] = $unit->name;
-                    $temp[$i]['value'] = 0;
+                    $temp[$i]['value']['original'] = 0;
+                    $temp[$i]['value']['showed'] = 0;
                     $temp[$i]['status'] = 'DATA TIDAK TERSEDIA';
                     $temp[$i]['color_status'] = 'light';
                 } else {
@@ -55,7 +56,8 @@ class RangkingService
 
                     $temp[$i]['level_id'] = $level->id;
                     $temp[$i]['name'] = $unit->name;
-                    $temp[$i]['value'] = $result['total']['PPK_110'];
+                    $temp[$i]['value']['original'] = $result['total']['PPK_110']['value']['original'];
+                    $temp[$i]['value']['showed'] = $result['total']['PPK_110']['value']['showed'];
                     $temp[$i]['status'] = $result['total']['PPK_110_status'];
                     $temp[$i]['color_status'] = $result['total']['PPK_110_color_status'];
                 }
@@ -139,147 +141,66 @@ class RangkingService
                     }
                 }
 
-                // //perhitungan status & warna status
-                // $status = '-';
-                // $status_color = 'none';
-                // $status_symbol = '-0';
-                // if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
-                //     if ($item['targets'][$month]['value'] == (float) 0) {
-                //         $status = 'BELUM DINILAI';
-                //         $status_color = 'info';
-                //         $status_symbol = '-0';
-                //     } else if ($achievement >= (float) 100) {
-                //         $status = 'BAIK';
-                //         $status_color = 'success';
-                //         $status_symbol = '+1';
-                //     } else if ($achievement >= (float) 95 && $achievement < (float) 100) {
-                //         $status = 'HATI-HATI';
-                //         $status_color = 'warning';
-                //         $status_symbol = '0';
-                //     } else if ($achievement < (float) 95) {
-                //         $status = 'MASALAH';
-                //         $status_color = 'danger';
-                //         $status_symbol = '-1';
-                //     }
-                // }
-
-                //
                 //perhitungan total KPI 100% & 110%
                 if (strtoupper($item['type']) === 'KPI') {
-                    if ($item['reducing_factor']) {
-                        $total_KPI_100 -= $item['realizations'][$month]['value'];
-                        $total_KPI_110 -= $item['realizations'][$month]['value'];
-                    } else {
-                        $total_KPI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
-                        $total_KPI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
+                    if (array_key_exists($month, $item['validity'])) {
+                        if ($item['reducing_factor']) {
+                            $total_KPI_100 -= $item['realizations'][$month]['value'];
+                            $total_KPI_110 -= $item['realizations'][$month]['value'];
+                        } else {
+                            if (!in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                                $total_KPI_100 += $capping_value_100;
+                            }
 
-                        if (array_key_exists($month, $item['validity'])) {
+                            if (!in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                                $total_KPI_110 += $capping_value_110;
+                                $total_weight_counted_KPI += $item['weight'][$month];
+                            }
+
                             $total_weight_KPI += $item['weight'][$month];
-                            $total_weight_counted_KPI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
 
-                //
                 //perhitungan total PI 100% & 110%
                 if (strtoupper($item['type']) === 'PI') {
-                    if ($item['reducing_factor']) {
-                        $total_PI_100 -= $item['realizations'][$month]['value'];
-                        $total_PI_110 -= $item['realizations'][$month]['value'];
-                    } else {
-                        $total_PI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
-                        $total_PI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
+                    if (array_key_exists($month, $item['validity'])) {
+                        if ($item['reducing_factor']) {
+                            $total_PI_100 -= $item['realizations'][$month]['value'];
+                            $total_PI_110 -= $item['realizations'][$month]['value'];
+                        } else {
+                            if (!in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                                $total_PI_100 += $capping_value_100;
+                            }
 
-                        if (array_key_exists($month, $item['validity'])) {
+                            if (!in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                                $total_PI_110 += $capping_value_110;
+                                $total_weight_counted_PI += $item['weight'][$month];
+                            }
+
                             $total_weight_PI += $item['weight'][$month];
-                            $total_weight_counted_PI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
-
-                // //packaging
-                // $newIndicators['partials'][$i]['id'] = $item['id'];
-                // $newIndicators['partials'][$i]['indicator'] = $item['indicator'];
-                // $newIndicators['partials'][$i]['type'] = $item['type'];
-                // $newIndicators['partials'][$i]['dummy'] = $item['dummy'];
-                // $newIndicators['partials'][$i]['reducing_factor'] = $item['reducing_factor'];
-                // $newIndicators['partials'][$i]['measure'] = is_null($item['measure']) ? '-' : $item['measure'];
-                // $newIndicators['partials'][$i]['polarity'] = $item['polarity'];
-                // $newIndicators['partials'][$i]['order'] = $item['order'];
-                // $newIndicators['partials'][$i]['bg_color'] = $item['bg_color'];
-
-                // $newIndicators['partials'][$i]['achievement'] = is_null($achievement) ? null : $achievement;
-                // $newIndicators['partials'][$i]['status'] = $status;
-                // $newIndicators['partials'][$i]['status_symbol'] = $status_symbol;
-                // $newIndicators['partials'][$i]['status_color'] = $status_color;
-                // $newIndicators['partials'][$i]['capping_value_110'] = $capping_value_110;
-                // $newIndicators['partials'][$i]['capping_value_100'] = $capping_value_100;
-
-                // $newIndicators['partials'][$i]['prefix'] = $item['prefix'];
-
-                // $selected_weight = '-';
-                // if (!$item['dummy'] && count($item['weight']) !== 0 && array_key_exists($month, $item['validity'])) {
-                //     $selected_weight = (float) $item['weight'][$month];
-                // }
-                // $newIndicators['partials'][$i]['selected_weight'] = $selected_weight;
-
-                // $selected_target = '-';
-                // if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
-                //     $selected_target = (float) $item['targets'][$month]['value'];
-                // }
-                // $newIndicators['partials'][$i]['selected_target'] = $selected_target;
-
-                // $selected_realization = '-';
-                // if (!$item['dummy'] && array_key_exists($month, $item['validity'])) {
-                //     $selected_realization = (float) $item['realizations'][$month]['value'];
-                // }
-                // $newIndicators['partials'][$i]['selected_realization'] = $selected_realization;
-
                 $i++;
             }
 
-            // $newIndicators['total']['KPI_100'] = $total_KPI_100;
-            // $newIndicators['total']['KPI_110'] = $total_KPI_110;
-            // $newIndicators['total']['PI_100'] = $total_PI_100;
-            // $newIndicators['total']['PI_110'] = $total_PI_110;
+            $PPK_110 = ($total_KPI_110 + $total_PI_110) == (float) 0 ? 0 : (($total_KPI_110 + $total_PI_110) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
 
-            // $newIndicators['total']['PK_100'] = $total_KPI_100 + $total_PI_100;
-            // $newIndicators['total']['PK_110'] = $total_KPI_110 + $total_PI_110;
+            $newIndicators['total']['PPK_110']['value']['original'] = $PPK_110;
+            $newIndicators['total']['PPK_110']['value']['showed'] = number_format($PPK_110, 2, ',', '.');
 
-            // $newIndicators['total']['PPK_100'] = ($total_KPI_100 + $total_PI_100) == (float) 0 ? 0 : (($total_KPI_100 + $total_PI_100) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
-            // $PPK_100_status = 'MASALAH';
-            // $PPK_100_color_status = 'light';
-            // if ($newIndicators['total']['PPK_100'] < 95) {
-            //     $PPK_100_status = 'MASALAH';
-            //     $PPK_100_color_status = 'danger';
-            // } else if ($newIndicators['total']['PPK_100'] >= 95 && $newIndicators['total']['PPK_100'] < 100) {
-            //     $PPK_100_status = 'HATI-HATI';
-            //     $PPK_100_color_status = 'warning';
-            // } else if ($newIndicators['total']['PPK_100'] >= 100) {
-            //     $PPK_100_status = 'BAIK';
-            //     $PPK_100_color_status = 'success';
-            // } else {
-            //     $PPK_100_status = 'N/A';
-            //     $PPK_100_color_status = 'light';
-            // }
-            // $newIndicators['total']['PPK_100_status'] = $PPK_100_status;
-            // $newIndicators['total']['PPK_100_color_status'] = $PPK_100_color_status;
-
-            $newIndicators['total']['PPK_110'] = ($total_KPI_110 + $total_PI_110) == (float) 0 ? 0 : (($total_KPI_110 + $total_PI_110) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
             $PPK_110_status = 'MASALAH';
-            $PPK_110_color_status = 'light';
-            if ($newIndicators['total']['PPK_110'] < 95) {
+            $PPK_110_color_status = 'danger';
+            if ($PPK_110 < 95) {
                 $PPK_110_status = 'MASALAH';
                 $PPK_110_color_status = 'danger';
-            } else if ($newIndicators['total']['PPK_110'] >= 95 && $newIndicators['total']['PPK_110'] < 100) {
+            } else if ($PPK_110 >= 95 && $PPK_110 < 100) {
                 $PPK_110_status = 'HATI-HATI';
                 $PPK_110_color_status = 'warning';
-            } else if ($newIndicators['total']['PPK_110'] >= 100) {
+            } else if ($PPK_110 >= 100) {
                 $PPK_110_status = 'BAIK';
                 $PPK_110_color_status = 'success';
-            } else {
-                $PPK_110_status = 'N/A';
-                $PPK_110_color_status = 'light';
             }
             $newIndicators['total']['PPK_110_status'] = $PPK_110_status;
             $newIndicators['total']['PPK_110_color_status'] = $PPK_110_color_status;
@@ -293,24 +214,13 @@ class RangkingService
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
             $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
-            //$indicator = $item->indicator;
 
-            //indikator packaging
-            //$this->indicators[$iteration]['id'] = $item->id;
-            //$this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
             $this->indicators[$iteration]['type'] = $item->type;
             $this->indicators[$iteration]['dummy'] = $item->dummy;
             $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
-            //$this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
             $this->indicators[$iteration]['validity'] = $item->validity;
-            //$this->indicators[$iteration]['polarity'] = $item->polarity;
             $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
-
-            //$this->indicators[$iteration]['order'] = $iteration;
-            //$this->indicators[$iteration]['bg_color'] = $bg_color;
-            //$this->indicators[$iteration]['prefix'] = $prefix;
-
 
             //target packaging
             $jan = $item->targets->search(function ($value) {

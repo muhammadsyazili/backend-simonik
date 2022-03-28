@@ -21,6 +21,8 @@ class MonitoringService
     private array $indicators = [];
     private int $iter = 0;
 
+    private int $decimals_showed = 2;
+
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->levelRepository = $constructRequest->levelRepository;
@@ -142,32 +144,42 @@ class MonitoringService
 
                 //perhitungan total KPI 100% & 110%
                 if (strtoupper($item['type']) === 'KPI') {
-                    if ($item['reducing_factor']) {
-                        $total_KPI_100 -= $item['realizations'][$month]['value'];
-                        $total_KPI_110 -= $item['realizations'][$month]['value'];
-                    } else {
-                        $total_KPI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
-                        $total_KPI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
+                    if (array_key_exists($month, $item['validity'])) {
+                        if ($item['reducing_factor']) {
+                            $total_KPI_100 -= $item['realizations'][$month]['value'];
+                            $total_KPI_110 -= $item['realizations'][$month]['value'];
+                        } else {
+                            if (!in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                                $total_KPI_100 += $capping_value_100;
+                            }
 
-                        if (array_key_exists($month, $item['validity'])) {
+                            if (!in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                                $total_KPI_110 += $capping_value_110;
+                                $total_weight_counted_KPI += $item['weight'][$month];
+                            }
+
                             $total_weight_KPI += $item['weight'][$month];
-                            $total_weight_counted_KPI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
 
                 //perhitungan total PI 100% & 110%
                 if (strtoupper($item['type']) === 'PI') {
-                    if ($item['reducing_factor']) {
-                        $total_PI_100 -= $item['realizations'][$month]['value'];
-                        $total_PI_110 -= $item['realizations'][$month]['value'];
-                    } else {
-                        $total_PI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
-                        $total_PI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
+                    if (array_key_exists($month, $item['validity'])) {
+                        if ($item['reducing_factor']) {
+                            $total_PI_100 -= $item['realizations'][$month]['value'];
+                            $total_PI_110 -= $item['realizations'][$month]['value'];
+                        } else {
+                            if (!in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                                $total_PI_100 += $capping_value_100;
+                            }
 
-                        if (array_key_exists($month, $item['validity'])) {
+                            if (!in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                                $total_PI_110 += $capping_value_110;
+                                $total_weight_counted_PI += $item['weight'][$month];
+                            }
+
                             $total_weight_PI += $item['weight'][$month];
-                            $total_weight_counted_PI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -178,20 +190,21 @@ class MonitoringService
                 $newIndicators['partials'][$i]['type'] = $item['type'];
                 $newIndicators['partials'][$i]['dummy'] = $item['dummy'];
                 $newIndicators['partials'][$i]['reducing_factor'] = $item['reducing_factor'];
-                // $newIndicators['partials'][$i]['formula'] = is_null($item['formula']) ? '-' : $item['formula'];
                 $newIndicators['partials'][$i]['measure'] = is_null($item['measure']) ? '-' : $item['measure'];
-                // $newIndicators['partials'][$i]['weight'] = $item['weight'];
-                // $newIndicators['partials'][$i]['validity'] = $item['validity'];
                 $newIndicators['partials'][$i]['polarity'] = $item['polarity'];
                 $newIndicators['partials'][$i]['order'] = $item['order'];
                 $newIndicators['partials'][$i]['bg_color'] = $item['bg_color'];
+                $newIndicators['partials'][$i]['show_chart'] = !$item['dummy'] && !$item['reducing_factor'] && !in_array($status_symbol, ['+0']) ? true : false;
 
-                $newIndicators['partials'][$i]['achievement'] = is_null($achievement) ? null : $achievement;
+                $newIndicators['partials'][$i]['achievement']['value']['original'] = $achievement;
+                $newIndicators['partials'][$i]['achievement']['value']['showed'] = in_array(gettype($achievement), ['double', 'integer']) ? number_format($achievement, $this->decimals_showed, ',', '.') . '%' : $achievement;
                 $newIndicators['partials'][$i]['status'] = $status;
                 $newIndicators['partials'][$i]['status_symbol'] = $status_symbol;
                 $newIndicators['partials'][$i]['status_color'] = $status_color;
-                $newIndicators['partials'][$i]['capping_value_110'] = $capping_value_110;
-                $newIndicators['partials'][$i]['capping_value_100'] = $capping_value_100;
+                $newIndicators['partials'][$i]['capping_value_100']['value']['original'] = $capping_value_100;
+                $newIndicators['partials'][$i]['capping_value_100']['value']['showed'] = in_array(gettype($capping_value_100), ['double', 'integer']) ? number_format($capping_value_100, $this->decimals_showed, ',', '.') : $capping_value_100;
+                $newIndicators['partials'][$i]['capping_value_110']['value']['original'] = $capping_value_110;
+                $newIndicators['partials'][$i]['capping_value_110']['value']['showed'] = in_array(gettype($capping_value_110), ['double', 'integer']) ? number_format($capping_value_110, $this->decimals_showed, ',', '.') : $capping_value_110;
 
                 $newIndicators['partials'][$i]['prefix'] = $item['prefix'];
 
@@ -205,13 +218,15 @@ class MonitoringService
                 if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     $selected_target = (float) $item['targets'][$month]['value'];
                 }
-                $newIndicators['partials'][$i]['selected_target'] = $selected_target;
+                $newIndicators['partials'][$i]['selected_target']['value']['original'] = $selected_target;
+                $newIndicators['partials'][$i]['selected_target']['value']['showed'] = in_array(gettype($selected_target), ['double', 'integer']) ? number_format($selected_target, $this->decimals_showed, ',', '.') : $selected_target;
 
                 $selected_realization = '-';
                 if (!$item['dummy'] && array_key_exists($month, $item['validity'])) {
                     $selected_realization = (float) $item['realizations'][$month]['value'];
                 }
-                $newIndicators['partials'][$i]['selected_realization'] = $selected_realization;
+                $newIndicators['partials'][$i]['selected_realization']['value']['original'] = $selected_realization;
+                $newIndicators['partials'][$i]['selected_realization']['value']['showed'] = in_array(gettype($selected_realization), ['double', 'integer']) ? number_format($selected_realization, $this->decimals_showed, ',', '.') : $selected_realization;
 
                 // $newIndicators['partials'][$i]['targets']['jan']['value'] = $item['targets']['jan']['value'];
                 // $newIndicators['partials'][$i]['targets']['feb']['value'] = $item['targets']['feb']['value'];
@@ -242,49 +257,57 @@ class MonitoringService
                 $i++;
             }
 
-            $newIndicators['total']['KPI_100'] = $total_KPI_100;
-            $newIndicators['total']['KPI_110'] = $total_KPI_110;
-            $newIndicators['total']['PI_100'] = $total_PI_100;
-            $newIndicators['total']['PI_110'] = $total_PI_110;
+            $newIndicators['total']['KPI_100']['value']['original'] = $total_KPI_100;
+            $newIndicators['total']['KPI_100']['value']['showed'] = number_format($total_KPI_100, $this->decimals_showed, ',', '.');
+            $newIndicators['total']['KPI_110']['value']['original'] = $total_KPI_110;
+            $newIndicators['total']['KPI_110']['value']['showed'] = number_format($total_KPI_110, $this->decimals_showed, ',', '.');
+            $newIndicators['total']['PI_100']['value']['original'] = $total_PI_100;
+            $newIndicators['total']['PI_100']['value']['showed'] = number_format($total_PI_100, $this->decimals_showed, ',', '.');
+            $newIndicators['total']['PI_110']['value']['original'] = $total_PI_110;
+            $newIndicators['total']['PI_110']['value']['showed'] = number_format($total_PI_110, $this->decimals_showed, ',', '.');
 
-            $newIndicators['total']['PK_100'] = $total_KPI_100 + $total_PI_100;
-            $newIndicators['total']['PK_110'] = $total_KPI_110 + $total_PI_110;
+            $PK_100 = $total_KPI_100 + $total_PI_100;
+            $PK_110 = $total_KPI_110 + $total_PI_110;
 
-            $newIndicators['total']['PPK_100'] = $newIndicators['total']['PK_100'] == (float) 0 ? 0 : ($newIndicators['total']['PK_100'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
-            $newIndicators['total']['PPK_110'] = $newIndicators['total']['PK_110'] == (float) 0 ? 0 : ($newIndicators['total']['PK_110'] / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
+            $newIndicators['total']['PK_100']['value']['original'] = $PK_100;
+            $newIndicators['total']['PK_100']['value']['showed'] = number_format($PK_100, $this->decimals_showed, ',', '.');
+            $newIndicators['total']['PK_110']['value']['original'] = $PK_110;
+            $newIndicators['total']['PK_110']['value']['showed'] = number_format($PK_110, $this->decimals_showed, ',', '.');
+
+            $PPK_100 = ($total_KPI_100 + $total_PI_100) == (float) 0 ? 0 : (($total_KPI_100 + $total_PI_100) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
+            $PPK_110 = ($total_KPI_110 + $total_PI_110) == (float) 0 ? 0 : (($total_KPI_110 + $total_PI_110) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
+
+            $newIndicators['total']['PPK_100']['value']['original'] = $PPK_100;
+            $newIndicators['total']['PPK_100']['value']['showed'] = number_format($PPK_100, $this->decimals_showed, ',', '.');
+            $newIndicators['total']['PPK_110']['value']['original'] = $PPK_110;
+            $newIndicators['total']['PPK_110']['value']['showed'] = number_format($PPK_110, $this->decimals_showed, ',', '.');
 
             $PPK_100_status = 'MASALAH';
-            $PPK_100_color_status = 'light';
-            if ($newIndicators['total']['PPK_100'] < 95) {
+            $PPK_100_color_status = 'danger';
+            if ($PPK_100 < 95) {
                 $PPK_100_status = 'MASALAH';
                 $PPK_100_color_status = 'danger';
-            } else if ($newIndicators['total']['PPK_100'] >= 95 && $newIndicators['total']['PPK_100'] < 100) {
+            } else if ($PPK_100 >= 95 && $PPK_100 < 100) {
                 $PPK_100_status = 'HATI-HATI';
                 $PPK_100_color_status = 'warning';
-            } else if ($newIndicators['total']['PPK_100'] >= 100) {
+            } else if ($PPK_100 >= 100) {
                 $PPK_100_status = 'BAIK';
                 $PPK_100_color_status = 'success';
-            } else {
-                $PPK_100_status = 'N/A';
-                $PPK_100_color_status = 'light';
             }
             $newIndicators['total']['PPK_100_status'] = $PPK_100_status;
             $newIndicators['total']['PPK_100_color_status'] = $PPK_100_color_status;
 
             $PPK_110_status = 'MASALAH';
-            $PPK_110_color_status = 'light';
-            if ($newIndicators['total']['PPK_110'] < 95) {
+            $PPK_110_color_status = 'danger';
+            if ($PPK_110 < 95) {
                 $PPK_110_status = 'MASALAH';
                 $PPK_110_color_status = 'danger';
-            } else if ($newIndicators['total']['PPK_110'] >= 95 && $newIndicators['total']['PPK_110'] < 100) {
+            } else if ($PPK_110 >= 95 && $PPK_110 < 100) {
                 $PPK_110_status = 'HATI-HATI';
                 $PPK_110_color_status = 'warning';
-            } else if ($newIndicators['total']['PPK_110'] >= 100) {
+            } else if ($PPK_110 >= 100) {
                 $PPK_110_status = 'BAIK';
                 $PPK_110_color_status = 'success';
-            } else {
-                $PPK_110_status = 'N/A';
-                $PPK_110_color_status = 'light';
             }
             $newIndicators['total']['PPK_110_status'] = $PPK_110_status;
             $newIndicators['total']['PPK_110_color_status'] = $PPK_110_color_status;
@@ -306,7 +329,6 @@ class MonitoringService
             $this->indicators[$iteration]['type'] = $item->type;
             $this->indicators[$iteration]['dummy'] = $item->dummy;
             $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
-            // $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
             $this->indicators[$iteration]['validity'] = $item->validity;
@@ -492,8 +514,8 @@ class MonitoringService
             $i = 0;
             foreach ($indicators as $item) {
                 //perhitungan pencapaian
-                $achievement = 0;
-                if (!$item['dummy'] && !$item['reducing_factor']) {
+                $achievement = '-';
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0 && $item['realizations'][$month]['value'] == (float) 0) {
                         $achievement = 100;
                     } else if ($item['targets'][$month]['value'] == (float) 0 && $item['realizations'][$month]['value'] !== (float) 0) {
@@ -502,16 +524,12 @@ class MonitoringService
                         $achievement = $item['realizations'][$month]['value'] == (float) 0 ? 0 : ($item['realizations'][$month]['value'] / $item['targets'][$month]['value']) * 100;
                     } else if ($item['original_polarity'] === '-1') {
                         $achievement = $item['realizations'][$month]['value'] == (float) 0 ? 0 : (2 - ($item['realizations'][$month]['value'] / $item['targets'][$month]['value'])) * 100;
-                    } else {
-                        $achievement = null;
                     }
-                } else {
-                    $achievement = null;
                 }
 
                 //perhitungan nilai capping 100%
                 $capping_value_100 = '-';
-                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_100 = 'BELUM DINILAI';
                     } else if ($achievement <= (float) 0) {
@@ -526,7 +544,7 @@ class MonitoringService
 
                 //perhitungan nilai capping 110%
                 $capping_value_110 = '-';
-                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $capping_value_110 = 'BELUM DINILAI';
                     } else if ($achievement <= (float) 0) {
@@ -542,7 +560,7 @@ class MonitoringService
 
                 //perhitungan status
                 $status = '-';
-                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['weight'])) {
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
                     if ($item['targets'][$month]['value'] == (float) 0) {
                         $status = 'BELUM DINILAI';
                     } else if ($achievement >= (float) 100) {
@@ -554,30 +572,44 @@ class MonitoringService
                     }
                 }
 
+                //perhitungan total KPI 100% & 110%
                 if (strtoupper($item['type']) === 'KPI') {
-                    if ($item['reducing_factor']) {
-                        $total_KPI_110 -= $item['realizations'][$month]['value'];
-                    } else {
-                        $total_KPI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
-                        $total_KPI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
+                    if (array_key_exists($month, $item['validity'])) {
+                        if ($item['reducing_factor']) {
+                            $total_KPI_100 -= $item['realizations'][$month]['value'];
+                            $total_KPI_110 -= $item['realizations'][$month]['value'];
+                        } else {
+                            if (!in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                                $total_KPI_100 += $capping_value_100;
+                            }
 
-                        if (array_key_exists($month, $item['weight'])) {
+                            if (!in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                                $total_KPI_110 += $capping_value_110;
+                                $total_weight_counted_KPI += $item['weight'][$month];
+                            }
+
                             $total_weight_KPI += $item['weight'][$month];
-                            $total_weight_counted_KPI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
 
+                //perhitungan total PI 100% & 110%
                 if (strtoupper($item['type']) === 'PI') {
-                    if ($item['reducing_factor']) {
-                        $total_PI_110 -= $item['realizations'][$month]['value'];
-                    } else {
-                        $total_PI_100 += in_array($capping_value_100, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_100;
-                        $total_PI_110 += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $capping_value_110;
+                    if (array_key_exists($month, $item['validity'])) {
+                        if ($item['reducing_factor']) {
+                            $total_PI_100 -= $item['realizations'][$month]['value'];
+                            $total_PI_110 -= $item['realizations'][$month]['value'];
+                        } else {
+                            if (in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                                $total_PI_100 += $capping_value_100;
+                            }
 
-                        if (array_key_exists($month, $item['weight'])) {
+                            if (in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                                $total_PI_110 += $capping_value_110;
+                                $total_weight_counted_PI += $item['weight'][$month];
+                            }
+
                             $total_weight_PI += $item['weight'][$month];
-                            $total_weight_counted_PI += in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : $item['weight'][$month];
                         }
                     }
                 }
@@ -586,17 +618,17 @@ class MonitoringService
                 $newIndicators[$i]['order'] = (string) $item['order'] + 1;
                 $newIndicators[$i]['indicator'] = (string) $item['indicator'];
                 $newIndicators[$i]['type'] = (string) $item['type'];
-                $newIndicators[$i]['formula'] = is_null($item['formula']) ? '-' : (string) $item['formula'];
-                $newIndicators[$i]['measure'] = is_null($item['measure']) ? '-' : (string) $item['measure'];
+                $newIndicators[$i]['formula'] = (string) is_null($item['formula']) ? '-' : $item['formula'];
+                $newIndicators[$i]['measure'] = (string) is_null($item['measure']) ? '-' : $item['measure'];
                 $newIndicators[$i]['polarity'] = (string) is_null($item['original_polarity']) ? '-' : ($item['original_polarity'] == '1' ? 'Positif' : 'Nagatif');
-                $newIndicators[$i]['weight'] = array_key_exists($month, $item['weight']) ? (string) $item['weight'][$month] : '-';
+                $newIndicators[$i]['weight'] = (string) array_key_exists($month, $item['weight']) ? $item['weight'][$month] : '-';
                 $newIndicators[$i]['weight_counted'] = (string) (in_array($capping_value_110, ['-', 'BELUM DINILAI']) ? 0 : (array_key_exists($month, $item['weight']) ? $item['weight'][$month] : '-'));
                 $newIndicators[$i]['target'] = (string) is_null($item['targets'][$month]['value']) ? '-' : $item['targets'][$month]['value'];
                 $newIndicators[$i]['realization'] = (string) is_null($item['realizations'][$month]['value']) ? '-' : $item['realizations'][$month]['value'];
-                $newIndicators[$i]['achievement'] = (string) is_null($achievement) ? '-' : $achievement;
-                $newIndicators[$i]['capping_value_100'] = (string) is_null($capping_value_100) ? '-' : $capping_value_100;
-                $newIndicators[$i]['capping_value_110'] = (string) is_null($capping_value_110) ? '-' : $capping_value_110;
-                $newIndicators[$i]['status'] = (string) is_null($status) ? '-' : $status;
+                $newIndicators[$i]['achievement'] = (string) $achievement;
+                $newIndicators[$i]['capping_value_100'] = (string) $capping_value_100;
+                $newIndicators[$i]['capping_value_110'] = (string) $capping_value_110;
+                $newIndicators[$i]['status'] = (string) $status;
 
                 $newIndicators[$i]['target_jan'] = (string) $item['targets']['jan']['value'];
                 $newIndicators[$i]['target_feb'] = (string) $item['targets']['feb']['value'];
@@ -731,6 +763,7 @@ class MonitoringService
             $this->indicators[$iteration]['formula'] = $item->formula;
             $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
+            $this->indicators[$iteration]['validity'] = $item->validity;
             $this->indicators[$iteration]['order'] = $iteration;
 
 
