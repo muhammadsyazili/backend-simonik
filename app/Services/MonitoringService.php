@@ -194,7 +194,7 @@ class MonitoringService
                 $newIndicators['partials'][$i]['polarity'] = $item['polarity'];
                 $newIndicators['partials'][$i]['order'] = $item['order'];
                 $newIndicators['partials'][$i]['bg_color'] = $item['bg_color'];
-                $newIndicators['partials'][$i]['show_chart'] = !$item['dummy'] && !$item['reducing_factor'] && !in_array($status_symbol, ['+0']) ? true : false;
+                $newIndicators['partials'][$i]['show_chart'] = !$item['dummy'] && !$item['reducing_factor'] && !in_array($status_symbol, ['+0'], true) ? true : false;
 
                 $newIndicators['partials'][$i]['achievement']['value']['original'] = $achievement;
                 $newIndicators['partials'][$i]['achievement']['value']['showed'] = in_array(gettype($achievement), ['double', 'integer']) ? number_format($achievement, $this->decimals_showed, ',', '.') . '%' : $achievement;
