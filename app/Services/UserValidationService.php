@@ -44,7 +44,6 @@ class UserValidationService
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
-            'email' => ':attribute harus valid.',
             'alpha_dash' => ':attribute hanya boleh mengandung huruf, angka, dashes (-) and underscores (_).',
         ];
 
@@ -172,7 +171,7 @@ class UserValidationService
         //memastikan user yang akan di-destroy role-nya 'employee'
         if ($user->role->name !== 'employee') {
             $validator->after(function ($validator) {
-                $validator->errors()->add('id', "(#1.1) : User Tidak Diizinkan Dihapus.");
+                $validator->errors()->add('id', "(#1.1) : User Tidak Diizinkan Dihapus."); //indikator tidak memiliki bobot ?
             });
         }
 
