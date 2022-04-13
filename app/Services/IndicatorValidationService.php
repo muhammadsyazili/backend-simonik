@@ -29,6 +29,7 @@ class IndicatorValidationService
     {
         $attributes = [
             'indicator' => ['required', 'string', 'max:100'],
+            'type' => ['required'],
             'dummy' => ['required', 'boolean'],
             'reducing_factor' => ['nullable', 'required_if:dummy,0', 'boolean'],
             'polarity' => ['nullable', 'required_if:reducing_factor,0', 'in:1,-1'],
