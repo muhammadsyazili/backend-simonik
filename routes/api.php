@@ -183,7 +183,7 @@ Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'dash
 
 Route::get('/monitoring', [App\Http\Controllers\MonitoringController::class, 'monitoring']);
 Route::get('/monitoring/{id}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
-Route::get('/monitoring/exporting', [App\Http\Controllers\MonitoringController::class, 'exporting']);
+Route::get('/exporting', [App\Http\Controllers\ExportingController::class, 'exporting']);
 
 Route::get('/rangking', [App\Http\Controllers\RangkingController::class, 'rangking']);
 

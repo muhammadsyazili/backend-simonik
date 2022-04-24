@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\Repositories\IndicatorRepository;
 use App\Repositories\UserRepository;
 use App\Rules\Level__IsThisAndChildFromUser__Custom;
 use App\Rules\Unit__IsThisAndChildFromUser__Custom;
@@ -11,10 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-class MonitoringValidationService
+class ExportingValidationService
 {
     private ?UserRepository $userRepository;
-    private ?IndicatorRepository $indicatorRepository;
 
     public function __construct(ConstructRequest $constructRequest)
     {
@@ -25,7 +23,7 @@ class MonitoringValidationService
     }
 
     //use repo UserRepository
-    public function monitoringValidation(Request $request): \Illuminate\Contracts\Validation\Validator
+    public function exportValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         //memastikan level yang akan di-edit sesuai dengan level user login saat ini atau level turunan yang diizinkan
         //memastikan unit yang akan di-edit sesuai dengan unit user login saat ini atau unit turunan yang diizinkan
@@ -50,34 +48,5 @@ class MonitoringValidationService
         $input = Arr::only($request->query(), array_keys($attributes));
 
         return Validator::make($input, $attributes, $messages);
-    }
-
-    //use repo IndicatorRepository
-    public function monitoringByIdValidation(string|int $id): \Illuminate\Contracts\Validation\Validator
-    {
-        $indicator = $this->indicatorRepository->find__with__level_unit__by__id($id);
-
-        $unit = is_null($indicator->unit) ? null : $indicator->unit->slug;
-
-        $attributes = [
-            'id' => ['required'],
-        ];
-
-        $messages = [
-            'required' => ':attribute tidak boleh kosong.',
-        ];
-
-        $input = ['id' => $id];
-
-        $validator = Validator::make($input, $attributes, $messages);
-
-        //bukan merupakan indikator super-master
-        if (is_null($unit)) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('id', "(#7.1) : Akses Ilegal !");
-            });
-        }
-
-        return $validator;
     }
 }

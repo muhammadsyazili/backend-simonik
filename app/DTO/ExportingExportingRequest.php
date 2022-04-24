@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class MonitoringExportingRequest
+class ExportingExportingRequest
 {
     public string $level;
     public string $unit;

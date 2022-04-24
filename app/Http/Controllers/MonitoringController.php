@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\MonitoringExportingRequest;
 use App\DTO\MonitoringMonitoringRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
@@ -59,56 +58,6 @@ class MonitoringController extends ApiController
             true,
             Response::HTTP_OK,
             "Monitoring",
-            [
-                'indicators' => $response->indicators,
-            ],
-            null,
-        );
-    }
-
-    public function exporting(Request $request)
-    {
-        $userRepository = new UserRepository();
-        $indicatorRepository = new IndicatorRepository();
-        $levelRepository = new LevelRepository();
-        $unitRepository = new UnitRepository();
-
-        $constructRequest = new ConstructRequest();
-
-        $constructRequest->userRepository = $userRepository;
-        $constructRequest->indicatorRepository = $indicatorRepository;
-        $constructRequest->levelRepository = $levelRepository;
-        $constructRequest->unitRepository = $unitRepository;
-
-        $monitoringValidationService = new MonitoringValidationService($constructRequest);
-
-        $validation = $monitoringValidationService->exportValidation($request);
-
-        if ($validation->fails()) {
-            return $this->APIResponse(
-                false,
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
-                null,
-                $validation->errors(),
-            );
-        }
-
-        $requestDTO = new MonitoringExportingRequest();
-
-        $requestDTO->level = $request->query('level');
-        $requestDTO->unit = $request->query('unit');
-        $requestDTO->year = $request->query('tahun');
-        $requestDTO->month = $request->query('bulan');
-
-        $monitoringService = new MonitoringService($constructRequest);
-
-        $response = $monitoringService->exporting($requestDTO);
-
-        return $this->APIResponse(
-            true,
-            Response::HTTP_OK,
-            "Exporting",
             [
                 'indicators' => $response->indicators,
             ],

@@ -247,7 +247,7 @@ class LevelService
 
             $levelCategoriesName = '';
             for ($j = 0; $j < count($levels); $j++) {
-                $name = count($levels) - 1 === $j ? $levels[$j]->name : $levels[$j]->name . ' ,';
+                $name = count($levels) - 1 === $j ? $levels[$j]->name : $levels[$j]->name . ', ';
                 $levelCategoriesName .= $name;
             }
 
