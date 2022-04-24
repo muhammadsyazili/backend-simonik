@@ -56,7 +56,7 @@ class UnitValidationService
         $level__lowercase = strtolower($request->post('level'));
 
         //memastikan nama yang akan di-store tidak mengandung keyword
-        if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        if (Str::containsAll($name__lowercase, ['super-master', 'super master', 'master'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('name', "(#1.1) : Nama Unit Kerja Sudah Tersedia.");
             });
@@ -141,7 +141,7 @@ class UnitValidationService
         $unit = $this->unitRepository->find__by__id($id);
 
         //memastikan nama yang akan di-update tidak mengandung keyword
-        if (Str::containsAll($name__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
+        if (Str::containsAll($name__lowercase, ['super-master', 'super master', 'master'])) {
             $validator->after(function ($validator) {
                 $validator->errors()->add('name', "(#1.3) : Nama Unit Kerja Sudah Tersedia.");
             });

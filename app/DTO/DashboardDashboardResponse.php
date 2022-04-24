@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class MonitoringExportResponse
+class DashboardDashboardResponse
 {
     public array $indicators;
 }

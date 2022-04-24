@@ -3,82 +3,57 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\RangkingRangkingRequest;
-use App\DTO\RangkingRangkingResponse;
+use App\DTO\DashboardDashboardRequest;
+use App\DTO\DashboardDashboardResponse;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
+use App\Repositories\UnitRepository;
 use Illuminate\Database\Eloquent\Collection;
 
-class RangkingService
+class DashboardService
 {
     private ?LevelRepository $levelRepository;
+    private ?UnitRepository $unitRepository;
     private ?IndicatorRepository $indicatorRepository;
 
     private array $indicators = [];
     private int $iter = 0;
 
+    private int $decimals_showed = 2;
+
     public function __construct(ConstructRequest $constructRequest)
     {
         $this->levelRepository = $constructRequest->levelRepository;
+        $this->unitRepository = $constructRequest->unitRepository;
         $this->indicatorRepository = $constructRequest->indicatorRepository;
     }
 
-    //use repo LevelRepository, IndicatorRepository
-    public function rangking(RangkingRangkingRequest $rangkingRequest): RangkingRangkingResponse
+    //use repo LevelRepository, UnitRepository, IndicatorRepository
+    public function dashboard(DashboardDashboardRequest $dashboardRequest): DashboardDashboardResponse
     {
-        $response = new RangkingRangkingResponse();
+        $response = new DashboardDashboardResponse();
 
-        $category = $rangkingRequest->category;
-        $year = $rangkingRequest->year;
-        $month = $rangkingRequest->month;
+        $level = $dashboardRequest->level;
+        $unit = $dashboardRequest->unit;
+        $year = $dashboardRequest->year;
+        $month = $dashboardRequest->month;
 
-        $levels = $this->levelRepository->find__all__by__parentId($category);
+        $levelId = $this->levelRepository->find__id__by__slug($level);
+        $unitId = $this->unitRepository->find__id__by__slug($unit);
 
-        $temp = [];
-        $i = 0;
-        foreach ($levels as $level) {
-            foreach ($level->units as $unit) {
-                $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_year($level->id, $unit->id, $year);
+        $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
 
-                if (count($indicators) === 0) {
-                    $temp[$i]['level_id'] = $level->id;
-                    $temp[$i]['name'] = $unit->name;
-                    $temp[$i]['value']['original'] = 0;
-                    $temp[$i]['value']['showed'] = 0;
-                    $temp[$i]['status'] = 'DATA TIDAK TERSEDIA';
-                    $temp[$i]['color_status'] = 'light';
-                } else {
-                    $this->indicators = []; //reset indicators
-                    $this->iter = 0; //reset iterator
-                    $this->mapping__rangking__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
+        $this->iter = 0; //reset iterator
+        $this->mapping__dashboard__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-                    $result = $this->calculating_rangking($this->indicators, $month);
+        $indicators = $this->calculating__dashboard($this->indicators, $month);
 
-                    $temp[$i]['level_id'] = $level->id;
-                    $temp[$i]['name'] = $unit->name;
-                    $temp[$i]['value']['original'] = $result['total']['PPK_110']['value']['original'];
-                    $temp[$i]['value']['showed'] = $result['total']['PPK_110']['value']['showed'];
-                    $temp[$i]['status'] = $result['total']['PPK_110_status'];
-                    $temp[$i]['color_status'] = $result['total']['PPK_110_color_status'];
-                }
-
-                $i++;
-            }
-        }
-
-        $collection = collect($temp);
-
-        $sorted = $collection->sortBy([
-            ['value', 'desc'],
-            ['level_id', 'asc'],
-        ]);
-
-        $response->units = $sorted->values()->all();
+        $response->indicators = $indicators;
 
         return $response;
     }
 
-    private function calculating_rangking(array $indicators, string $month): array
+    private function calculating__dashboard(array $indicators, string $month): array
     {
         $newIndicators = [];
 
@@ -141,6 +116,30 @@ class RangkingService
                     }
                 }
 
+                //perhitungan status & warna status
+                $status = '-';
+                $status_color = 'none';
+                $status_symbol = '+0';
+                if (!$item['dummy'] && !$item['reducing_factor'] && array_key_exists($month, $item['validity'])) {
+                    if ($item['targets'][$month]['value'] == (float) 0) {
+                        $status = 'BELUM DINILAI';
+                        $status_color = 'info';
+                        $status_symbol = '-0';
+                    } else if ($achievement >= (float) 100) {
+                        $status = 'BAIK';
+                        $status_color = 'success';
+                        $status_symbol = '+1';
+                    } else if ($achievement >= (float) 95 && $achievement < (float) 100) {
+                        $status = 'HATI-HATI';
+                        $status_color = 'warning';
+                        $status_symbol = '0';
+                    } else if ($achievement < (float) 95) {
+                        $status = 'MASALAH';
+                        $status_color = 'danger';
+                        $status_symbol = '-1';
+                    }
+                }
+
                 //perhitungan total KPI 100% & 110%
                 if (strtoupper($item['type']) === 'KPI') {
                     if (array_key_exists($month, $item['validity'])) {
@@ -182,13 +181,45 @@ class RangkingService
                         }
                     }
                 }
+
+                //packaging
+                $newIndicators['partials'][$i]['indicator'] = $item['indicator'];//
+                $newIndicators['partials'][$i]['type'] = $item['type'];//
+                $newIndicators['partials'][$i]['measure'] = is_null($item['measure']) ? '-' : $item['measure'];//
+                $newIndicators['partials'][$i]['polarity'] = $item['polarity'];//
+                $newIndicators['partials'][$i]['bg_color'] = $item['bg_color'];//
+
+                $newIndicators['partials'][$i]['achievement']['value']['original'] = $achievement;//
+                $newIndicators['partials'][$i]['achievement']['value']['showed'] = in_array(gettype($achievement), ['double', 'integer']) ? number_format($achievement, $this->decimals_showed, ',', '.') . '%' : $achievement;//
+                $newIndicators['partials'][$i]['status'] = $status;//
+                $newIndicators['partials'][$i]['status_symbol'] = $status_symbol;//
+                $newIndicators['partials'][$i]['status_color'] = $status_color;//
+
                 $i++;
             }
 
+            $PPK_100 = ($total_KPI_100 + $total_PI_100) == (float) 0 ? 0 : (($total_KPI_100 + $total_PI_100) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
             $PPK_110 = ($total_KPI_110 + $total_PI_110) == (float) 0 ? 0 : (($total_KPI_110 + $total_PI_110) / ($total_weight_counted_KPI + $total_weight_counted_PI)) * 100;
 
-            $newIndicators['total']['PPK_110']['value']['original'] = $PPK_110;
-            $newIndicators['total']['PPK_110']['value']['showed'] = number_format($PPK_110, 2, ',', '.');
+            $newIndicators['total']['PPK_100']['value']['original'] = $PPK_100;//
+            $newIndicators['total']['PPK_100']['value']['showed'] = number_format($PPK_100, $this->decimals_showed, ',', '.');//
+            $newIndicators['total']['PPK_110']['value']['original'] = $PPK_110;//
+            $newIndicators['total']['PPK_110']['value']['showed'] = number_format($PPK_110, $this->decimals_showed, ',', '.');//
+
+            $PPK_100_status = 'MASALAH';
+            $PPK_100_color_status = 'danger';
+            if ($PPK_100 < 95) {
+                $PPK_100_status = 'MASALAH';
+                $PPK_100_color_status = 'danger';
+            } else if ($PPK_100 >= 95 && $PPK_100 < 100) {
+                $PPK_100_status = 'HATI-HATI';
+                $PPK_100_color_status = 'warning';
+            } else if ($PPK_100 >= 100) {
+                $PPK_100_status = 'BAIK';
+                $PPK_100_color_status = 'success';
+            }
+            $newIndicators['total']['PPK_100_status'] = $PPK_100_status;//
+            $newIndicators['total']['PPK_100_color_status'] = $PPK_100_color_status;//
 
             $PPK_110_status = 'MASALAH';
             $PPK_110_color_status = 'danger';
@@ -202,25 +233,36 @@ class RangkingService
                 $PPK_110_status = 'BAIK';
                 $PPK_110_color_status = 'success';
             }
-            $newIndicators['total']['PPK_110_status'] = $PPK_110_status;
-            $newIndicators['total']['PPK_110_color_status'] = $PPK_110_color_status;
+            $newIndicators['total']['PPK_110_status'] = $PPK_110_status;//
+            $newIndicators['total']['PPK_110_color_status'] = $PPK_110_color_status;//
         }
 
         return $newIndicators;
     }
 
-    private function mapping__rangking__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
+    private function mapping__dashboard__indicators(Collection $indicators, array $bg_color, string $prefix = null, bool $first = true): void
     {
         $indicators->each(function ($item, $key) use ($prefix, $first, $bg_color) {
             $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
             $iteration = $first && $this->iter === 0 ? 0 : $this->iter;
+            $indicator = $item->indicator;
 
+            //indikator packaging
+            $this->indicators[$iteration]['id'] = $item->id;
+            $this->indicators[$iteration]['indicator'] = "$prefix. $indicator";
             $this->indicators[$iteration]['type'] = $item->type;
             $this->indicators[$iteration]['dummy'] = $item->dummy;
             $this->indicators[$iteration]['reducing_factor'] = $item->reducing_factor;
+            $this->indicators[$iteration]['measure'] = $item->measure;
             $this->indicators[$iteration]['weight'] = $item->weight;
             $this->indicators[$iteration]['validity'] = $item->validity;
+            $this->indicators[$iteration]['polarity'] = $item->polarity;
             $this->indicators[$iteration]['original_polarity'] = $item->getRawOriginal('polarity');
+
+            $this->indicators[$iteration]['order'] = $iteration;
+            $this->indicators[$iteration]['bg_color'] = $bg_color;
+            $this->indicators[$iteration]['prefix'] = $prefix;
+
 
             //target packaging
             $jan = $item->targets->search(function ($value) {
@@ -347,7 +389,7 @@ class RangkingService
             $this->iter++;
 
             if (!empty($item->childsHorizontalRecursive)) {
-                $this->mapping__rangking__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
+                $this->mapping__dashboard__indicators($item->childsHorizontalRecursive, ['r' => $bg_color['r'] - 15, 'g' => $bg_color['g'] - 15, 'b' => $bg_color['b'] - 15], $prefix, false);
             }
         });
     }

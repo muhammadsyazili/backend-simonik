@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ConstructRequest;
-use App\DTO\MonitoringExportRequest;
+use App\DTO\MonitoringExportingRequest;
 use App\DTO\MonitoringMonitoringRequest;
 use App\Repositories\IndicatorRepository;
 use App\Repositories\LevelRepository;
@@ -30,20 +30,18 @@ class MonitoringController extends ApiController
         $constructRequest->levelRepository = $levelRepository;
         $constructRequest->unitRepository = $unitRepository;
 
-        if ($request->query('auth') === '1') {
-            $monitoringValidationService = new MonitoringValidationService($constructRequest);
+        $monitoringValidationService = new MonitoringValidationService($constructRequest);
 
-            $validation = $monitoringValidationService->monitoringValidation($request);
+        $validation = $monitoringValidationService->monitoringValidation($request);
 
-            if ($validation->fails()) {
-                return $this->APIResponse(
-                    false,
-                    Response::HTTP_UNPROCESSABLE_ENTITY,
-                    Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
-                    null,
-                    $validation->errors(),
-                );
-            }
+        if ($validation->fails()) {
+            return $this->APIResponse(
+                false,
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                Response::$statusTexts[Response::HTTP_UNPROCESSABLE_ENTITY],
+                null,
+                $validation->errors(),
+            );
         }
 
         $requestDTO = new MonitoringMonitoringRequest();
@@ -68,7 +66,7 @@ class MonitoringController extends ApiController
         );
     }
 
-    public function export(Request $request)
+    public function exporting(Request $request)
     {
         $userRepository = new UserRepository();
         $indicatorRepository = new IndicatorRepository();
@@ -96,7 +94,7 @@ class MonitoringController extends ApiController
             );
         }
 
-        $requestDTO = new MonitoringExportRequest();
+        $requestDTO = new MonitoringExportingRequest();
 
         $requestDTO->level = $request->query('level');
         $requestDTO->unit = $request->query('unit');
@@ -105,12 +103,12 @@ class MonitoringController extends ApiController
 
         $monitoringService = new MonitoringService($constructRequest);
 
-        $response = $monitoringService->export($requestDTO);
+        $response = $monitoringService->exporting($requestDTO);
 
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Monitoring",
+            "Exporting",
             [
                 'indicators' => $response->indicators,
             ],

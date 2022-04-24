@@ -179,9 +179,11 @@ Route::get('/indicators/paper-work/{level}/{unit}/{year}/public', [App\Http\Cont
 
 Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
 
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'dashboard']);
+
 Route::get('/monitoring', [App\Http\Controllers\MonitoringController::class, 'monitoring']);
 Route::get('/monitoring/{id}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
-Route::get('/monitoring/export', [App\Http\Controllers\MonitoringController::class, 'export']);
+Route::get('/monitoring/exporting', [App\Http\Controllers\MonitoringController::class, 'exporting']);
 
 Route::get('/rangking', [App\Http\Controllers\RangkingController::class, 'rangking']);
 

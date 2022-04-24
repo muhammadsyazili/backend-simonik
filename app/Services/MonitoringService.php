@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\DTO\ConstructRequest;
-use App\DTO\MonitoringExportRequest;
-use App\DTO\MonitoringExportResponse;
+use App\DTO\MonitoringExportingRequest;
+use App\DTO\MonitoringExportingResponse;
 use App\DTO\MonitoringMonitoringRequest;
 use App\DTO\MonitoringMonitoringResponse;
 use App\Repositories\IndicatorRepository;
@@ -48,14 +48,14 @@ class MonitoringService
         $this->iter = 0; //reset iterator
         $this->mapping__monitoring__indicators($indicators, ['r' => 255, 'g' => 255, 'b' => 255]);
 
-        $indicators = $this->monitoring_calc($this->indicators, $month);
+        $indicators = $this->calculating_monitoring($this->indicators, $month);
 
         $response->indicators = $indicators;
 
         return $response;
     }
 
-    private function monitoring_calc(array $indicators, string $month): array
+    private function calculating_monitoring(array $indicators, string $month): array
     {
         $newIndicators = [];
 
@@ -471,9 +471,9 @@ class MonitoringService
     }
 
     //use repo LevelRepository, UnitRepository, IndicatorRepository
-    public function export(MonitoringExportRequest $monitoringRequest): MonitoringExportResponse
+    public function exporting(MonitoringExportingRequest $monitoringRequest): MonitoringExportingResponse
     {
-        $response = new MonitoringExportResponse();
+        $response = new MonitoringExportingResponse();
 
         $level = $monitoringRequest->level;
         $unit = $monitoringRequest->unit;
@@ -486,16 +486,16 @@ class MonitoringService
         $indicators = $this->indicatorRepository->find__all__with__childs_targets_realizations__by__levelId_unitId_year($levelId, $unitId, $year);
 
         $this->iter = 0; //reset iterator
-        $this->mapping__export__indicators($indicators);
+        $this->mapping__exporting__indicators($indicators);
 
-        $indicators = $this->export_calc($this->indicators, $month);
+        $indicators = $this->calculating_exporting($this->indicators, $month);
 
         $response->indicators = $indicators;
 
         return $response;
     }
 
-    private function export_calc(array $indicators, string $month): array
+    private function calculating_exporting(array $indicators, string $month): array
     {
         $newIndicators = [];
 
@@ -600,11 +600,11 @@ class MonitoringService
                             $total_PI_100 -= $item['realizations'][$month]['value'];
                             $total_PI_110 -= $item['realizations'][$month]['value'];
                         } else {
-                            if (in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
+                            if (!in_array($capping_value_100, ['-', 'BELUM DINILAI'])) {
                                 $total_PI_100 += $capping_value_100;
                             }
 
-                            if (in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
+                            if (!in_array($capping_value_110, ['-', 'BELUM DINILAI'])) {
                                 $total_PI_110 += $capping_value_110;
                                 $total_weight_counted_PI += $item['weight'][$month];
                             }
@@ -747,7 +747,7 @@ class MonitoringService
         return $newIndicators;
     }
 
-    private function mapping__export__indicators(Collection $indicators, string $prefix = null, bool $first = true): void
+    private function mapping__exporting__indicators(Collection $indicators, string $prefix = null, bool $first = true): void
     {
         $indicators->each(function ($item, $key) use ($prefix, $first) {
             $prefix = is_null($prefix) ? (string) ($key + 1) : (string) $prefix . '.' . ($key + 1);
@@ -892,7 +892,7 @@ class MonitoringService
             $this->iter++;
 
             if (!empty($item->childsHorizontalRecursive)) {
-                $this->mapping__export__indicators($item->childsHorizontalRecursive, $prefix, false);
+                $this->mapping__exporting__indicators($item->childsHorizontalRecursive, $prefix, false);
             }
         });
     }
