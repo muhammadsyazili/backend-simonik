@@ -36,11 +36,11 @@ class ComparingController extends ApiController
 
         $requestDTO = new ComparingComparingRequest();
 
-        $requestDTO->idLeft = $request->query('id_left');
-        $requestDTO->monthLeft = $request->query('bulan_left');
+        $requestDTO->idLeft = $request->query('id_kiri');
+        $requestDTO->monthLeft = $request->query('bulan_kiri');
 
-        $requestDTO->idRight = $request->query('id_right');
-        $requestDTO->monthRight = $request->query('bulan_right');
+        $requestDTO->idRight = $request->query('id_kanan');
+        $requestDTO->monthRight = $request->query('bulan_kanan');
 
         $comparingService = new ComparingService($constructRequest);
 

@@ -11,11 +11,11 @@ class ComparingValidationService
     public function comparingValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'id_left' => ['required', 'uuid'],
-            'bulan_left' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
+            'id_kiri' => ['required', 'uuid'],
+            'bulan_kiri' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
 
-            'id_right' => ['required', 'uuid'],
-            'bulan_right' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
+            'id_kanan' => ['required', 'uuid'],
+            'bulan_kanan' => ['required', 'string', 'in:jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec'],
         ];
 
         $messages = [
