@@ -35,16 +35,16 @@ class UserValidationService
     public function storeValidation(Request $request): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'name' => ['required', 'string'],
+            'nama' => ['required', 'string'],
             'nip' => ['required', 'string'],
             'username' => ['required', 'string', 'alpha_dash'],
             'email' => ['required', 'string'],
-            'unit' => ['required', 'string'],
+            'unit_kerja' => ['required', 'string'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
-            'alpha_dash' => ':attribute hanya boleh mengandung huruf, angka, dashes (-) and underscores (_).',
+            'alpha_dash' => ':attribute hanya boleh mengandung huruf, angka, dashes (-) dan underscores (_).',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -52,12 +52,12 @@ class UserValidationService
         $validator = Validator::make($input, $attributes, $messages);
 
         $username__lowercase = strtolower($request->post('username'));
-        $unit = $request->post('unit');
+        $unit = $request->post('unit_kerja');
 
         //memastikan username yang akan di-store tidak mengandung keyword
         if (Str::containsAll($username__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('username', "(#1.1) : Username Sudah Tersedia.");
+                $validator->errors()->add('username', "(#1.1) : Username Sudah Terdaftar.");
             });
         }
 
@@ -66,7 +66,7 @@ class UserValidationService
         foreach ($users as $user) {
             if (strtolower($user->username) === $username__lowercase) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('username', "(#1.2) : Username Sudah Tersedia.");
+                    $validator->errors()->add('username', "(#1.2) : Username Sudah Terdaftar.");
                 });
                 break;
             }
@@ -76,7 +76,7 @@ class UserValidationService
         $result = $this->unitRepository->count__all__by__slug($unit);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('unit', "(#1.1) : Unit Kerja Belum Tersedia.");
+                $validator->errors()->add('unit_kerja', "(#1.1) : Unit Kerja Belum Terdaftar.");
             });
         }
 
@@ -91,17 +91,17 @@ class UserValidationService
     public function updateValidation(Request $request, string|int $id): \Illuminate\Contracts\Validation\Validator
     {
         $attributes = [
-            'name' => ['required', 'string'],
+            'nama' => ['required', 'string'],
             'nip' => ['required', 'string'],
             'username' => ['required', 'string', 'alpha_dash'],
             'email' => ['required', 'string'],
-            'unit' => ['required', 'string'],
+            'unit_kerja' => ['required', 'string'],
         ];
 
         $messages = [
             'required' => ':attribute tidak boleh kosong.',
             'email' => ':attribute harus valid.',
-            'alpha_dash' => ':attribute hanya boleh mengandung huruf, angka, dashes (-) and underscores (_).',
+            'alpha_dash' => ':attribute hanya boleh mengandung huruf, angka, dashes (-) dan underscores (_).',
         ];
 
         $input = Arr::only($request->post(), array_keys($attributes));
@@ -109,7 +109,7 @@ class UserValidationService
         $validator = Validator::make($input, $attributes, $messages);
 
         $username__lowercase = strtolower($request->post('username'));
-        $unit = $request->post('unit');
+        $unit = $request->post('unit_kerja');
 
         $user = $this->userRepository->find__with__role__by__id($id);
 
@@ -123,7 +123,7 @@ class UserValidationService
         //memastikan username yang akan di-update tidak mengandung keyword
         if (Str::containsAll($username__lowercase, ['super-master', 'master', 'child', 'super-admin', 'admin', 'data-entry', 'employee'])) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('username', "(#1.3) : Username Sudah Tersedia.");
+                $validator->errors()->add('username', "(#1.3) : Username Sudah Terdaftar.");
             });
         }
 
@@ -134,18 +134,18 @@ class UserValidationService
             foreach ($users as $user) {
                 if (strtolower($user->username) === $username__lowercase) {
                     $validator->after(function ($validator) {
-                        $validator->errors()->add('username', "(#1.4) : Username Sudah Tersedia.");
+                        $validator->errors()->add('username', "(#1.4) : Username Sudah Terdaftar.");
                     });
                     break;
                 }
             }
         }
 
-        //memastikan unit yang akan di-update terdapat di DB
+        //memastikan unit kerja yang akan di-update terdapat di DB
         $result = $this->unitRepository->count__all__by__slug($unit);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('unit', "(#1.2) : Unit Kerja Belum Tersedia.");
+                $validator->errors()->add('unit_kerja', "(#1.2) : Unit Kerja Belum Terdaftar.");
             });
         }
 

@@ -68,7 +68,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User - Create",
+            "User Create",
             [
                 'units' => $response->units
             ],
@@ -110,11 +110,11 @@ class UserController extends ApiController
 
         $requestDTO = new UserStoreRequest();
 
-        $requestDTO->name = $request->post('name');
+        $requestDTO->name = $request->post('nama');
         $requestDTO->nip = $request->post('nip');
         $requestDTO->username = $request->post('username');
         $requestDTO->email = $request->post('email');
-        $requestDTO->unit = $request->post('unit');
+        $requestDTO->unit = $request->post('unit_kerja');
 
         $userService = new UserService($constructRequest);
 
@@ -123,7 +123,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User Berhasil Ditambahkan",
+            "User Created!",
             null,
             null,
         );
@@ -156,7 +156,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User - Edit",
+            "User Edit",
             [
                 'user' => $response->user,
                 'units' => $response->units,
@@ -201,11 +201,11 @@ class UserController extends ApiController
         $UserUpdateRequest = new UserUpdateRequest();
 
         $UserUpdateRequest->id = $id;
-        $UserUpdateRequest->name = $request->post('name');
+        $UserUpdateRequest->name = $request->post('nama');
         $UserUpdateRequest->nip = $request->post('nip');
         $UserUpdateRequest->username = $request->post('username');
         $UserUpdateRequest->email = $request->post('email');
-        $UserUpdateRequest->unit = $request->post('unit');
+        $UserUpdateRequest->unit = $request->post('unit_kerja');
 
         $userService = new UserService($constructRequest);
 
@@ -214,7 +214,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User Berhasil Diubah",
+            "User Updated!",
             null,
             null,
         );
@@ -259,7 +259,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "User Berhasil Dihapus",
+            "User Deleted!",
             null,
             null,
         );
@@ -290,7 +290,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Password Berhasil Di-reset",
+            "Password Reseted!",
             null,
             null,
         );
@@ -323,7 +323,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Password Berhasil Diubah",
+            "Password Changed!",
             null,
             null,
         );
