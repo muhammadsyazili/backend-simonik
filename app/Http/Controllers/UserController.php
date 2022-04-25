@@ -290,7 +290,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Password Reseted!",
+            "User Password Reseted!",
             null,
             null,
         );
@@ -323,7 +323,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Password Changed!",
+            "User Password Changed!",
             null,
             null,
         );
@@ -354,7 +354,7 @@ class UserController extends ApiController
         return $this->APIResponse(
             true,
             Response::HTTP_OK,
-            "Active Check",
+            "User Active Check",
             [
                 'user' => ['actived' => $response->actived],
             ],
