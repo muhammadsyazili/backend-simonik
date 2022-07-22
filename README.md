@@ -23,49 +23,14 @@ Response:
     "status" : "boolean",
     "code" : "integer",
     "message" : "string",
-    "data" : {
-        "indicators" : {
-            "partials" : [
-                {
-                    "indicator": "string",
-                    "type": "string",
-                    "measure": "string",
-                    "polarity": "string|null",
-                    "bg_color": {
-                        "r": "integer",
-                        "g": "integer",
-                        "b": "integer"
-                    },
-                    "achievement": {
-                        "value": {
-                            "original": "string|float|integer",
-                            "showed": "string|float|integer"
-                        }
-                    },
-                    "status": "enum[-, BELUM DINILAI, BAIK, HATI-HATI, MASALAH]",
-                    "status_symbol": "enum[+0, -0, +1, 0, -1]",
-                    "status_color": "enum[none, info, success, warning, danger]"
-                }
-            ],
-            "total" : {
-                "PPK_100": {
-                    "value": {
-                        "original": "float|integer",
-                        "showed": "float|integer"
-                    }
-                },
-                "PPK_110": {
-                    "value": {
-                        "original": "float|integer",
-                        "showed": "float|integer"
-                    }
-                },
-                "PPK_100_status": "enum[MASALAH, HATI-HATI, BAIK]",
-                "PPK_100_color_status": "enum[danger, warning, success]",
-                "PPK_110_status": "enum[MASALAH, HATI-HATI, BAIK]",
-                "PPK_110_color_status": "enum[danger, warning, success]"
-            }
-        }
+    "data": {
+        "id": "string",
+        "username": "string",
+        "role": "enum[super-admin, admin, data-entry, employee]",
+        "level": "string|null",
+        "unit": "string|null",
+        "actived": "boolean",
+        "token": "string"
     },
     "errors": "null|array of objects"
 }
