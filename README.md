@@ -1,4 +1,4 @@
-# API Spec
+# API Specification
 ---
 ## Sistem Informasi Monitoring Kinerja dan Resiko
 
