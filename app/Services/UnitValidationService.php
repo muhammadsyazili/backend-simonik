@@ -89,11 +89,11 @@ class UnitValidationService
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "(#1.1) : Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
+                    $validator->errors()->add('parent_unit', "(#1.1) : Parent Unit Kerja Belum Tersedia.");
                 });
             }
 
-            //memastikan level yang akan di-store merupakan turunan dari level yang ada di parent unit
+            //memastikan level yang akan di-store merupakan parent level yang ada di parent unit
             $isAvailable = false;
             foreach ($units as $unit) {
                 if ($unit->slug === $parent_unit) {
@@ -176,7 +176,7 @@ class UnitValidationService
             //memastikan parent unit yang akan di-update bukan merupakan unit yang saat ini di-update
             if ($unit->slug === $parent_unit) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "(#1.1) : Pada Turunan Dari Unit Kerja, Tidak Diizinkan Memilih Unit Kerja Yang Sama.");
+                    $validator->errors()->add('parent_unit', "(#1.1) : Tidak Diizinkan Memilih Parent Yang Sama Dengan Unit Kerja.");
                 });
             }
 
@@ -184,11 +184,11 @@ class UnitValidationService
             $result = $this->unitRepository->count__all__by__slug($parent_unit);
             if ($result === 0) {
                 $validator->after(function ($validator) {
-                    $validator->errors()->add('parent_unit', "(#1.2) : Pada Turunan Dari Unit Kerja, Unit Kerja Belum Tersedia.");
+                    $validator->errors()->add('parent_unit', "(#1.2) : Parent Unit Kerja Belum Tersedia.");
                 });
             }
 
-            //memastikan level yang akan di-update merupakan turunan dari level yang ada di parent unit
+            //memastikan level yang akan di-update merupakan parent level yang ada di parent unit
             $isAvailable = false;
             foreach ($units as $unit) {
                 if ($unit->slug === $parent_unit) {

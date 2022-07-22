@@ -72,7 +72,7 @@ class LevelValidationService
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "(#1.1) : Pada Turunan Dari Level, Level Belum Tersedia.");
+                $validator->errors()->add('parent_level', "(#1.1) : Parent Level Belum Tersedia.");
             });
         }
 
@@ -128,7 +128,7 @@ class LevelValidationService
         //memastikan parent level yang akan di-update bukan merupakan level yang saat ini di-update
         if ($level->slug === $parent_level) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "(#1.1) : Pada Turunan Dari Level, Tidak Diizinkan Memilih Level Yang Sama.");
+                $validator->errors()->add('parent_level', "(#1.1) : Tidak Diizinkan Memilih Parent Yang Sama Dengan Level.");
             });
         }
 
@@ -136,7 +136,7 @@ class LevelValidationService
         $result = $this->levelRepository->count__all__by__slug($parent_level);
         if ($result === 0) {
             $validator->after(function ($validator) {
-                $validator->errors()->add('parent_level', "(#1.2) : Pada Turunan Dari Level, Level Belum Tersedia.");
+                $validator->errors()->add('parent_level', "(#1.2) : Parent Level Belum Tersedia.");
             });
         }
 

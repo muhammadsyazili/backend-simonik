@@ -15,6 +15,27 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login');
 
+Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'get_units_by_levelSlug']);
+
+Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'get_parents_by_levelSlug']);
+Route::get('/level/categories', [App\Http\Controllers\LevelController::class, 'get_categories']);
+Route::get('/levels/public', [App\Http\Controllers\LevelController::class, 'public_levels']);
+Route::get('/levels/user/{id}', [App\Http\Controllers\LevelController::class, 'get_levels_by_userId']);
+
+Route::get('/indicators/paper-work/{level}/{unit}/{year}/public', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'public_indicators']);
+
+Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
+
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'dashboard']);
+
+Route::get('/monitoring', [App\Http\Controllers\MonitoringController::class, 'monitoring']);
+Route::get('/monitoring/{id}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
+Route::get('/exporting', [App\Http\Controllers\ExportingController::class, 'exporting']);
+
+Route::get('/rangking', [App\Http\Controllers\RangkingController::class, 'rangking']);
+
+Route::get('/comparing', [App\Http\Controllers\ComparingController::class, 'comparing']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
@@ -167,24 +188,3 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware([App\Http\Middleware\HasUserIdInHeader::class, App\Http\Middleware\IsSuperAdmin::class]);
     //End Route : unit
 });
-
-Route::get('/level/{slug}/units', [App\Http\Controllers\UnitController::class, 'get_units_by_levelSlug']);
-
-Route::get('/level/{slug}/parents', [App\Http\Controllers\LevelController::class, 'get_parents_by_levelSlug']);
-Route::get('/level/categories', [App\Http\Controllers\LevelController::class, 'get_categories']);
-Route::get('/levels/public', [App\Http\Controllers\LevelController::class, 'public_levels']);
-Route::get('/levels/user/{id}', [App\Http\Controllers\LevelController::class, 'get_levels_by_userId']);
-
-Route::get('/indicators/paper-work/{level}/{unit}/{year}/public', [App\Http\Controllers\Extends\Indicator\PaperWorkIndicatorController::class, 'public_indicators']);
-
-Route::get('/realizations/paper-work/{id}/{month}/lock/change', [App\Http\Controllers\Extends\Realization\PaperWorkRealizationController::class, 'lock_change']);
-
-Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'dashboard']);
-
-Route::get('/monitoring', [App\Http\Controllers\MonitoringController::class, 'monitoring']);
-Route::get('/monitoring/{id}/{month}', [App\Http\Controllers\MonitoringController::class, 'monitoring_by_id']);
-Route::get('/exporting', [App\Http\Controllers\ExportingController::class, 'exporting']);
-
-Route::get('/rangking', [App\Http\Controllers\RangkingController::class, 'rangking']);
-
-Route::get('/comparing', [App\Http\Controllers\ComparingController::class, 'comparing']);
